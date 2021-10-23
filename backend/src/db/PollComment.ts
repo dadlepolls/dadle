@@ -6,7 +6,7 @@ const schema = new Schema<PollComment>({
   text: { type: Schema.Types.String, required: true },
 });
 
-let model: mongoose.Model<PollComment, {}, {}, {}>;
+let model;
 if (mongoose.models.PollComment) {
   model = mongoose.models.PollComment;
 } else {

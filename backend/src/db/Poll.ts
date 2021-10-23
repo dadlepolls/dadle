@@ -13,7 +13,7 @@ const schema = new Schema<Poll>({
 });
 schema.plugin(mongooseUniqueValidator);
 
-let model: mongoose.Model<Poll, {}, {}, {}>;
+let model;
 if (mongoose.models.Poll) {
   model = mongoose.models.Poll;
 } else {

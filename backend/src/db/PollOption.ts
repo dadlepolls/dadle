@@ -10,7 +10,7 @@ const schema = new Schema<PollOption>({
   responses: [PollOptionResponseSchema],
 });
 
-let model: mongoose.Model<PollOption, {}, {}, {}>;
+let model;
 if (mongoose.models.PollOption) {
   model = mongoose.models.PollOption;
 } else {
