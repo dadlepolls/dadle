@@ -1,10 +1,10 @@
-interface Poll {
-  _id: string;
+interface IPoll {
+  _id?: string;
   title: string;
   link: string;
   author?: string;
-  options?: PollOption[];
-  comments?: PollComment[];
+  options?: IPollOption[];
+  comments?: IPollComment[];
 }
 
 enum PollOptionType {
@@ -13,13 +13,13 @@ enum PollOptionType {
   Arbitrary,
 }
 
-interface PollOption {
-  _id: string;
+interface IPollOption {
+  _id?: string;
   type: PollOptionType;
   from?: Date;
   to?: Date;
   title?: string;
-  responses?: PollOptionResponse[];
+  responses?: IPollOptionResponse[];
 }
 
 enum PollOptionResponseChoice {
@@ -28,18 +28,18 @@ enum PollOptionResponseChoice {
   Maybe,
 }
 
-interface PollOptionResponse {
-  _id: string;
+interface IPollOptionResponse {
+  _id?: string;
   by: string;
   response: PollOptionResponseChoice;
 }
 
-interface PollComment {
-  _id: string;
+interface IPollComment {
+  _id?: string;
   by: string;
   text: string;
 }
 
-export type { Poll, PollOption, PollOptionResponse, PollComment };
+export type { IPoll, IPollOption, IPollOptionResponse, IPollComment };
 export { PollOptionType, PollOptionResponseChoice };
 
