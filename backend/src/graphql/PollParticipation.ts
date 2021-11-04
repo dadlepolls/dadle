@@ -1,24 +1,7 @@
 import { Types } from "mongoose";
-import { Field, ID, InputType, ObjectType, registerEnumType } from "type-graphql";
+import { Field, ID, InputType, ObjectType } from "type-graphql";
 import { IPollChoice, IPollParticipation, YesNoMaybe } from "../util/types";
-
-registerEnumType(YesNoMaybe, {
-  name: "YesNoMaybe",
-});
-
-@ObjectType()
-class PollChoice implements IPollChoice {
-  @Field((type) => ID, {description: "references the ID of a PollOption of this very Poll"})
-  option: Types.ObjectId;
-
-  @Field((type) => YesNoMaybe)
-  choice: YesNoMaybe;
-
-  constructor(option: Types.ObjectId, choice: YesNoMaybe) {
-    this.option = option;
-    this.choice = choice;
-  }
-}
+import { PollChoice } from "./PollChoice";
 
 @ObjectType()
 class PollParticipation implements IPollParticipation {
