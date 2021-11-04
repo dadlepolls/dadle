@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
+import { Field, ID, InputType, ObjectType, registerEnumType } from "type-graphql";
 import { IPollChoice, IPollParticipation, YesNoMaybe } from "../util/types";
 
 registerEnumType(YesNoMaybe, {
@@ -26,14 +26,14 @@ class PollParticipation implements IPollParticipation {
   _id: string;
 
   @Field()
-  by: string;
+  author: string;
 
   @Field((type) => [PollChoice])
   choices: IPollChoice[] = [];
 
-  constructor(_id: string, by: string, choices: IPollChoice[]) {
+  constructor(_id: string, author: string, choices: IPollChoice[]) {
     this._id = _id;
-    this.by = by;
+    this.author = author;
     this.choices = choices;
   }
 }

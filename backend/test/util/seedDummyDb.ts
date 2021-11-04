@@ -38,7 +38,7 @@ const main = async () => {
       participations: [
         {
           _id: "6183940cbc075756bf99191d",
-          by: "participant 1",
+          author: "participant 1",
           choices: [
             {
               option: new Types.ObjectId("618393b80741d1adcaeb9306"),
@@ -56,7 +56,7 @@ const main = async () => {
         },
         {
           _id: "6183946bf94d7ca802f3a524",
-          by: "participant 2",
+          author: "participant 2",
           choices: [
             {
               option: new Types.ObjectId("618393b80741d1adcaeb9306"),
@@ -105,7 +105,7 @@ const main = async () => {
       participations: [
         {
           _id: "61839aac138650d554bed41a",
-          by: "participant 3",
+          author: "participant 3",
           choices: [
             {
               option: new Types.ObjectId("618399b0efffa57f99138fe1"),
@@ -123,7 +123,7 @@ const main = async () => {
         },
         {
           _id: "61839ab089e13ef722e8430a",
-          by: "participant 2",
+          author: "participant 2",
           choices: [
             {
               option: new Types.ObjectId("618399b78b890e7c323a21e3"),

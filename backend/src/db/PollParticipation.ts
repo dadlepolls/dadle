@@ -3,7 +3,7 @@ import { IPollParticipation } from "../util/types";
 import { schema as PollChoiceSchema } from "./PollChoice";
 
 const schema = new Schema<IPollParticipation>({
-  by: { type: Schema.Types.String, required: true },
+  author: { type: Schema.Types.String, required: true },
   choices: [PollChoiceSchema],
 });
 

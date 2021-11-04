@@ -38,7 +38,7 @@ interface IPollChoice {
 
 interface IPollParticipation {
   _id?: string;
-  by: string;
+  author: string;
   choices: IPollChoice[];
 }
 
