@@ -1,6 +1,6 @@
 import { ApolloError } from "apollo-server-errors";
 import { Min } from "class-validator";
-import { IPoll } from "../util/types";
+import { Error } from "mongoose";
 import {
   Arg,
   Args,
@@ -15,9 +15,10 @@ import {
   Resolver,
 } from "type-graphql";
 import { Poll as PollModel } from "../db/models";
+import { IPoll } from "../util/types";
 import { PollComment } from "./PollComment";
 import { PollOption, PollOptionInput } from "./PollOption";
-import { Error, Model } from "mongoose";
+import { PollParticipation } from "./PollParticipation";
 
 @ObjectType()
 class Poll implements IPoll {
@@ -38,6 +39,9 @@ class Poll implements IPoll {
 
   @Field((type) => [PollComment])
   comments?: PollComment[];
+
+  @Field((type) => [PollParticipation])
+  participations?: PollParticipation[];
 
   constructor(_id: string, title: string, link: string) {
     this._id = _id;

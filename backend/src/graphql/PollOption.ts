@@ -1,8 +1,4 @@
-import {
-  IPollOption,
-  IPollOptionResponse,
-  PollOptionType,
-} from "../util/types";
+import { IPollOption, PollOptionType } from "../util/types";
 import {
   Field,
   ID,
@@ -10,7 +6,6 @@ import {
   ObjectType,
   registerEnumType,
 } from "type-graphql";
-import { PollOptionResponse } from "./PollOptionResponse";
 
 registerEnumType(PollOptionType, {
   name: "PollOptionType",
@@ -32,9 +27,6 @@ class PollOption implements IPollOption {
 
   @Field({ nullable: true })
   title?: string;
-
-  @Field((type) => [PollOptionResponse], { nullable: true })
-  responses?: PollOptionResponse[];
 
   constructor(_id: string, type: PollOptionType) {
     this._id = _id;

@@ -1,9 +1,12 @@
+import { Types as MongooseSchemaTypes } from "mongoose";
+
 interface IPoll {
   _id?: string;
   title: string;
   link: string;
   author?: string;
   options?: IPollOption[];
+  participations?: IPollParticipation[];
   comments?: IPollComment[];
 }
 
@@ -19,19 +22,24 @@ interface IPollOption {
   from?: Date;
   to?: Date;
   title?: string;
-  responses?: IPollOptionResponse[];
 }
 
-enum PollOptionResponseChoice {
+enum YesNoMaybe {
   Yes = 1,
   No,
   Maybe,
 }
 
-interface IPollOptionResponse {
+interface IPollChoice {
+  //id string of corresponding id
+  option: MongooseSchemaTypes.ObjectId;
+  choice: YesNoMaybe;
+}
+
+interface IPollParticipation {
   _id?: string;
   by: string;
-  response: PollOptionResponseChoice;
+  choices: IPollChoice[];
 }
 
 interface IPollComment {
@@ -40,6 +48,11 @@ interface IPollComment {
   text: string;
 }
 
-export type { IPoll, IPollOption, IPollOptionResponse, IPollComment };
-export { PollOptionType, PollOptionResponseChoice };
-
+export type {
+  IPoll,
+  IPollOption,
+  IPollParticipation,
+  IPollChoice,
+  IPollComment,
+};
+export { PollOptionType, YesNoMaybe };
