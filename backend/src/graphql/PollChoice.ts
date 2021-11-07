@@ -1,11 +1,18 @@
 import { Types } from "mongoose";
-import { IPollChoice, YesNoMaybe } from "src/util/types";
-import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
+import { IPollChoice, YesNoMaybe } from "../util/types";
+import {
+  Field,
+  ID,
+  InputType,
+  ObjectType,
+  registerEnumType,
+} from "type-graphql";
 
 registerEnumType(YesNoMaybe, {
   name: "YesNoMaybe",
 });
 
+@InputType("PollChoiceInput")
 @ObjectType()
 class PollChoice implements IPollChoice {
   @Field((type) => ID, {

@@ -12,13 +12,31 @@ class PollParticipation implements IPollParticipation {
   author: string;
 
   @Field((type) => [PollChoice])
-  choices: IPollChoice[] = [];
+  choices: PollChoice[] = [];
 
-  constructor(_id: string, author: string, choices: IPollChoice[]) {
+  constructor(_id: string, author: string, choices: PollChoice[]) {
     this._id = _id;
     this.author = author;
     this.choices = choices;
   }
 }
 
-export { PollParticipation };
+@InputType()
+class PollParticipationInput implements Partial<IPollParticipation> {
+  @Field((type) => ID, { nullable: true })
+  _id?: string;
+
+  @Field()
+  author: string;
+
+  @Field((type) => [PollChoice])
+  choices: IPollChoice[];
+
+  constructor(_id: string, author: string, choices: PollChoice[]) {
+    this._id = _id;
+    this.author = author;
+    this.choices = choices;
+  }
+}
+
+export { PollParticipation, PollParticipationInput };

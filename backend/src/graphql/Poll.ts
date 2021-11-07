@@ -15,10 +15,10 @@ import {
   Resolver,
 } from "type-graphql";
 import { Poll as PollModel } from "../db/models";
-import { IPoll } from "../util/types";
+import { IPoll, IPollParticipation } from "../util/types";
 import { PollComment } from "./PollComment";
 import { PollOption, PollOptionInput } from "./PollOption";
-import { PollParticipation } from "./PollParticipation";
+import { PollParticipation, PollParticipationInput } from "./PollParticipation";
 
 @ObjectType()
 class Poll implements IPoll {
@@ -179,6 +179,60 @@ class PollResolver {
         opt["to"] = givenPollOpt["to"];
         opt["type"] = givenPollOpt["type"];
       }
+    }
+
+    await dbPoll.save();
+    return dbPoll;
+  }
+
+  @Mutation((returns) => Poll)
+  async createOrUpdateParticipation(
+    @Arg("pollId", (type) => ID) pollId: string,
+    @Arg("participation") participationInput: PollParticipationInput
+  ) {
+    const dbPoll = await PollModel.findOne({ _id: pollId }).exec();
+    if (!dbPoll) {
+      throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
+    }
+
+    //validate that all options exist for this poll
+    for (const opt of participationInput.choices) {
+      if (!dbPoll.options?.some((o) => o._id == opt.option.toString())) {
+        throw new ApolloError(
+          "Response for unkown option given",
+          "REPONSE_TO_INVALID_OPTION",
+          { invalidOptionId: opt.option.toString() }
+        );
+      }
+    }
+
+    if (participationInput._id) {
+      //participation does already exist, try to update
+      const participation = dbPoll.participations?.find(
+        (p) => p._id == participationInput._id
+      );
+
+      if (!participation)
+        throw new ApolloError(
+          "Couldn't find participation!",
+          "PARTICIPATION_NOT_FOUNDF"
+        );
+
+      participation.author = participationInput.author;
+
+      for (const opt of participationInput.choices) {
+        //update existing choices
+        participation.choices.forEach((c) => {
+          if (c.option == opt.option) c.choice = opt.choice;
+        });
+        //create new choices
+        if (!participation.choices.some((c) => c.option == opt.option)) {
+          participation.choices.push(opt);
+        }
+      }
+    } else {
+      if (!dbPoll.participations) dbPoll.participations = [];
+      dbPoll.participations.push(participationInput);
     }
 
     await dbPoll.save();
