@@ -11,7 +11,7 @@ import dbConnect from "./db/db";
 import { PollResolver } from "./graphql/Poll";
 
 const app = express();
-const port = 3000;
+const port = process.env.HTTP_PORT || 3000;
 
 app.get("/", (req, res) => {
   res.send("Hello World");
