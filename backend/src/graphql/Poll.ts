@@ -238,6 +238,22 @@ class PollResolver {
     await dbPoll.save();
     return dbPoll;
   }
+
+  @Mutation((returns) => Poll)
+  async deleteParticipation(
+    @Arg("pollId", (type) => ID) pollId: string,
+    @Arg("participationId", (type) => ID) participationId: string
+  ) {
+    return await PollModel.findByIdAndUpdate(
+      pollId,
+      {
+        $pull: {
+          participations: { _id: participationId },
+        },
+      },
+      { new: true }
+    );
+  }
 }
 
 export { PollResolver };
