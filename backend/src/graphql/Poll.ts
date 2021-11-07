@@ -15,14 +15,14 @@ import {
   Resolver,
 } from "type-graphql";
 import { Poll as PollModel } from "../db/models";
-import { IPoll, IPollParticipation } from "../util/types";
+import { IPoll } from "../util/types";
 import { PollComment } from "./PollComment";
 import { PollOption, PollOptionInput } from "./PollOption";
 import { PollParticipation, PollParticipationInput } from "./PollParticipation";
 
 @ObjectType()
 class Poll implements IPoll {
-  @Field((type) => ID)
+  @Field(() => ID)
   _id: string;
 
   @Field()
@@ -34,13 +34,13 @@ class Poll implements IPoll {
   @Field({ nullable: true })
   author?: string;
 
-  @Field((type) => [PollOption])
+  @Field(() => [PollOption])
   options?: PollOption[];
 
-  @Field((type) => [PollComment])
+  @Field(() => [PollComment])
   comments?: PollComment[];
 
-  @Field((type) => [PollParticipation])
+  @Field(() => [PollParticipation])
   participations?: PollParticipation[];
 
   constructor(_id: string, title: string, link: string) {
@@ -58,7 +58,7 @@ class PollInput {
   @Field()
   link: string;
 
-  @Field((type) => [PollOptionInput])
+  @Field(() => [PollOptionInput])
   options: PollOptionInput[];
 
   constructor(title: string, link: string, options: PollOptionInput[]) {
@@ -70,18 +70,18 @@ class PollInput {
 
 @ArgsType()
 class GetPollsArgs {
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Min(0)
-  first: number = 0;
+  first = 0;
 
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Min(1)
   limit: number | undefined = undefined;
 }
 
 @ArgsType()
 class GetPollByLinkArgs {
-  @Field((type) => String)
+  @Field(() => String)
   pollLink: string;
 
   constructor(pollLink: string) {
@@ -91,9 +91,7 @@ class GetPollByLinkArgs {
 
 @Resolver(Poll)
 class PollResolver {
-  constructor() {}
-
-  @Query((returns) => [Poll])
+  @Query(() => [Poll])
   async getPolls(@Args() { first, limit }: GetPollsArgs) {
     const query = PollModel.find();
     if (first) {
@@ -105,7 +103,7 @@ class PollResolver {
     return await query.exec();
   }
 
-  @Query((returns) => Poll, { nullable: true })
+  @Query(() => Poll, { nullable: true })
   async getPollByLink(@Args() { pollLink }: GetPollByLinkArgs) {
     const polls = await PollModel.find({ link: pollLink });
     if (!polls.length) {
@@ -114,7 +112,7 @@ class PollResolver {
     return polls[0];
   }
 
-  @Mutation((returns) => Poll)
+  @Mutation(() => Poll)
   async createPoll(@Arg("poll") poll: PollInput) {
     //TODO take author from user session once authentication is implemented
     const pollDoc = new PollModel({ ...poll, author: "Dummy Author" });
@@ -138,9 +136,9 @@ class PollResolver {
     return pollDoc;
   }
 
-  @Mutation((returns) => Poll)
+  @Mutation(() => Poll)
   async updatePoll(
-    @Arg("pollId", (type) => ID) pollId: string,
+    @Arg("pollId", () => ID) pollId: string,
     @Arg("poll") poll: PollInput
   ) {
     const dbPoll = await PollModel.findOne({ _id: pollId }).exec();
@@ -185,9 +183,9 @@ class PollResolver {
     return dbPoll;
   }
 
-  @Mutation((returns) => Poll)
+  @Mutation(() => Poll)
   async createOrUpdateParticipation(
-    @Arg("pollId", (type) => ID) pollId: string,
+    @Arg("pollId", () => ID) pollId: string,
     @Arg("participation") participationInput: PollParticipationInput
   ) {
     const dbPoll = await PollModel.findOne({ _id: pollId }).exec();
@@ -239,10 +237,10 @@ class PollResolver {
     return dbPoll;
   }
 
-  @Mutation((returns) => Poll)
+  @Mutation(() => Poll)
   async deleteParticipation(
-    @Arg("pollId", (type) => ID) pollId: string,
-    @Arg("participationId", (type) => ID) participationId: string
+    @Arg("pollId", () => ID) pollId: string,
+    @Arg("participationId", () => ID) participationId: string
   ) {
     return await PollModel.findByIdAndUpdate(
       pollId,

@@ -3,7 +3,7 @@ import { Field, ID, ObjectType } from "type-graphql";
 
 @ObjectType()
 class PollComment implements IPollComment {
-  @Field((type) => ID)
+  @Field(() => ID)
   _id: string;
 
   @Field()

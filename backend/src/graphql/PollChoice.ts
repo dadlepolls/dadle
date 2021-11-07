@@ -15,12 +15,12 @@ registerEnumType(YesNoMaybe, {
 @InputType("PollChoiceInput")
 @ObjectType()
 class PollChoice implements IPollChoice {
-  @Field((type) => ID, {
+  @Field(() => ID, {
     description: "references the ID of a PollOption of this very Poll",
   })
   option: Types.ObjectId;
 
-  @Field((type) => YesNoMaybe)
+  @Field(() => YesNoMaybe)
   choice: YesNoMaybe;
 
   constructor(option: Types.ObjectId, choice: YesNoMaybe) {

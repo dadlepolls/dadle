@@ -1,17 +1,16 @@
-import { Types } from "mongoose";
 import { Field, ID, InputType, ObjectType } from "type-graphql";
-import { IPollChoice, IPollParticipation, YesNoMaybe } from "../util/types";
+import { IPollChoice, IPollParticipation } from "../util/types";
 import { PollChoice } from "./PollChoice";
 
 @ObjectType()
 class PollParticipation implements IPollParticipation {
-  @Field((type) => ID)
+  @Field(() => ID)
   _id: string;
 
   @Field()
   author: string;
 
-  @Field((type) => [PollChoice])
+  @Field(() => [PollChoice])
   choices: PollChoice[] = [];
 
   constructor(_id: string, author: string, choices: PollChoice[]) {
@@ -23,13 +22,13 @@ class PollParticipation implements IPollParticipation {
 
 @InputType()
 class PollParticipationInput implements Partial<IPollParticipation> {
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   _id?: string;
 
   @Field()
   author: string;
 
-  @Field((type) => [PollChoice])
+  @Field(() => [PollChoice])
   choices: IPollChoice[];
 
   constructor(_id: string, author: string, choices: PollChoice[]) {

@@ -13,10 +13,10 @@ registerEnumType(PollOptionType, {
 
 @ObjectType()
 class PollOption implements IPollOption {
-  @Field((type) => ID)
+  @Field(() => ID)
   _id: string;
 
-  @Field((type) => PollOptionType)
+  @Field(() => PollOptionType)
   type: PollOptionType;
 
   @Field({ nullable: true })
@@ -36,10 +36,10 @@ class PollOption implements IPollOption {
 
 @InputType()
 class PollOptionInput implements Partial<PollOption> {
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   _id?: string;
 
-  @Field((type) => PollOptionType)
+  @Field(() => PollOptionType)
   type: PollOptionType;
 
   @Field({ nullable: true })
