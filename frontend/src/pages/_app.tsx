@@ -42,7 +42,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         </Header>
         <Content style={{ padding: "50px 50px 0 50px" }}>
           <div
-            style={{ minHeight: "280px", padding: "24px", background: "#fff" }}
+            style={{ minHeight: "280px", padding: "24px" }}
           >
             <Component {...pageProps} />
           </div>
