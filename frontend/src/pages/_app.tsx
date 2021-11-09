@@ -1,6 +1,7 @@
 import { MailOutlined } from "@ant-design/icons";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import "@styles/globals.css";
+import "@styles/pollpage.css";
 import { Layout, Menu } from "antd";
 import type { AppProps } from "next/app";
 
@@ -41,9 +42,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           </Menu>
         </Header>
         <Content style={{ padding: "50px 50px 0 50px" }}>
-          <div
-            style={{ minHeight: "280px", padding: "24px" }}
-          >
+          <div style={{ minHeight: "280px", padding: "24px" }}>
             <Component {...pageProps} />
           </div>
         </Content>

@@ -1,0 +1,140 @@
+.pollpage--container{
+  display: flex;
+  flex-direction: row;
+  background: #fff;
+}
+
+.pollpage--participations-container{
+  background-color: grey;
+  width: auto;
+  overflow-x: auto;
+}
+
+.pollpage--participations{
+  background: #d9d9d9;
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.pollpage--participation-choice-row{
+  display: flex;
+}
+
+.pollpage--participation-choice-row > div{
+  width: 79px;
+  height: 44px;
+  margin-left: 1px;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 22px;
+}
+
+.pollpage--participation-choice-row > div:last-child{
+  margin-right: 1px;
+}
+
+.pollpage--participation-choice-row:last-child{
+  margin-bottom: 1px;
+}
+
+.pollpage--option-choice-yes{
+  background-color: #52c41a;
+}
+
+.pollpage--option-choice-no{
+  background-color: #ff4d4f;
+}
+
+.pollpage--option-choice-maybe{
+  background-color: #faad14;
+}
+
+.pollpage--participation-option-row{
+  padding-bottom: 10px;
+  height: 130px;
+  background-color: #fff;
+  display: flex;
+  box-sizing: content-box;
+  flex-direction: row;
+  align-items: flex-end;
+}
+
+.pollpage--participation-option{
+  border: 1px solid #d9d9d9;
+  margin-left: 5px;
+  margin-right: 5px;
+  box-sizing: border-box;
+  min-width: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pollpage--participation-option-weekday,
+.pollpage--participation-option-month{
+  font-size: 18px;
+  line-height: 20px;
+}
+
+.pollpage--participation-option-day{
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.pollpage--participation-option-times{
+  border-top: 1px solid #d9d9d9;
+  padding-top: 5px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 20px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.pollpage--participants{
+  max-width: 400px;
+}
+
+.pollpage--participant{
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 45px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-grow: 1;
+  border-color: #d9d9d9;
+  border-style: solid;
+  border-width: 0 0 0 1px;
+}
+
+.pollpage--participant > .pollpage--participant-name{
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-height: 100%;
+  margin-right: 5px;
+}
+
+.pollpage--participant:first-child{
+  margin-top: 140px;
+  border-radius: 2px 0 0 0;
+  border-width: 1px 0 0 1px;
+}
+
+.pollpage--participant:last-child{
+  border-radius: 0 0 0 2px;
+  box-sizing: border-box;
+  border-width: 0 0 1px 1px;
+}
+
+.pollpage--participant > .pollpage--participant-edit-btn{
+  margin-left: auto;
+}
