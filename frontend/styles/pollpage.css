@@ -1,26 +1,25 @@
-.pollpage--container{
+.pollpage--container {
   display: flex;
   flex-direction: row;
   background: #fff;
 }
 
-.pollpage--participations-container{
-  background-color: grey;
+.pollpage--participations-container {
   width: auto;
   overflow-x: auto;
 }
 
-.pollpage--participations{
+.pollpage--participations {
   background: #d9d9d9;
   display: inline-flex;
   flex-direction: column;
 }
 
-.pollpage--participation-choice-row{
+.pollpage--participation-choice-row {
   display: flex;
 }
 
-.pollpage--participation-choice-row > div{
+.pollpage--participation-choice-row > div {
   width: 79px;
   height: 44px;
   margin-left: 1px;
@@ -32,31 +31,31 @@
   font-size: 22px;
 }
 
-.pollpage--participation-choice-row > div:last-child{
+.pollpage--participation-choice-row > div:last-child {
   margin-right: 1px;
 }
 
-.pollpage--participation-choice-row:last-child{
+.pollpage--participation-choice-row:last-child {
   margin-bottom: 1px;
 }
 
-.pollpage--option-choice-yes{
+.pollpage--option-choice-yes {
   background-color: #52c41a;
 }
 
-.pollpage--option-choice-no{
+.pollpage--option-choice-no {
   background-color: #ff4d4f;
 }
 
-.pollpage--option-choice-maybe{
+.pollpage--option-choice-maybe {
   background-color: #faad14;
 }
 
-.pollpage--option-choice-editable{
+.pollpage--option-choice-editable {
   cursor: pointer;
 }
 
-.pollpage--participation-option-row{
+.pollpage--participation-option-row {
   padding-bottom: 10px;
   height: 130px;
   background-color: #fff;
@@ -66,7 +65,7 @@
   align-items: flex-end;
 }
 
-.pollpage--participation-option{
+.pollpage--participation-option {
   border: 1px solid #d9d9d9;
   margin-left: 5px;
   margin-right: 5px;
@@ -79,18 +78,18 @@
 }
 
 .pollpage--participation-option-weekday,
-.pollpage--participation-option-month{
+.pollpage--participation-option-month {
   font-size: 18px;
   line-height: 20px;
 }
 
-.pollpage--participation-option-day{
+.pollpage--participation-option-day {
   font-size: 26px;
   font-weight: 700;
   line-height: 28px;
 }
 
-.pollpage--participation-option-times{
+.pollpage--participation-option-times {
   border-top: 1px solid #d9d9d9;
   padding-top: 5px;
   width: 100%;
@@ -102,11 +101,11 @@
   font-weight: 700;
 }
 
-.pollpage--participants{
+.pollpage--participants {
   max-width: 400px;
 }
 
-.pollpage--participant{
+.pollpage--participant {
   padding-left: 5px;
   padding-right: 5px;
   height: 45px;
@@ -119,27 +118,30 @@
   border-width: 0 0 0 1px;
 }
 
-.pollpage--participant > .pollpage--participant-name{
+.pollpage--participant > .pollpage--participant-name {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
   max-height: 100%;
   margin-right: 5px;
-  border-left-width: 1px;
 }
 
-.pollpage--participant:first-child{
+.pollpage--participant:first-child {
   margin-top: 140px;
-  border-radius: 2px 0 0 0;
+  border-top-left-radius: 2px;
   border-top-width: 1px;
 }
 
-.pollpage--participant:last-child{
-  border-radius: 0 0 0 2px;
-  box-sizing: border-box;
+.pollpage--participant:last-child {
+  border-bottom-left-radius: 2px;
+  box-sizing: content-box;
   border-bottom-width: 1px;
 }
 
-.pollpage--participant > .pollpage--participant-action-btn{
+.pollpage--participant:only-child {
+  height: 44px;
+}
+
+.pollpage--participant > .pollpage--participant-action-btn {
   margin-left: auto;
 }
