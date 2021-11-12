@@ -52,6 +52,10 @@
   background-color: #faad14;
 }
 
+.pollpage--option-choice-editable{
+  cursor: pointer;
+}
+
 .pollpage--participation-option-row{
   padding-bottom: 10px;
   height: 130px;
@@ -136,6 +140,6 @@
   border-bottom-width: 1px;
 }
 
-.pollpage--participant > .pollpage--participant-edit-btn{
+.pollpage--participant > .pollpage--participant-action-btn{
   margin-left: auto;
 }

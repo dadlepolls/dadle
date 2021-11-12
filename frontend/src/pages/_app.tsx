@@ -12,7 +12,19 @@ const { Header, Content, Footer } = Layout;
 
 const client = new ApolloClient({
   uri: "/graphql",
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Poll: {
+        fields: {
+          participations: {
+            merge(_, incoming: any[]) {
+              return incoming;
+            },
+          },
+        },
+      },
+    },
+  }),
 });
 
 Router.events.on("routeChangeStart", () => NProgress.start());
