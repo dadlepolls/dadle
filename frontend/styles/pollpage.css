@@ -3,6 +3,7 @@
   flex-direction: row;
   width: 100%;
   justify-content: center;
+  align-items: end;
 }
 
 .pollpage--participations-container {
@@ -58,7 +59,6 @@
 
 .pollpage--participation-option-row {
   padding-bottom: 10px;
-  height: 130px;
   background-color: #fff;
   display: flex;
   box-sizing: content-box;
@@ -128,7 +128,6 @@
 }
 
 .pollpage--participant:first-child {
-  margin-top: 140px;
   border-top-left-radius: 2px;
   border-top-width: 1px;
 }
