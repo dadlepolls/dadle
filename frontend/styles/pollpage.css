@@ -1,7 +1,8 @@
 .pollpage--container {
   display: flex;
   flex-direction: row;
-  background: #fff;
+  width: 100%;
+  justify-content: center;
 }
 
 .pollpage--participations-container {
