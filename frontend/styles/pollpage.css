@@ -121,18 +121,19 @@
   white-space: nowrap;
   max-height: 100%;
   margin-right: 5px;
+  border-left-width: 1px;
 }
 
 .pollpage--participant:first-child{
   margin-top: 140px;
   border-radius: 2px 0 0 0;
-  border-width: 1px 0 0 1px;
+  border-top-width: 1px;
 }
 
 .pollpage--participant:last-child{
   border-radius: 0 0 0 2px;
   box-sizing: border-box;
-  border-width: 0 0 1px 1px;
+  border-bottom-width: 1px;
 }
 
 .pollpage--participant > .pollpage--participant-edit-btn{
