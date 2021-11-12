@@ -4,6 +4,9 @@ import "@styles/globals.css";
 import "@styles/pollpage.css";
 import { Layout, Menu } from "antd";
 import type { AppProps } from "next/app";
+import { Router } from "next/dist/client/router";
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
 
 const { Header, Content, Footer } = Layout;
 
@@ -11,6 +14,10 @@ const client = new ApolloClient({
   uri: "/graphql",
   cache: new InMemoryCache(),
 });
+
+Router.events.on("routeChangeStart", () => NProgress.start());
+Router.events.on("routeChangeComplete", () => NProgress.done());
+Router.events.on("routeChangeError", () => NProgress.done());
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
