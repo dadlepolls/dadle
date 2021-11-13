@@ -3,6 +3,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
+  PlusOutlined,
   QuestionCircleOutlined,
   SaveOutlined
 } from "@ant-design/icons";
@@ -38,12 +39,18 @@ import { PollOptionType, YesNoMaybe } from "__generated__/globalTypes";
 const ParticipantRow = ({
   name: _name,
   editable = false,
+  deletable = true,
+  deleteConfirmation = true,
+  className = "",
   onEditClick = () => {},
   onSaveClick = () => {},
   onDeleteClick = () => {},
 }: {
   name: string;
   editable?: boolean;
+  deletable?: boolean;
+  deleteConfirmation?: boolean;
+  className?: string;
   onEditClick?: () => any;
   onSaveClick?: (_newName: string) => any;
   onDeleteClick?: () => any;
@@ -51,7 +58,7 @@ const ParticipantRow = ({
   const [name, setName] = useState(_name);
 
   return (
-    <div className="pollpage--participant">
+    <div className={`pollpage--participant ${className}`}>
       <div className="pollpage--participant-name">
         {editable ? (
           <Input
@@ -66,17 +73,29 @@ const ParticipantRow = ({
       <div className="pollpage--participant-action-btn">
         {editable ? (
           <Space>
-            <Popconfirm
-              title="Soll die Antwort wirklich gelöscht werden?"
-              okText="Ja"
-              cancelText="Abbrechen"
-              onConfirm={() => onDeleteClick()}
-            >
-              <Button danger icon={<DeleteOutlined />} />
-            </Popconfirm>
+            {deletable ? (
+              deleteConfirmation ? (
+                <Popconfirm
+                  title="Soll die Antwort wirklich gelöscht werden?"
+                  okText="Ja"
+                  cancelText="Abbrechen"
+                  onConfirm={() => onDeleteClick()}
+                >
+                  <Button danger icon={<DeleteOutlined />} />
+                </Popconfirm>
+              ) : (
+                <Button
+                  icon={<DeleteOutlined />}
+                  onClick={() => onDeleteClick()}
+                />
+              )
+            ) : null}
             <Button
               type="primary"
-              onClick={() => onSaveClick(name)}
+              onClick={() => {
+                if (!name) message.error("Bitte gib einen Namen an!");
+                else onSaveClick(name);
+              }}
               icon={<SaveOutlined />}
             />
           </Space>
@@ -162,7 +181,10 @@ const ParticipationRow = ({
   onChoiceChange = () => {},
 }: {
   options: GetPollByLink_getPollByLink_options[];
-  participation: GetPollByLink_getPollByLink_participations;
+  participation: Omit<
+    GetPollByLink_getPollByLink_participations,
+    "_id" | "__typename"
+  >;
   editable?: boolean;
   onChoiceChange?: (
     newChoices: GetPollByLink_getPollByLink_participations_choices[]
@@ -269,6 +291,10 @@ const PollPage: NextPage = () => {
 
   const [editableParticipation, setEditableParticipation] =
     useState<GetPollByLink_getPollByLink_participations | null>(null);
+  const [participationBeingAdded, setParticipationBeingAdded] = useState<Omit<
+    GetPollByLink_getPollByLink_participations,
+    "_id" | "__typename"
+  > | null>(null);
 
   const { error, loading, data } = useQuery<GetPollByLink>(GET_POLL_BY_LINK, {
     skip: !pollLink,
@@ -282,8 +308,11 @@ const PollPage: NextPage = () => {
     useMutation<DeleteParticipation>(DELETE_PARTICIPATION);
 
   const saveParticipation = async (
-    newAuthorName: string,
-    newChoices?: GetPollByLink_getPollByLink_participations_choices[]
+    participation: Omit<
+      GetPollByLink_getPollByLink_participations,
+      "_id" | "__typename"
+    > &
+      Partial<Pick<GetPollByLink_getPollByLink_participations, "_id">>
   ) => {
     NProgress.start();
     try {
@@ -291,10 +320,9 @@ const PollPage: NextPage = () => {
         variables: {
           pollId: poll?._id,
           participation: {
-            ...editableParticipation,
+            ...participation,
             __typename: undefined,
-            author: newAuthorName,
-            choices: newChoices?.map((n) => ({
+            choices: participation.choices.map((n) => ({
               ...n,
               __typename: undefined,
             })),
@@ -320,7 +348,6 @@ const PollPage: NextPage = () => {
       );
     } finally {
       NProgress.done();
-      setEditableParticipation(null);
     }
   };
 
@@ -362,7 +389,7 @@ const PollPage: NextPage = () => {
     }
   };
 
-  if (loading) return <div>loading...</div>;
+  if (loading || !poll) return <div>loading...</div>;
   if (error) return <div>An Error occured: {JSON.stringify(error)}</div>;
 
   return (
@@ -387,17 +414,53 @@ const PollPage: NextPage = () => {
                 name={p.author}
                 editable={editableParticipation?._id == p._id}
                 onEditClick={() => setEditableParticipation(p)}
-                onSaveClick={(e) =>
-                  saveParticipation(e, editableParticipation?.choices)
-                }
+                onSaveClick={async (e) => {
+                  if (!editableParticipation) return;
+                  await saveParticipation({
+                    ...editableParticipation,
+                    author: e,
+                  });
+                  setEditableParticipation(null);
+                }}
                 onDeleteClick={() => deleteParticipation(p._id)}
               />
             ))}
+            {participationBeingAdded ? (
+              <ParticipantRow
+                name=""
+                className="pollpage--participant-add-field-container"
+                editable={true}
+                deletable={true}
+                deleteConfirmation={false}
+                onSaveClick={async (e) => {
+                  await saveParticipation({
+                    ...participationBeingAdded,
+                    author: e,
+                  });
+                  setParticipationBeingAdded(null);
+                }}
+                onDeleteClick={() => setParticipationBeingAdded(null)}
+              />
+            ) : (
+              <div className="pollpage--add-btn-container">
+                <Button
+                  shape="circle"
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() =>
+                    setParticipationBeingAdded({
+                      author: "",
+                      choices: [],
+                    })
+                  }
+                />
+              </div>
+            )}
           </div>
           <div className="pollpage--participations-container">
             <OptionsRow key="optionstitles" options={poll?.options || []} />
             <div className="pollpage--participations">
-              {poll?.participations.map((p, idx) => (
+              {poll.participations.map((p, idx) => (
                 <ParticipationRow
                   key={idx}
                   participation={p}
@@ -410,6 +473,20 @@ const PollPage: NextPage = () => {
                   }
                 />
               ))}
+              {participationBeingAdded ? (
+                <ParticipationRow
+                  participation={participationBeingAdded}
+                  options={poll?.options}
+                  editable={true}
+                  onChoiceChange={(c) =>
+                    setParticipationBeingAdded((p) => {
+                      return p ? { ...p, choices: c } : null;
+                    })
+                  }
+                />
+              ) : (
+                <div className="pollpage--participation-choice-row pollpage--participation-choice-row-empty" />
+              )}
             </div>
           </div>
         </div>
