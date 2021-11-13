@@ -21,6 +21,7 @@ import {
 import {
   Button,
   Card,
+  Checkbox,
   Descriptions,
   Input,
   message,
@@ -178,11 +179,11 @@ const ParticipationRow = ({
       case YesNoMaybe.Maybe:
         return "pollpage--option-choice-maybe";
       default:
-        return "";
+        return "pollpage--option-choice-unknown";
     }
   };
 
-  const mapChoiceToIcon = (c?: YesNoMaybe) => {
+  const mapChoiceToIcon = (c?: YesNoMaybe, editable: boolean = false) => {
     switch (c) {
       case YesNoMaybe.Yes:
         return <CheckCircleOutlined />;
@@ -191,7 +192,7 @@ const ParticipationRow = ({
       case YesNoMaybe.Maybe:
         return <QuestionCircleOutlined />;
       default:
-        return <></>;
+        return editable ? <Checkbox /> : <></>;
     }
   };
 
@@ -254,7 +255,7 @@ const ParticipationRow = ({
                 e.preventDefault() /* prevent selecting text on page when double-clicking fast */
             }
           >
-            {mapChoiceToIcon(p?.choice)}
+            {mapChoiceToIcon(p?.choice, editable)}
           </div>
         );
       })}

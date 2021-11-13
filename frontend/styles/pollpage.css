@@ -1,3 +1,7 @@
+:root {
+  --pollpage--border-color: #d9d9d9;
+}
+
 .pollpage--container {
   display: flex;
   flex-direction: row;
@@ -12,7 +16,6 @@
 }
 
 .pollpage--participations {
-  background: #d9d9d9;
   display: inline-flex;
   flex-direction: column;
 }
@@ -24,8 +27,9 @@
 .pollpage--participation-choice-row > div {
   width: 79px;
   height: 44px;
-  margin-left: 1px;
-  margin-top: 1px;
+  border-left: 1px solid var(--pollpage--border-color);
+  border-top: 1px solid var(--pollpage--border-color);
+  box-sizing: content-box;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -34,11 +38,11 @@
 }
 
 .pollpage--participation-choice-row > div:last-child {
-  margin-right: 1px;
+  border-right: 1px solid var(--pollpage--border-color);
 }
 
-.pollpage--participation-choice-row:last-child {
-  margin-bottom: 1px;
+.pollpage--participation-choice-row:nth-last-child(2) {
+  border-bottom: 1px solid var(--pollpage--border-color);
 }
 
 .pollpage--option-choice-yes {
@@ -51,6 +55,10 @@
 
 .pollpage--option-choice-maybe {
   background-color: #faad14;
+}
+
+.pollpage--option-choice-unknown {
+  background-color: var(--pollpage--border-color);
 }
 
 .pollpage--option-choice-editable {
@@ -67,7 +75,7 @@
 }
 
 .pollpage--participation-option {
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--pollpage--border-color);
   margin-left: 5px;
   margin-right: 5px;
   box-sizing: border-box;
@@ -91,7 +99,7 @@
 }
 
 .pollpage--participation-option-times {
-  border-top: 1px solid #d9d9d9;
+  border-top: 1px solid var(--pollpage--border-color);
   padding-top: 5px;
   width: 100%;
   display: flex;
@@ -114,7 +122,7 @@
   flex-direction: row;
   align-items: center;
   flex-grow: 1;
-  border-color: #d9d9d9;
+  border-color: var(--pollpage--border-color);
   border-style: solid;
   border-width: 0 0 0 1px;
 }
