@@ -8,6 +8,7 @@ import {
   SaveOutlined
 } from "@ant-design/icons";
 import { ApolloError, useMutation, useQuery } from "@apollo/client";
+import { PollCommentArea } from "@components/PollCommentArea";
 import { CREATE_OR_UPDATE_PARTICIPATION } from "@operations/mutations/CreateOrUpdateParticipation";
 import { DELETE_PARTICIPATION } from "@operations/mutations/DeleteParticipation";
 import { CreateOrUpdateParticipation } from "@operations/mutations/__generated__/CreateOrUpdateParticipation";
@@ -541,13 +542,7 @@ const PollPage: NextPage = () => {
           </div>
         </div>
       </Card>
-      <Card title="Kommentare" style={{ marginTop: 16 }}>
-        {poll.comments.map((c, idx) => (
-          <Card size="small" title={c.by} key={idx} style={{ marginBottom: 16 }}>
-            {c.text}
-          </Card>
-        ))}
-      </Card>
+      <PollCommentArea pollId={poll._id} comments={poll.comments} />
     </>
   );
 };
