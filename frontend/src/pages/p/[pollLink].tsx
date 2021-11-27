@@ -541,6 +541,13 @@ const PollPage: NextPage = () => {
           </div>
         </div>
       </Card>
+      <Card title="Kommentare" style={{ marginTop: 16 }}>
+        {poll.comments.map((c, idx) => (
+          <Card size="small" title={c.by} key={idx} style={{ marginBottom: 16 }}>
+            {c.text}
+          </Card>
+        ))}
+      </Card>
     </>
   );
 };
