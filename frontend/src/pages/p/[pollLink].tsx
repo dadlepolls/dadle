@@ -36,6 +36,11 @@ import NProgress from "nprogress";
 import React, { useEffect, useState } from "react";
 import { PollOptionType, YesNoMaybe } from "__generated__/globalTypes";
 
+type TAccumulatedChoicesPerOption = Record<
+  string,
+  { yes: number; no: number; maybe: number }
+>;
+
 const ParticipantRow = ({
   name: _name,
   editable = false,
@@ -109,8 +114,10 @@ const ParticipantRow = ({
 
 const OptionTitle = ({
   option,
+  badgeContent,
 }: {
   option: GetPollByLink_getPollByLink_options;
+  badgeContent?: string;
 }) => {
   const content = [];
 
@@ -157,18 +164,37 @@ const OptionTitle = ({
     content.push(<span key="arb">{option.title}</span>);
   }
 
-  return <div className="pollpage--participation-option">{content}</div>;
+  return (
+    <div className="pollpage--participation-option">
+      {badgeContent ? (
+        <span className="pollpage--participation-option-badge">
+          {badgeContent}
+        </span>
+      ) : null}
+      {content}
+    </div>
+  );
 };
 
 const OptionsRow = ({
   options,
+  choiceCountPerOption = {},
 }: {
   options: GetPollByLink_getPollByLink_options[];
+  choiceCountPerOption?: TAccumulatedChoicesPerOption;
 }) => {
   return (
     <div className="pollpage--participation-option-row">
       {options.map((o, idx) => (
-        <OptionTitle option={o} key={idx} />
+        <OptionTitle
+          option={o}
+          key={idx}
+          badgeContent={
+            choiceCountPerOption[o._id]?.yes
+              ? String(choiceCountPerOption[o._id]?.yes)
+              : undefined
+          }
+        />
       ))}
     </div>
   );
@@ -392,6 +418,22 @@ const PollPage: NextPage = () => {
   if (loading || !poll) return <div>loading...</div>;
   if (error) return <div>An Error occured: {JSON.stringify(error)}</div>;
 
+  let choiceCountPerOption = poll?.options.reduce(
+    (map: TAccumulatedChoicesPerOption, o) => {
+      const getAmountOfResponsesForChoice = (choice: YesNoMaybe) =>
+        poll?.participations.filter((p) =>
+          p.choices.some((c) => c.option == o._id && c.choice == choice)
+        ).length;
+      map[o._id] = {
+        yes: getAmountOfResponsesForChoice(YesNoMaybe.Yes),
+        no: getAmountOfResponsesForChoice(YesNoMaybe.No),
+        maybe: getAmountOfResponsesForChoice(YesNoMaybe.Maybe),
+      };
+      return map;
+    },
+    {}
+  );
+
   return (
     <>
       <PageHeader
@@ -458,7 +500,11 @@ const PollPage: NextPage = () => {
             )}
           </div>
           <div className="pollpage--participations-container">
-            <OptionsRow key="optionstitles" options={poll?.options || []} />
+            <OptionsRow
+              key="optionstitles"
+              options={poll?.options || []}
+              choiceCountPerOption={choiceCountPerOption}
+            />
             <div className="pollpage--participations">
               {poll.participations.map((p, idx) => (
                 <ParticipationRow
