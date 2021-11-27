@@ -32,6 +32,7 @@ import {
 } from "antd";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
+import Head from "next/head";
 import NProgress from "nprogress";
 import React, { useEffect, useState } from "react";
 import { PollOptionType, YesNoMaybe } from "__generated__/globalTypes";
@@ -436,6 +437,9 @@ const PollPage: NextPage = () => {
 
   return (
     <>
+      <Head>
+        <title>{poll.title} | DadleX</title>
+      </Head>
       <PageHeader
         ghost={false}
         onBack={() => router.back()}

@@ -5,6 +5,7 @@ import { GetPollsOverview } from "@operations/queries/__generated__/GetPollsOver
 import { Card, Typography } from "antd";
 import type { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
+import Head from "next/head";
 import Link from "next/link";
 
 const Home: NextPage = () => {
@@ -17,6 +18,9 @@ const Home: NextPage = () => {
 
   return (
     <>
+      <Head>
+        <title>DadleX</title>
+      </Head>
       <PollCreationDialog key="dialog" />
       {data?.getPolls.map((poll, idx) => (
         <Card
