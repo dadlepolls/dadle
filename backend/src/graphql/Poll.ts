@@ -16,7 +16,7 @@ import {
 } from "type-graphql";
 import { Poll as PollModel } from "../db/models";
 import { IPoll } from "../util/types";
-import { PollComment } from "./PollComment";
+import { PollComment, PollCommentInput } from "./PollComment";
 import { PollOption, PollOptionInput } from "./PollOption";
 import { PollParticipation, PollParticipationInput } from "./PollParticipation";
 
@@ -247,6 +247,47 @@ class PollResolver {
       {
         $pull: {
           participations: { _id: participationId },
+        },
+      },
+      { new: true }
+    );
+  }
+
+  @Mutation(() => Poll)
+  async createOrUpdateComment(
+    @Arg("pollId", () => ID) pollId: string,
+    @Arg("comment") commentInput: PollCommentInput
+  ) {
+    const dbPoll = await PollModel.findOne({ _id: pollId }).exec();
+    if (!dbPoll) {
+      throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
+    }
+
+    if (commentInput._id) {
+      const comment = dbPoll.comments?.find((c) => c._id == commentInput._id);
+      if (!comment)
+        throw new ApolloError("Couldn't find comment!", "COMMENT_NOT_FOUND");
+
+      comment.by = commentInput.by;
+      comment.text = commentInput.text;
+    } else {
+      dbPoll.comments?.push(commentInput);
+    }
+
+    await dbPoll.save();
+    return dbPoll;
+  }
+
+  @Mutation(() => Poll)
+  async deleteComment(
+    @Arg("pollId", () => ID) pollId: string,
+    @Arg("commentId", () => ID) commentId: string
+  ) {
+    return await PollModel.findByIdAndUpdate(
+      pollId,
+      {
+        $pull: {
+          comments: { _id: commentId },
         },
       },
       { new: true }

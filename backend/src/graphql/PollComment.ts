@@ -1,5 +1,5 @@
 import { IPollComment } from "../util/types";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, InputType, ObjectType } from "type-graphql";
 
 @ObjectType()
 class PollComment implements IPollComment {
@@ -19,4 +19,21 @@ class PollComment implements IPollComment {
   }
 }
 
-export { PollComment };
+@InputType()
+class PollCommentInput implements Partial<PollComment> {
+  @Field(() => ID, { nullable: true })
+  _id?: string;
+
+  @Field()
+  by: string;
+
+  @Field()
+  text: string;
+
+  constructor(by: string, text: string) {
+    this.by = by;
+    this.text = text;
+  }
+}
+
+export { PollComment, PollCommentInput };
