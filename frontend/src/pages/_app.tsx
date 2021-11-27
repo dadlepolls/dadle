@@ -21,6 +21,11 @@ const client = new ApolloClient({
               return incoming;
             },
           },
+          comments: {
+            merge(_, incoming: any[]) {
+              return incoming;
+            },
+          },
         },
       },
     },
