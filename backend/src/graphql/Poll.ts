@@ -213,7 +213,7 @@ class PollResolver {
       if (!participation)
         throw new ApolloError(
           "Couldn't find participation!",
-          "PARTICIPATION_NOT_FOUNDF"
+          "PARTICIPATION_NOT_FOUND"
         );
 
       participation.author = participationInput.author;
