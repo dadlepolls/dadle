@@ -220,7 +220,7 @@ export const PollEditDialog = ({
         layout="vertical"
         onFinish={(e) => savePoll(e)}
       >
-        <Form.Item required={true} label="Name der Umfarge" name="title">
+        <Form.Item required={true} label="Name der Umfrage" name="title">
           <Input
             type="text"
             size="large"
