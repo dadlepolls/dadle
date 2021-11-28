@@ -212,11 +212,13 @@ export const PollCommentArea = ({
           }}
         >
           <Button
-            shape="circle"
+            shape="round"
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => setCommentBeingAdded({ by: "", text: "" })}
-          />
+          >
+            Neuer Kommentar
+          </Button>
         </div>
       )}
     </Card>
