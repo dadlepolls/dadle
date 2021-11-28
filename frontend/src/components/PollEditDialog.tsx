@@ -1,5 +1,5 @@
 import { DeleteOutlined } from "@ant-design/icons";
-import { ApolloError, useMutation } from "@apollo/client";
+import { ApolloError, gql, useMutation } from "@apollo/client";
 import { CREATE_POLL } from "@operations/mutations/CreateOrUpdateComment copy";
 import {
   CreatePoll,
@@ -158,7 +158,28 @@ export const PollEditDialog = ({
   ); //link is not marked as "modified manually" if there is not link given at the first place
   const [pollIsSaving, setPollIsSaving] = useState(false);
 
-  const [createPollMutation] = useMutation<CreatePoll>(CREATE_POLL);
+  const [createPollMutation] = useMutation<CreatePoll>(CREATE_POLL, {
+    update(cache, { data }) {
+      cache.modify({
+        fields: {
+          getPolls(existingPolls = []) {
+            const newPollRef = cache.readFragment({
+              id: `Poll:${data?.createPoll._id}`,
+              fragment: gql`
+                fragment NewPoll on Poll {
+                  _id
+                  title
+                  link
+                  author
+                }
+              `,
+            });
+            return [...existingPolls, newPollRef];
+          },
+        },
+      });
+    },
+  });
 
   const savePoll = async (poll: Partial<CreatePoll_createPoll>) => {
     setPollIsSaving(true);
