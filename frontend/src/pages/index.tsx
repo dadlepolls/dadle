@@ -1,5 +1,5 @@
 import { useQuery } from "@apollo/client";
-import { PollCreationDialog } from "@components/PollCreationDialog";
+import { PollEditDialog } from "@components/PollEditDialog";
 import { GET_POLLS_OVERVIEW } from "@operations/queries/GetPollsOverview";
 import { GetPollsOverview } from "@operations/queries/__generated__/GetPollsOverview";
 import { Card, Typography } from "antd";
@@ -21,7 +21,7 @@ const Home: NextPage = () => {
       <Head>
         <title>DadleX</title>
       </Head>
-      <PollCreationDialog key="dialog" />
+      <PollEditDialog key="dialog" />
       {data?.getPolls.map((poll, idx) => (
         <Card
           key={idx}
