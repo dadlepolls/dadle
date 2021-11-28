@@ -260,7 +260,7 @@ export const PollEditDialog = ({
         </Form.Item>
         <OptionEditor options={_poll?.options} />
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" loading={pollIsSaving}>
             Umfrage erstellen
           </Button>
         </Form.Item>
