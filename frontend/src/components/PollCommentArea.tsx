@@ -84,6 +84,7 @@ const PollComment = ({
           placeholder="Kommentar..."
           value={text}
           onChange={(e) => setText(e.target.value)}
+          autoSize={true}
         />
       ) : (
         comment.text
