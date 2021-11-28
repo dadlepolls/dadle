@@ -12,7 +12,7 @@ import { DeleteComment } from "@operations/mutations/__generated__/DeleteComment
 import { GetPollByLink_getPollByLink_comments } from "@operations/queries/__generated__/GetPollByLink";
 import { Button, Card, Input, message, Space } from "antd";
 import NProgress from "nprogress";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 type SaveCommentType = Partial<
   Pick<GetPollByLink_getPollByLink_comments, "_id">
@@ -25,12 +25,14 @@ const PollComment = ({
   onEditClick = () => {},
   onDeleteClick = () => {},
   onSaveClick = (_) => {},
+  isSaving = false,
 }: {
   comment: Partial<GetPollByLink_getPollByLink_comments>;
   editable?: boolean;
   onSaveClick?: (comment: SaveCommentType) => any;
   onEditClick?: () => any;
   onDeleteClick?: () => any;
+  isSaving?: boolean;
 }) => {
   const [by, setBy] = useState(comment.by || "");
   const [text, setText] = useState(comment.text || "");
@@ -56,6 +58,7 @@ const PollComment = ({
           <Button
             size="small"
             type="primary"
+            loading={isSaving}
             icon={<SaveOutlined />}
             onClick={() => onSaveClick({ ...comment, by, text })}
             style={{ marginLeft: 16 }}
@@ -101,13 +104,20 @@ export const PollCommentArea = ({
   const [commentBeingAdded, setCommentBeingAdded] =
     useState<SaveCommentType | null>(null);
 
+  const [commentIsSaving, setCommentIsSaving] = useState(false);
+
   const [createOrUpdateCommentMutation] = useMutation<CreateOrUpdateComment>(
     CREATE_OR_UPDATE_COMMENT
   );
   const [deleteCommentMutation] = useMutation<DeleteComment>(DELETE_COMMENT);
 
+  useEffect(() => {
+    if (commentIsSaving) NProgress.start();
+    else NProgress.done();
+  }, [commentIsSaving]);
+
   const saveComment = async (comment: SaveCommentType) => {
-    NProgress.start();
+    setCommentIsSaving(true);
     try {
       await createOrUpdateCommentMutation({
         variables: {
@@ -136,7 +146,7 @@ export const PollCommentArea = ({
         </>
       );
     } finally {
-      NProgress.done();
+      setCommentIsSaving(false);
     }
   };
 
@@ -191,6 +201,7 @@ export const PollCommentArea = ({
             await saveComment(c);
             setEditableComment(null);
           }}
+          isSaving={commentIsSaving}
         />
       ))}
       {commentBeingAdded ? (
@@ -201,6 +212,7 @@ export const PollCommentArea = ({
             await saveComment(c);
             setCommentBeingAdded(null);
           }}
+          isSaving={commentIsSaving}
         />
       ) : (
         <div
