@@ -21,7 +21,7 @@ const Home: NextPage = () => {
       <Head>
         <title>DadleX</title>
       </Head>
-      <PollEditDialog key="dialog" />
+      <PollEditDialog title="Neue Umfrage erstellen" key="dialog" />
       {data?.getPolls.map((poll, idx) => (
         <Card
           key={idx}

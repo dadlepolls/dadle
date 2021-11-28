@@ -1,3 +1,5 @@
+import { PollOptionType, YesNoMaybe } from "__generated__/globalTypes";
+
 interface Poll {
   _id: string;
   title: string;
@@ -5,12 +7,6 @@ interface Poll {
   author?: string;
   options?: PollOption[];
   comments?: PollComment[];
-}
-
-enum PollOptionType {
-  Date = 1,
-  DateTime,
-  Arbitrary,
 }
 
 interface PollOption {
@@ -22,16 +18,10 @@ interface PollOption {
   responses?: PollOptionResponse[];
 }
 
-enum PollOptionResponseChoice {
-  Yes = 1,
-  No,
-  Maybe,
-}
-
 interface PollOptionResponse {
   _id: string;
   by: string;
-  response: PollOptionResponseChoice;
+  response: YesNoMaybe;
 }
 
 interface PollComment {
@@ -41,5 +31,3 @@ interface PollComment {
 }
 
 export type { Poll, PollOption, PollOptionResponse, PollComment };
-export { PollOptionType, PollOptionResponseChoice };
-
