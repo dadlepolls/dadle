@@ -9,7 +9,7 @@ import {
   GetPollByLink_getPollByLink,
   GetPollByLink_getPollByLink_options
 } from "@operations/queries/__generated__/GetPollByLink";
-import { Button, Card, Form, Input, message, Radio } from "antd";
+import { Button, Card, Form, Input, message, Radio, Tooltip } from "antd";
 import { useRouter } from "next/dist/client/router";
 import React, { useState } from "react";
 import { PollOptionType } from "__generated__/globalTypes";
@@ -95,6 +95,10 @@ const OptionEditor = ({
     options?.length ? options[0].type : null
   );
 
+  /* disabled type change in case there are any options specified */
+  const typeChangeDisabled =
+    options && options.filter((o) => o.type == pollOptionType).length > 0;
+
   return (
     <div
       style={{
@@ -104,24 +108,35 @@ const OptionEditor = ({
         flexDirection: "column",
       }}
     >
-      <Radio.Group
-        buttonStyle="solid"
-        value={pollOptionType}
-        onChange={(e) => setPollOptionType(e.target.value)}
-        disabled={
-          options && options.filter((o) => o.type == pollOptionType).length > 0
-        } /* disabled in case there are any options specified */
+      <Tooltip
+        title={
+          typeChangeDisabled ? (
+            <>
+              Die Art der Umfrage kann nicht geändert werden, wenn schon
+              Antwortoptionen angegeben wurden.
+              <br />
+              Bitte lösche zuerst die Antwortoptionen.
+            </>
+          ) : null
+        }
       >
-        <Radio.Button value={PollOptionType.DateTime}>
-          Ein Datum und eine Uhrzeit finden
-        </Radio.Button>
-        <Radio.Button value={PollOptionType.Date}>
-          Ein Datum finden
-        </Radio.Button>
-        <Radio.Button value={PollOptionType.Arbitrary}>
-          Über beliebige Optionen abstimmen
-        </Radio.Button>
-      </Radio.Group>
+        <Radio.Group
+          buttonStyle="solid"
+          value={pollOptionType}
+          onChange={(e) => setPollOptionType(e.target.value)}
+          disabled={typeChangeDisabled}
+        >
+          <Radio.Button value={PollOptionType.DateTime}>
+            Ein Datum und eine Uhrzeit finden
+          </Radio.Button>
+          <Radio.Button value={PollOptionType.Date}>
+            Ein Datum finden
+          </Radio.Button>
+          <Radio.Button value={PollOptionType.Arbitrary}>
+            Über beliebige Optionen abstimmen
+          </Radio.Button>
+        </Radio.Group>
+      </Tooltip>
       <div style={{ width: "100%", marginTop: 16 }}>
         {pollOptionType == PollOptionType.Arbitrary ? (
           <OptionEditorFormItem />
@@ -258,7 +273,11 @@ export const PollEditDialog = ({
             }}
           />
         </Form.Item>
-        <OptionEditor options={_poll?.options} />
+        <Form.Item noStyle dependencies={["options"]}>
+          {({ getFieldValue }) => (
+            <OptionEditor options={getFieldValue("options")} />
+          )}
+        </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={pollIsSaving}>
             Umfrage erstellen
