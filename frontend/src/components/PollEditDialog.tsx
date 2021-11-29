@@ -273,10 +273,12 @@ export const PollEditDialog = ({
             }}
           />
         </Form.Item>
-        <Form.Item noStyle dependencies={["options"]}>
-          {({ getFieldValue }) => (
-            <OptionEditor options={getFieldValue("options")} />
-          )}
+        <Form.Item noStyle dependencies={["options", "title"]}>
+          {({ getFieldValue }) =>
+            getFieldValue("title") ? (
+              <OptionEditor options={getFieldValue("options")} />
+            ) : null
+          }
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={pollIsSaving}>
