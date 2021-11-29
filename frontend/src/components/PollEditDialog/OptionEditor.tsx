@@ -1,11 +1,162 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { GetPollByLink_getPollByLink_options } from "@operations/queries/__generated__/GetPollByLink";
 import { Button, Form, Input, Radio, Tooltip } from "antd";
+import moment from "moment";
+import "moment/locale/de";
 import React, { useState } from "react";
+import {
+  Calendar as RBCalendar,
+  Event,
+  momentLocalizer,
+  SlotInfo,
+  stringOrDate
+} from "react-big-calendar";
+import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
+//TODO use ant styling for calendar
+import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 import { PollOptionType } from "__generated__/globalTypes";
 
+interface PollOptionAsEvent extends Event {
+  optionIndex: number;
+  optionId?: string;
+}
+
+const localizer = momentLocalizer(moment);
+const Calendar = withDragAndDrop<PollOptionAsEvent>(RBCalendar as any);
+
+const OptionEditorCalendar = ({
+  value = [],
+  onChange = () => {},
+  pollTitle,
+}: {
+  value?: Partial<GetPollByLink_getPollByLink_options>[];
+  onChange?: (value: Partial<GetPollByLink_getPollByLink_options>[]) => any;
+  pollTitle: string;
+}) => {
+  const mapValueToCalendarEvents = (
+    value: Partial<GetPollByLink_getPollByLink_options>[]
+  ) => {
+    return value.map<PollOptionAsEvent>((o, idx) => ({
+      optionIndex: idx,
+      optionId: o._id,
+      start: o.from,
+      end:
+        o.type == PollOptionType.Date ? moment(o.from).add(24, "hours") : o.to,
+      title: pollTitle,
+      allDay: o.type == PollOptionType.Date,
+    }));
+  };
+
+  const isMidnight = (dt: Date | string) => {
+    let date = moment(dt);
+    return date.hours() === 0 && date.minutes() === 0 && date.seconds() === 0;
+  };
+
+  const handleEventChange = (e: {
+    event: PollOptionAsEvent;
+    start: stringOrDate;
+    end: stringOrDate;
+    isAllDay: boolean;
+  }) => {
+    if (!moment(e.start).isSame(moment(e.end), "day")) {
+      //prevent events from lasting longer than one day
+      e.end = moment(e.start).hours(23).minutes(59).seconds(59).toDate();
+    }
+    if (e.isAllDay) {
+      //assure that the event start date is always midnight of the very day when created as all-day event
+      e.start = moment(e.start).hours(0).minutes(0).seconds(0).toDate();
+    }
+    const opts = [...value];
+    opts[e.event.optionIndex] = {
+      ...opts[e.event.optionIndex],
+      from: e.start,
+      to: e.isAllDay ? undefined : e.end,
+      type: e.isAllDay ? PollOptionType.Date : PollOptionType.DateTime,
+    };
+    onChange(opts);
+  };
+
+  const handleEventCreate = (e: SlotInfo) => {
+    const isAllDay = isMidnight(e.start) && isMidnight(e.end);
+    const opts = [...value];
+    opts.push({
+      type: isAllDay ? PollOptionType.Date : PollOptionType.DateTime,
+      from: e.start,
+      to: isAllDay ? undefined : e.end,
+    });
+    onChange(opts);
+  };
+
+  return (
+    <Calendar
+      defaultDate={moment().toDate()}
+      defaultView="week"
+      localizer={localizer}
+      resizable
+      style={{ height: "600px" }}
+      events={mapValueToCalendarEvents(value)}
+      onEventDrop={handleEventChange}
+      onEventResize={handleEventChange}
+      onSelectSlot={handleEventCreate}
+      onDoubleClickEvent={(e) => {
+        const opts = [...value];
+        opts.splice(e.optionIndex, 1);
+        onChange(opts);
+      }}
+      selectable
+      views={["week", "agenda"]}
+      popup={true}
+      messages={{
+        agenda: "Übersicht",
+        week: "Kalenderansicht",
+        today: "Heute",
+        next: "Nächste Woche",
+        previous: "Vorherige Woche",
+      }}
+      formats={{
+        dayRangeHeaderFormat: (range, culture, localizer) => {
+          return `${
+            localizer?.format(range.start, "DD.MM.", culture || "de") || ""
+          } - ${localizer?.format(range.end, "DD.MM.", culture || "de") || ""}`;
+        },
+        dayFormat: (date, culture, localizer) => {
+          return localizer?.format(date, "dd (DD.)", culture || "de") || "";
+        },
+      }}
+    />
+  );
+};
+
+const OptionEditorCalendarFormItem = ({ pollTitle }: { pollTitle: string }) => {
+  return (
+    <Form.Item
+      name="options"
+      rules={[
+        {
+          validator: (
+            _,
+            val: Partial<GetPollByLink_getPollByLink_options>[]
+          ) => {
+            if (val.length == 0)
+              return Promise.reject(
+                new Error(
+                  "Es muss mindestens eine Umfrageoption angelegt angelegt sein!"
+                )
+              );
+            return Promise.resolve();
+          },
+        },
+      ]}
+    >
+      <OptionEditorCalendar pollTitle={pollTitle} />
+    </Form.Item>
+  );
+};
+
 const OptionEditorArbitrary = ({
-  value = [], onChange = () => { },
+  value = [],
+  onChange = () => {},
 }: {
   value?: Partial<GetPollByLink_getPollByLink_options>[];
   onChange?: (value: Partial<GetPollByLink_getPollByLink_options>[]) => any;
@@ -27,7 +178,8 @@ const OptionEditorArbitrary = ({
                 title: e.target.value,
               };
               onChange(opts);
-            }} />
+            }}
+          />
           {idx < arr.length - 1 ? (
             <Button
               icon={<DeleteOutlined />}
@@ -35,7 +187,8 @@ const OptionEditorArbitrary = ({
                 const opts = [...value];
                 opts.splice(idx, 1);
                 onChange(opts);
-              }} />
+              }}
+            />
           ) : null}
         </Input.Group>
       ))}
@@ -43,7 +196,7 @@ const OptionEditorArbitrary = ({
   );
 };
 
-const OptionEditorFormItem = () => {
+const OptionEditorArbitraryFormItem = () => {
   return (
     <Form.Item
       name="options"
@@ -72,17 +225,31 @@ const OptionEditorFormItem = () => {
     </Form.Item>
   );
 };
+
+enum OptionEditorType {
+  Arbitrary,
+  Calendar,
+}
+
 export const OptionEditor = ({
   options,
+  pollTitle,
 }: {
   options?: GetPollByLink_getPollByLink_options[];
+  pollTitle: string;
 }) => {
-  const [pollOptionType, setPollOptionType] = useState(
-    options?.length ? options[0].type : null
+  const mapOptionTypeToEditorType = (t?: PollOptionType) => {
+    if (t == PollOptionType.Arbitrary) return OptionEditorType.Arbitrary;
+    else if (t) return OptionEditorType.Calendar;
+    else return null;
+  };
+
+  const [editorType, setEditorType] = useState(
+    options?.length ? mapOptionTypeToEditorType(options[0].type) : null
   );
 
   /* disabled type change in case there are any options specified */
-  const typeChangeDisabled = options && options.filter((o) => o.type == pollOptionType).length > 0;
+  const typeChangeDisabled = options && options.length > 0;
 
   return (
     <div
@@ -94,35 +261,37 @@ export const OptionEditor = ({
       }}
     >
       <Tooltip
-        title={typeChangeDisabled ? (
-          <>
-            Die Art der Umfrage kann nicht geändert werden, wenn schon
-            Antwortoptionen angegeben wurden.
-            <br />
-            Bitte lösche zuerst die Antwortoptionen.
-          </>
-        ) : null}
+        title={
+          typeChangeDisabled ? (
+            <>
+              Die Art der Umfrage kann nicht geändert werden, wenn schon
+              Antwortoptionen angegeben wurden.
+              <br />
+              Bitte lösche zuerst die Antwortoptionen.
+            </>
+          ) : null
+        }
       >
         <Radio.Group
           buttonStyle="solid"
-          value={pollOptionType}
-          onChange={(e) => setPollOptionType(e.target.value)}
+          value={editorType}
+          onChange={(e) => setEditorType(e.target.value)}
           disabled={typeChangeDisabled}
         >
-          <Radio.Button value={PollOptionType.DateTime}>
-            Ein Datum und eine Uhrzeit finden
+          <Radio.Button value={OptionEditorType.Calendar}>
+            Kalender
           </Radio.Button>
-          <Radio.Button value={PollOptionType.Date}>
-            Ein Datum finden
-          </Radio.Button>
-          <Radio.Button value={PollOptionType.Arbitrary}>
+          <Radio.Button value={OptionEditorType.Arbitrary}>
             Über beliebige Optionen abstimmen
           </Radio.Button>
         </Radio.Group>
       </Tooltip>
       <div style={{ width: "100%", marginTop: 16 }}>
-        {pollOptionType == PollOptionType.Arbitrary ? (
-          <OptionEditorFormItem />
+        {editorType == OptionEditorType.Arbitrary ? (
+          <OptionEditorArbitraryFormItem />
+        ) : null}
+        {editorType == OptionEditorType.Calendar ? (
+          <OptionEditorCalendarFormItem pollTitle={pollTitle} />
         ) : null}
       </div>
     </div>

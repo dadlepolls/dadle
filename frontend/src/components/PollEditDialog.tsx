@@ -151,7 +151,10 @@ export const PollEditDialog = ({
         <Form.Item noStyle dependencies={["options", "title"]}>
           {({ getFieldValue }) =>
             getFieldValue("title") ? (
-              <OptionEditor options={getFieldValue("options")} />
+              <OptionEditor
+                pollTitle={getFieldValue("title")}
+                options={getFieldValue("options")}
+              />
             ) : null
           }
         </Form.Item>
