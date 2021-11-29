@@ -100,7 +100,17 @@ export const PollEditDialog = ({
         layout="vertical"
         onFinish={(e) => savePoll(e)}
       >
-        <Form.Item required={true} label="Name der Umfrage" name="title">
+          <Form.Item
+            required={true}
+            label="Name der Umfrage"
+            name="title"
+            rules={[
+              {
+                required: true,
+                message: "Es muss ein Name für die Umfrage angegeben werden",
+              },
+            ]}
+          >
           <Input
             type="text"
             size="large"
