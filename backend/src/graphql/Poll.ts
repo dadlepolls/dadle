@@ -52,6 +52,9 @@ class Poll implements IPoll {
 
 @InputType()
 class PollInput {
+  @Field(() => ID, { nullable: true })
+  _id?: string;
+
   @Field()
   title: string;
 
@@ -113,6 +116,77 @@ class PollResolver {
   }
 
   @Mutation(() => Poll)
+  async createOrUpdatePoll(@Arg("poll") poll: PollInput) {
+    if (poll._id) {
+      //update an existing poll
+      const dbPoll = await PollModel.findOne({ _id: poll._id }).exec();
+      if (!dbPoll) {
+        throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
+      }
+
+      //manually update the new poll options since they require more logic, just copy the new poll props
+      const { options: givenPollOptions, ...newPollProps } = poll;
+
+      //take all poll props except the PollOptions
+      let k: keyof typeof newPollProps;
+      for (k in newPollProps) dbPoll[k] = newPollProps[k];
+
+      //remove any poll options that don't exist in the new options
+      dbPoll.options = dbPoll.options?.filter(
+        (x) => x._id && givenPollOptions.some((o) => x._id == o._id)
+      );
+
+      //manually update the poll options
+      for (const givenPollOpt of givenPollOptions) {
+        if (
+          !givenPollOpt._id ||
+          !dbPoll.options?.some((x) => x._id == givenPollOpt._id)
+        ) {
+          //no id is given or id does not exist on db => create new option
+          dbPoll.options?.push(givenPollOpt);
+        }
+        for (const opt of dbPoll.options?.filter(
+          (x) => x._id == givenPollOpt._id
+        ) || []) {
+          //update a poll option with a specific id
+          //TODO manually assigning object properties
+          opt["title"] = givenPollOpt["title"];
+          opt["from"] = givenPollOpt["from"];
+          opt["to"] = givenPollOpt["to"];
+          opt["type"] = givenPollOpt["type"];
+        }
+      }
+
+      await dbPoll.save();
+      return dbPoll;
+    } else {
+      //create a new poll
+      //TODO take author from user session once authentication is implemented
+      const pollDoc = new PollModel({ ...poll, author: "Dummy Author" });
+      try {
+        await pollDoc.save();
+      } catch (err) {
+        if (err instanceof Error.ValidationError) {
+          throw new ApolloError(
+            "Poll validation failed!",
+            "POLL_VALIDATION_FAILED",
+            {
+              message: err.message,
+              stacktrace: err.stack,
+            }
+          );
+        } else {
+          throw err;
+        }
+      }
+
+      return pollDoc;
+    }
+  }
+
+  @Mutation(() => Poll, {
+    deprecationReason: "Use createOrUpdatePoll instead!",
+  })
   async createPoll(@Arg("poll") poll: PollInput) {
     //TODO take author from user session once authentication is implemented
     const pollDoc = new PollModel({ ...poll, author: "Dummy Author" });
@@ -136,7 +210,9 @@ class PollResolver {
     return pollDoc;
   }
 
-  @Mutation(() => Poll)
+  @Mutation(() => Poll, {
+    deprecationReason: "Use createOrUpdatePoll instead!",
+  })
   async updatePoll(
     @Arg("pollId", () => ID) pollId: string,
     @Arg("poll") poll: PollInput
