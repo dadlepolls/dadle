@@ -1,9 +1,7 @@
 import { ApolloError, gql, useMutation } from "@apollo/client";
-import { CREATE_POLL } from "@operations/mutations/CreateOrUpdateComment copy";
-import {
-  CreatePoll,
-  CreatePoll_createPoll
-} from "@operations/mutations/__generated__/CreatePoll";
+import { CREATE_OR_UPDATE_POLL } from "@operations/mutations/CreateOrUpdatePoll";
+import { CreateOrUpdatePoll } from "@operations/mutations/__generated__/CreateOrUpdatePoll";
+import { CreatePoll_createPoll } from "@operations/mutations/__generated__/CreatePoll";
 import { GetPollByLink_getPollByLink } from "@operations/queries/__generated__/GetPollByLink";
 import { Button, Card, Form, Input, message } from "antd";
 import { useRouter } from "next/dist/client/router";
@@ -37,28 +35,31 @@ export const PollEditDialog = ({
   ); //link is not marked as "modified manually" if there is not link given at the first place
   const [pollIsSaving, setPollIsSaving] = useState(false);
 
-  const [createPollMutation] = useMutation<CreatePoll>(CREATE_POLL, {
-    update(cache, { data }) {
-      cache.modify({
-        fields: {
-          getPolls(existingPolls = []) {
-            const newPollRef = cache.readFragment({
-              id: `Poll:${data?.createPoll._id}`,
-              fragment: gql`
-                fragment NewPoll on Poll {
-                  _id
-                  title
-                  link
-                  author
-                }
-              `,
-            });
-            return [...existingPolls, newPollRef];
+  const [createPollMutation] = useMutation<CreateOrUpdatePoll>(
+    CREATE_OR_UPDATE_POLL,
+    {
+      update(cache, { data }) {
+        cache.modify({
+          fields: {
+            getPolls(existingPolls = []) {
+              const newPollRef = cache.readFragment({
+                id: `Poll:${data?.createOrUpdatePoll._id}`,
+                fragment: gql`
+                  fragment NewPoll on Poll {
+                    _id
+                    title
+                    link
+                    author
+                  }
+                `,
+              });
+              return [...existingPolls, newPollRef];
+            },
           },
-        },
-      });
-    },
-  });
+        });
+      },
+    }
+  );
 
   const savePoll = async (poll: Partial<CreatePoll_createPoll>) => {
     setPollIsSaving(true);

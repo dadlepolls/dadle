@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
-export const CREATE_POLL = gql`
-  mutation CreatePoll($poll: PollInput!) {
-    createPoll(poll: $poll) {
+export const CREATE_OR_UPDATE_POLL = gql`
+  mutation CreateOrUpdatePoll($poll: PollInput!) {
+    createOrUpdatePoll(poll: $poll) {
       _id
       title
       link
