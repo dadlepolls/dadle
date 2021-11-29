@@ -97,23 +97,22 @@ export const PollEditDialog = ({
       <Form
         form={form}
         initialValues={_poll}
-        layout="vertical"
+        layout="horizontal"
         onFinish={(e) => savePoll(e)}
       >
-          <Form.Item
-            required={true}
-            label="Name der Umfrage"
-            name="title"
-            rules={[
-              {
-                required: true,
-                message: "Es muss ein Name für die Umfrage angegeben werden",
-              },
-            ]}
-          >
+        <Form.Item
+          required={true}
+          label="Name der Umfrage"
+          name="title"
+          rules={[
+            {
+              required: true,
+              message: "Es muss ein Name für die Umfrage angegeben werden",
+            },
+          ]}
+        >
           <Input
             type="text"
-            size="large"
             placeholder="Name der Umfrage"
             onChange={(e) => {
               if (!linkModifiedManually)
