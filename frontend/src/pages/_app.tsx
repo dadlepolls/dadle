@@ -65,8 +65,14 @@ function MyApp({ Component, pageProps }: AppProps) {
             </Menu.SubMenu>
           </Menu>
         </Header>
-        <Content style={{ padding: "50px 50px 0 50px" }}>
-          <div style={{ minHeight: "280px", padding: "24px" }}>
+        <Content style={{ padding: "0 50px" }}>
+          <div
+            style={{
+              minHeight: "280px",
+              paddingTop: "24px",
+              paddingBottom: "24px",
+            }}
+          >
             <Component {...pageProps} />
           </div>
         </Content>
