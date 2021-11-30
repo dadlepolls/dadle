@@ -5,8 +5,10 @@ import { CreateOrUpdatePoll } from "@operations/mutations/__generated__/CreateOr
 import { CreatePoll_createPoll } from "@operations/mutations/__generated__/CreatePoll";
 import { GetPollByLink_getPollByLink } from "@operations/queries/__generated__/GetPollByLink";
 import { Button, Card, Collapse, Form, Input, message } from "antd";
+import moment from "moment";
 import { useRouter } from "next/dist/client/router";
 import React, { useState } from "react";
+import { PollOptionType } from "__generated__/globalTypes";
 import { OptionEditor } from "./PollEditDialog/OptionEditor";
 
 const autocreateLinkFromTitle = (title: string) => {
@@ -19,6 +21,22 @@ const autocreateLinkFromTitle = (title: string) => {
     .replaceAll("ü", "ue")
     .replaceAll("Ü", "UE")
     .replaceAll(/(?![\w-])./g, "");
+};
+
+const sortPollOptions = (poll: Partial<CreatePoll_createPoll>) => {
+  const { options: originalOptions, ...pollData } = poll;
+  const options = [...(originalOptions || [])].sort((a, b) => {
+    if (
+      a.type == PollOptionType.Arbitrary &&
+      b.type == PollOptionType.Arbitrary
+    )
+      return 0;
+    if (a.type == PollOptionType.Arbitrary) return -1;
+    if (b.type == PollOptionType.Arbitrary) return 1;
+    if (!a.from || !b.from) return 0;
+    return moment(a.from).diff(moment(b.from));
+  });
+  return { ...pollData, options };
 };
 
 export const PollEditDialog = ({
@@ -67,7 +85,7 @@ export const PollEditDialog = ({
     try {
       await createPollMutation({
         variables: {
-          poll,
+          poll: sortPollOptions(poll),
         },
       });
       message.success("Umfrage gespeichert!");
