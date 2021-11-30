@@ -139,7 +139,7 @@ const OptionTitle = ({
     );
     content.push(
       <span key="day" className="pollpage--participation-option-day">
-        {from?.getDay()}
+        {from?.getDate()}
       </span>
     );
     content.push(
