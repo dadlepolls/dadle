@@ -42,9 +42,13 @@ const sortPollOptions = (poll: Partial<CreatePoll_createPoll>) => {
 export const PollEditDialog = ({
   poll: _poll,
   title,
+  saveButtonContent = "Speichern",
+  saveButtonIcon,
 }: {
   poll?: Partial<GetPollByLink_getPollByLink>;
   title: string;
+  saveButtonIcon?: JSX.Element;
+  saveButtonContent?: JSX.Element | string;
 }) => {
   const [form] = Form.useForm();
   const router = useRouter();
@@ -201,11 +205,11 @@ export const PollEditDialog = ({
           <Button
             type="primary"
             htmlType="submit"
-            icon={<PlusOutlined />}
+            icon={saveButtonIcon}
             loading={pollIsSaving}
             style={{ float: "right", marginTop: 16 }}
           >
-            Umfrage erstellen
+            {saveButtonContent}
           </Button>
         </Form.Item>
       </Form>

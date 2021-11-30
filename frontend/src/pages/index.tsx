@@ -1,3 +1,4 @@
+import { PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@apollo/client";
 import { PollEditDialog } from "@components/PollEditDialog";
 import { GET_POLLS_OVERVIEW } from "@operations/queries/GetPollsOverview";
@@ -7,6 +8,7 @@ import type { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import Head from "next/head";
 import Link from "next/link";
+import React from "react";
 
 const Home: NextPage = () => {
   const router = useRouter();
@@ -21,7 +23,12 @@ const Home: NextPage = () => {
       <Head>
         <title>DadleX</title>
       </Head>
-      <PollEditDialog title="Neue Umfrage erstellen" key="dialog" />
+      <PollEditDialog
+        title="Neue Umfrage erstellen"
+        key="dialog"
+        saveButtonIcon={<PlusOutlined />}
+        saveButtonContent="Umfrage erstellen"
+      />
       {data?.getPolls.map((poll, idx) => (
         <Card
           key={idx}
