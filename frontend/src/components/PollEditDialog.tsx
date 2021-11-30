@@ -1,9 +1,10 @@
+import { PlusOutlined } from "@ant-design/icons";
 import { ApolloError, gql, useMutation } from "@apollo/client";
 import { CREATE_OR_UPDATE_POLL } from "@operations/mutations/CreateOrUpdatePoll";
 import { CreateOrUpdatePoll } from "@operations/mutations/__generated__/CreateOrUpdatePoll";
 import { CreatePoll_createPoll } from "@operations/mutations/__generated__/CreatePoll";
 import { GetPollByLink_getPollByLink } from "@operations/queries/__generated__/GetPollByLink";
-import { Button, Card, Form, Input, message } from "antd";
+import { Button, Card, Collapse, Form, Input, message } from "antd";
 import { useRouter } from "next/dist/client/router";
 import React, { useState } from "react";
 import { OptionEditor } from "./PollEditDialog/OptionEditor";
@@ -104,6 +105,7 @@ export const PollEditDialog = ({
           required={true}
           label="Name der Umfrage"
           name="title"
+          style={{ marginBottom: 0 }}
           rules={[
             {
               required: true,
@@ -122,31 +124,48 @@ export const PollEditDialog = ({
             }}
           />
         </Form.Item>
-        <Form.Item
-          required={true}
-          label="Link zur Umfrage"
-          name="link"
-          rules={[
-            {
-              required: true,
-              message: "Es muss ein Link für die Umfrage angegeben werden!",
-            },
-            {
-              pattern: /^[\w-]+$/g,
-              message:
-                "Der Link darf nur Buchstaben, Zahlen, Bindestriche und Unterstriche enthalten!",
-            },
-          ]}
-        >
-          <Input
-            type="text"
-            addonBefore="http://dadlelink/p/" /*TODO get hostname dynamically */
-            placeholder="Link zur Umfrage"
-            onChange={() => {
-              if (!linkModifiedManually) setLinkModifiedManually(true);
-            }}
-          />
+        <Form.Item noStyle dependencies={["title"]}>
+          {({ getFieldValue }) =>
+            getFieldValue("title") ? (
+              <Collapse ghost>
+                <Collapse.Panel
+                  key="1"
+                  header="Erweiterte Einstellungen"
+                  forceRender={true}
+                >
+                  <Form.Item
+                    required={true}
+                    label="Link zur Umfrage"
+                    name="link"
+                    rules={[
+                      {
+                        required: true,
+                        message:
+                          "Es muss ein Link für die Umfrage angegeben werden!",
+                      },
+                      {
+                        pattern: /^[\w-]+$/g,
+                        message:
+                          "Der Link darf nur Buchstaben, Zahlen, Bindestriche und Unterstriche enthalten!",
+                      },
+                    ]}
+                  >
+                    <Input
+                      type="text"
+                      addonBefore="http://dadlelink/p/" /*TODO get hostname dynamically */
+                      placeholder="Link zur Umfrage"
+                      onChange={() => {
+                        if (!linkModifiedManually)
+                          setLinkModifiedManually(true);
+                      }}
+                    />
+                  </Form.Item>
+                </Collapse.Panel>
+              </Collapse>
+            ) : null
+          }
         </Form.Item>
+
         <Form.Item noStyle dependencies={["options", "title"]}>
           {({ getFieldValue }) =>
             getFieldValue("title") ? (
@@ -157,8 +176,14 @@ export const PollEditDialog = ({
             ) : null
           }
         </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit" loading={pollIsSaving}>
+        <Form.Item style={{ marginBottom: 0 }}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            icon={<PlusOutlined />}
+            loading={pollIsSaving}
+            style={{ float: "right", marginTop: 16 }}
+          >
             Umfrage erstellen
           </Button>
         </Form.Item>
