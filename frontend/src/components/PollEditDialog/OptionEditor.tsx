@@ -1,6 +1,7 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { GetPollByLink_getPollByLink_options } from "@operations/queries/__generated__/GetPollByLink";
 import { Button, Form, Input, Radio, Tooltip } from "antd";
+import { Rule } from "antd/lib/form";
 import moment from "moment";
 import "moment/locale/de";
 import React, { useState } from "react";
@@ -94,7 +95,7 @@ const OptionEditorCalendar = ({
       defaultView="week"
       localizer={localizer}
       resizable
-      style={{ height: "600px" }}
+      style={{ height: "550px" }}
       events={mapValueToCalendarEvents(value)}
       onEventDrop={handleEventChange}
       onEventResize={handleEventChange}
@@ -125,32 +126,6 @@ const OptionEditorCalendar = ({
         },
       }}
     />
-  );
-};
-
-const OptionEditorCalendarFormItem = ({ pollTitle }: { pollTitle: string }) => {
-  return (
-    <Form.Item
-      name="options"
-      rules={[
-        {
-          validator: (
-            _,
-            val: Partial<GetPollByLink_getPollByLink_options>[]
-          ) => {
-            if (val.length == 0)
-              return Promise.reject(
-                new Error(
-                  "Es muss mindestens eine Umfrageoption angelegt angelegt sein!"
-                )
-              );
-            return Promise.resolve();
-          },
-        },
-      ]}
-    >
-      <OptionEditorCalendar pollTitle={pollTitle} />
-    </Form.Item>
   );
 };
 
@@ -196,36 +171,6 @@ const OptionEditorArbitrary = ({
   );
 };
 
-const OptionEditorArbitraryFormItem = () => {
-  return (
-    <Form.Item
-      name="options"
-      rules={[
-        {
-          validator: (
-            _,
-            val: Partial<GetPollByLink_getPollByLink_options>[]
-          ) => {
-            if (val.some((v) => !v.title))
-              return Promise.reject(
-                new Error("Es muss für alle Optionen ein Name vergeben sein!")
-              );
-            if (val.length == 0)
-              return Promise.reject(
-                new Error(
-                  "Es muss mindestens eine Umfrageoption angelegt angelegt sein!"
-                )
-              );
-            return Promise.resolve();
-          },
-        },
-      ]}
-    >
-      <OptionEditorArbitrary />
-    </Form.Item>
-  );
-};
-
 enum OptionEditorType {
   Arbitrary,
   Calendar,
@@ -251,6 +196,27 @@ export const OptionEditor = ({
   /* disabled type change in case there are any options specified */
   const typeChangeDisabled = options && options.length > 0;
 
+  const optionsValidatorRules: Rule[] = [
+    {
+      validator: (
+        _,
+        val: Partial<GetPollByLink_getPollByLink_options>[] = []
+      ) => {
+        if (val.some((v) => v.type == PollOptionType.Arbitrary && !v.title))
+          return Promise.reject(
+            new Error("Es muss für alle Optionen ein Name vergeben sein!")
+          );
+        if (val.length == 0)
+          return Promise.reject(
+            new Error(
+              "Es muss mindestens eine Umfrageoption angelegt angelegt sein!"
+            )
+          );
+        return Promise.resolve();
+      },
+    },
+  ];
+
   return (
     <div
       style={{
@@ -272,27 +238,46 @@ export const OptionEditor = ({
           ) : null
         }
       >
-        <Radio.Group
-          buttonStyle="solid"
-          value={editorType}
-          onChange={(e) => setEditorType(e.target.value)}
-          disabled={typeChangeDisabled}
-        >
-          <Radio.Button value={OptionEditorType.Calendar}>
-            Kalender
-          </Radio.Button>
-          <Radio.Button value={OptionEditorType.Arbitrary}>
-            Über beliebige Optionen abstimmen
-          </Radio.Button>
-        </Radio.Group>
+        <Form.Item noStyle name="editorType">
+          <Radio.Group
+            buttonStyle="solid"
+            value={editorType}
+            onChange={(e) => setEditorType(e.target.value)}
+            disabled={typeChangeDisabled}
+          >
+            <Radio.Button value={OptionEditorType.Calendar}>
+              Kalender
+            </Radio.Button>
+            <Radio.Button value={OptionEditorType.Arbitrary}>
+              Über beliebige Optionen abstimmen
+            </Radio.Button>
+          </Radio.Group>
+        </Form.Item>
       </Tooltip>
       <div style={{ width: "100%", marginTop: 16 }}>
-        {editorType == OptionEditorType.Arbitrary ? (
-          <OptionEditorArbitraryFormItem />
-        ) : null}
-        {editorType == OptionEditorType.Calendar ? (
-          <OptionEditorCalendarFormItem pollTitle={pollTitle} />
-        ) : null}
+        <Form.Item dependencies={["editorType"]} noStyle>
+          {({ getFieldValue }) => {
+            const editorType = getFieldValue("editorType");
+            if (editorType == OptionEditorType.Arbitrary)
+              return (
+                <Form.Item name="options" rules={optionsValidatorRules}>
+                  <OptionEditorArbitrary />
+                </Form.Item>
+              );
+            else if (editorType == OptionEditorType.Calendar)
+              return (
+                <Form.Item name="options" rules={optionsValidatorRules}>
+                  <OptionEditorCalendar pollTitle={pollTitle} />
+                </Form.Item>
+              );
+            else
+              return (
+                <Form.Item name="options" rules={optionsValidatorRules}>
+                  <input type="hidden" />
+                </Form.Item>
+              );
+          }}
+        </Form.Item>
       </div>
     </div>
   );

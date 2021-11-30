@@ -117,7 +117,10 @@ export const PollEditDialog = ({
         form={form}
         initialValues={_poll}
         layout="horizontal"
-        onFinish={(e) => savePoll(e)}
+        onFinish={(e) => {
+          const { editorType, ...poll } = e; //omit editor type, since it's a form key but not required for poll
+          savePoll(poll);
+        }}
       >
         <Form.Item
           required={true}
