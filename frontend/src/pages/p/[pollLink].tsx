@@ -36,7 +36,7 @@ import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import Head from "next/head";
 import NProgress from "nprogress";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { PollOptionType, YesNoMaybe } from "__generated__/globalTypes";
 
 type TAccumulatedChoicesPerOption = Record<
@@ -285,7 +285,7 @@ const ParticipationRow = ({
 
   useEffect(() => {
     onChoiceChange(participation.choices);
-  }, [participation]);
+  }, [participation, onChoiceChange]);
 
   return (
     <div className="pollpage--participation-choice-row">
@@ -331,6 +331,21 @@ const PollPage: NextPage = () => {
     variables: { pollLink },
   });
   const { getPollByLink: poll } = data || {};
+
+  const onChoiceChangeCallbackEditing = useCallback(
+    (c) =>
+      setEditableParticipation((p) => {
+        return p ? { ...p, choices: c } : null;
+      }),
+    [setEditableParticipation]
+  );
+  const onChoiceChangeCallbackAdding = useCallback(
+    (c) =>
+      setParticipationBeingAdded((p) => {
+        return p ? { ...p, choices: c } : null;
+      }),
+    [setParticipationBeingAdded]
+  );
 
   const [createOrUpdateParticipationMutation] =
     useMutation<CreateOrUpdateParticipation>(CREATE_OR_UPDATE_PARTICIPATION);
@@ -536,11 +551,7 @@ const PollPage: NextPage = () => {
                   participation={p}
                   options={poll.options}
                   editable={editableParticipation?._id == p._id}
-                  onChoiceChange={(c) =>
-                    setEditableParticipation((p) => {
-                      return p ? { ...p, choices: c } : null;
-                    })
-                  }
+                  onChoiceChange={onChoiceChangeCallbackEditing}
                 />
               ))}
               {participationBeingAdded ? (
@@ -548,11 +559,7 @@ const PollPage: NextPage = () => {
                   participation={participationBeingAdded}
                   options={poll?.options}
                   editable={true}
-                  onChoiceChange={(c) =>
-                    setParticipationBeingAdded((p) => {
-                      return p ? { ...p, choices: c } : null;
-                    })
-                  }
+                  onChoiceChange={onChoiceChangeCallbackAdding}
                 />
               ) : (
                 <div className="pollpage--participation-choice-row pollpage--participation-choice-row-empty" />
