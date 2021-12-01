@@ -28,6 +28,7 @@ const Home: NextPage = () => {
         key="dialog"
         saveButtonIcon={<PlusOutlined />}
         saveButtonContent="Umfrage erstellen"
+        onSaveSuccess={(p) => router.push(`/p/${p?.link}`)}
       />
       {data?.getPolls.map((poll, idx) => (
         <Card

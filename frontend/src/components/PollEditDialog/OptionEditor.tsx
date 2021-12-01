@@ -4,7 +4,7 @@ import { Button, Form, Input, Radio, Tooltip } from "antd";
 import { Rule } from "antd/lib/form";
 import moment from "moment";
 import "moment/locale/de";
-import React, { useState } from "react";
+import React from "react";
 import {
   Calendar as RBCalendar,
   Event,
@@ -41,9 +41,10 @@ const OptionEditorCalendar = ({
     return value.map<PollOptionAsEvent>((o, idx) => ({
       optionIndex: idx,
       optionId: o._id,
-      start: o.from,
-      end:
-        o.type == PollOptionType.Date ? moment(o.from).add(24, "hours") : o.to,
+      start: moment(o.from).toDate(),
+      end: moment(
+        o.type == PollOptionType.Date ? moment(o.from).hours(23).minutes(59).seconds(59) : o.to
+      ).toDate(),
       title: pollTitle,
       allDay: o.type == PollOptionType.Date,
     }));
@@ -88,6 +89,8 @@ const OptionEditorCalendar = ({
     });
     onChange(opts);
   };
+
+  console.log(mapValueToCalendarEvents(value));
 
   return (
     <Calendar
@@ -171,7 +174,7 @@ const OptionEditorArbitrary = ({
   );
 };
 
-enum OptionEditorType {
+export enum OptionEditorType {
   Arbitrary,
   Calendar,
 }
@@ -183,16 +186,6 @@ export const OptionEditor = ({
   options?: GetPollByLink_getPollByLink_options[];
   pollTitle: string;
 }) => {
-  const mapOptionTypeToEditorType = (t?: PollOptionType) => {
-    if (t == PollOptionType.Arbitrary) return OptionEditorType.Arbitrary;
-    else if (t) return OptionEditorType.Calendar;
-    else return null;
-  };
-
-  const [editorType, setEditorType] = useState(
-    options?.length ? mapOptionTypeToEditorType(options[0].type) : null
-  );
-
   /* disabled type change in case there are any options specified */
   const typeChangeDisabled = options && options.length > 0;
 
@@ -239,12 +232,7 @@ export const OptionEditor = ({
         }
       >
         <Form.Item noStyle name="editorType">
-          <Radio.Group
-            buttonStyle="solid"
-            value={editorType}
-            onChange={(e) => setEditorType(e.target.value)}
-            disabled={typeChangeDisabled}
-          >
+          <Radio.Group buttonStyle="solid" disabled={typeChangeDisabled}>
             <Radio.Button value={OptionEditorType.Calendar}>
               Kalender
             </Radio.Button>

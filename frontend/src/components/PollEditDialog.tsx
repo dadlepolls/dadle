@@ -1,15 +1,15 @@
-import { PlusOutlined } from "@ant-design/icons";
 import { ApolloError, gql, useMutation } from "@apollo/client";
 import { CREATE_OR_UPDATE_POLL } from "@operations/mutations/CreateOrUpdatePoll";
-import { CreateOrUpdatePoll } from "@operations/mutations/__generated__/CreateOrUpdatePoll";
-import { CreatePoll_createPoll } from "@operations/mutations/__generated__/CreatePoll";
+import {
+  CreateOrUpdatePoll,
+  CreateOrUpdatePoll_createOrUpdatePoll
+} from "@operations/mutations/__generated__/CreateOrUpdatePoll";
 import { GetPollByLink_getPollByLink } from "@operations/queries/__generated__/GetPollByLink";
 import { Button, Card, Collapse, Form, Input, message } from "antd";
 import moment from "moment";
-import { useRouter } from "next/dist/client/router";
 import React, { useState } from "react";
 import { PollOptionType } from "__generated__/globalTypes";
-import { OptionEditor } from "./PollEditDialog/OptionEditor";
+import { OptionEditor, OptionEditorType } from "./PollEditDialog/OptionEditor";
 
 const autocreateLinkFromTitle = (title: string) => {
   return title
@@ -23,7 +23,9 @@ const autocreateLinkFromTitle = (title: string) => {
     .replaceAll(/(?![\w-])./g, "");
 };
 
-const sortPollOptions = (poll: Partial<CreatePoll_createPoll>) => {
+const sortPollOptions = (
+  poll: Partial<CreateOrUpdatePoll_createOrUpdatePoll>
+) => {
   const { options: originalOptions, ...pollData } = poll;
   const options = [...(originalOptions || [])].sort((a, b) => {
     if (
@@ -39,19 +41,28 @@ const sortPollOptions = (poll: Partial<CreatePoll_createPoll>) => {
   return { ...pollData, options };
 };
 
+const mapOptionTypeToEditorType = (t?: PollOptionType) => {
+  if (t == PollOptionType.Arbitrary) return OptionEditorType.Arbitrary;
+  else if (t) return OptionEditorType.Calendar;
+  else return null;
+};
+
 export const PollEditDialog = ({
   poll: _poll,
   title,
   saveButtonContent = "Speichern",
   saveButtonIcon,
+  onSaveSuccess = (_) => {},
+  onSaveFailure = () => {},
 }: {
   poll?: Partial<GetPollByLink_getPollByLink>;
   title: string;
   saveButtonIcon?: JSX.Element;
   saveButtonContent?: JSX.Element | string;
+  onSaveSuccess?: (poll?: CreateOrUpdatePoll_createOrUpdatePoll) => any;
+  onSaveFailure?: () => any;
 }) => {
   const [form] = Form.useForm();
-  const router = useRouter();
 
   const [linkModifiedManually, setLinkModifiedManually] = useState(
     !!_poll?.link
@@ -84,15 +95,28 @@ export const PollEditDialog = ({
     }
   );
 
-  const savePoll = async (poll: Partial<CreatePoll_createPoll>) => {
+  const savePoll = async (
+    _poll: Partial<CreateOrUpdatePoll_createOrUpdatePoll>
+  ) => {
     setPollIsSaving(true);
+
+    const { __typename, ...poll } = sortPollOptions(_poll); //omit typename key and sort options
+
     try {
-      await createPollMutation({
+      const mutationResult = await createPollMutation({
         variables: {
-          poll: sortPollOptions(poll),
+          poll: {
+            ...poll,
+            options: poll.options.map((o) => {
+              //omit typename key for each option
+              const { __typename, ...rest } = o;
+              return rest;
+            }),
+          },
         },
       });
       message.success("Umfrage gespeichert!");
+      onSaveSuccess(mutationResult.data?.createOrUpdatePoll);
     } catch (ex) {
       let additionalMessage;
       if (ex instanceof ApolloError) {
@@ -109,9 +133,9 @@ export const PollEditDialog = ({
           {additionalMessage}
         </>
       );
+      onSaveFailure();
     } finally {
       setPollIsSaving(false);
-      router.push(`/p/${poll.link}`);
     }
   };
 
@@ -119,11 +143,16 @@ export const PollEditDialog = ({
     <Card style={{ width: "100%" }} title={title}>
       <Form
         form={form}
-        initialValues={_poll}
+        initialValues={{
+          ..._poll,
+          editorType: mapOptionTypeToEditorType(
+            _poll?.options?.length ? _poll.options[0].type : undefined
+          ),
+        }}
         layout="horizontal"
         onFinish={(e) => {
-          const { editorType, ...poll } = e; //omit editor type, since it's a form key but not required for poll
-          savePoll(poll);
+          const { editorType, ...newPollData } = e; //omit editor type, since it's a form key but not required for poll
+          savePoll({ _id: _poll?._id, ...newPollData });
         }}
       >
         <Form.Item

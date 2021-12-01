@@ -9,6 +9,7 @@ import {
 } from "@ant-design/icons";
 import { ApolloError, useMutation, useQuery } from "@apollo/client";
 import { PollCommentArea } from "@components/PollCommentArea";
+import { PollEditDialog } from "@components/PollEditDialog";
 import { CREATE_OR_UPDATE_PARTICIPATION } from "@operations/mutations/CreateOrUpdateParticipation";
 import { DELETE_PARTICIPATION } from "@operations/mutations/DeleteParticipation";
 import { CreateOrUpdateParticipation } from "@operations/mutations/__generated__/CreateOrUpdateParticipation";
@@ -323,6 +324,7 @@ const PollPage: NextPage = () => {
     GetPollByLink_getPollByLink_participations,
     "_id" | "__typename"
   > | null>(null);
+  const [isEditingPoll, setIsEditingPoll] = useState(false);
 
   const { error, loading, data } = useQuery<GetPollByLink>(GET_POLL_BY_LINK, {
     skip: !pollLink,
@@ -447,10 +449,27 @@ const PollPage: NextPage = () => {
         title={poll?.title}
         subTitle={poll?.author}
         style={{ marginBottom: "16px" }}
+        extra={
+          <Button
+            hidden={isEditingPoll}
+            onClick={() => setIsEditingPoll(true)}
+            icon={<EditOutlined />}
+          />
+        }
       >
         <Descriptions size="small" column={3}>
           <Descriptions.Item label="Created">tbd</Descriptions.Item>
         </Descriptions>
+
+        {isEditingPoll ? (
+          <PollEditDialog
+            title="Umfrage bearbeiten"
+            poll={poll}
+            saveButtonIcon={<SaveOutlined />}
+            saveButtonContent="Änderungen speichern"
+            onSaveSuccess={() => setIsEditingPoll(false)}
+          />
+        ) : null}
       </PageHeader>
       <Card>
         <div className="pollpage--container">
