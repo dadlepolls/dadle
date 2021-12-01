@@ -43,7 +43,9 @@ const OptionEditorCalendar = ({
       optionId: o._id,
       start: moment(o.from).toDate(),
       end: moment(
-        o.type == PollOptionType.Date ? moment(o.from).hours(23).minutes(59).seconds(59) : o.to
+        o.type == PollOptionType.Date
+          ? moment(o.from).hours(23).minutes(59).seconds(59)
+          : o.to
       ).toDate(),
       title: pollTitle,
       allDay: o.type == PollOptionType.Date,
@@ -179,6 +181,43 @@ export enum OptionEditorType {
   Calendar,
 }
 
+const OptionEditorTypeSelector = ({
+  value,
+  onChange = () => {},
+  typeChangeDisabled,
+}: {
+  value?: OptionEditorType;
+  onChange?: (o: OptionEditorType) => any;
+  typeChangeDisabled?: boolean;
+}) => {
+  return (
+    <Tooltip
+      title={
+        typeChangeDisabled ? (
+          <>
+            Die Art der Umfrage kann nicht geändert werden, wenn schon
+            Antwortoptionen angegeben wurden.
+            <br />
+            Bitte lösche zuerst die Antwortoptionen.
+          </>
+        ) : null
+      }
+    >
+      <Radio.Group
+        buttonStyle="solid"
+        disabled={typeChangeDisabled}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <Radio.Button value={OptionEditorType.Calendar}>Kalender</Radio.Button>
+        <Radio.Button value={OptionEditorType.Arbitrary}>
+          Über beliebige Optionen abstimmen
+        </Radio.Button>
+      </Radio.Group>
+    </Tooltip>
+  );
+};
+
 export const OptionEditor = ({
   options,
   pollTitle,
@@ -219,29 +258,9 @@ export const OptionEditor = ({
         flexDirection: "column",
       }}
     >
-      <Tooltip
-        title={
-          typeChangeDisabled ? (
-            <>
-              Die Art der Umfrage kann nicht geändert werden, wenn schon
-              Antwortoptionen angegeben wurden.
-              <br />
-              Bitte lösche zuerst die Antwortoptionen.
-            </>
-          ) : null
-        }
-      >
-        <Form.Item noStyle name="editorType">
-          <Radio.Group buttonStyle="solid" disabled={typeChangeDisabled}>
-            <Radio.Button value={OptionEditorType.Calendar}>
-              Kalender
-            </Radio.Button>
-            <Radio.Button value={OptionEditorType.Arbitrary}>
-              Über beliebige Optionen abstimmen
-            </Radio.Button>
-          </Radio.Group>
-        </Form.Item>
-      </Tooltip>
+      <Form.Item noStyle name="editorType">
+        <OptionEditorTypeSelector typeChangeDisabled={typeChangeDisabled} />
+      </Form.Item>
       <div style={{ width: "100%", marginTop: 16 }}>
         <Form.Item dependencies={["editorType"]} noStyle>
           {({ getFieldValue }) => {
