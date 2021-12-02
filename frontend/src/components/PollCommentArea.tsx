@@ -11,8 +11,8 @@ import { CreateOrUpdateComment } from "@operations/mutations/__generated__/Creat
 import { DeleteComment } from "@operations/mutations/__generated__/DeleteComment";
 import { GetPollByLink_getPollByLink_comments } from "@operations/queries/__generated__/GetPollByLink";
 import { Button, Card, Input, message, Space } from "antd";
-import NProgress from "nprogress";
 import React, { useEffect, useState } from "react";
+import LoadingBar from "./LoadingBar";
 
 type SaveCommentType = Partial<
   Pick<GetPollByLink_getPollByLink_comments, "_id">
@@ -113,8 +113,8 @@ export const PollCommentArea = ({
   const [deleteCommentMutation] = useMutation<DeleteComment>(DELETE_COMMENT);
 
   useEffect(() => {
-    if (commentIsSaving) NProgress.start();
-    else NProgress.done();
+    if (commentIsSaving) LoadingBar.start();
+    else LoadingBar.done();
   }, [commentIsSaving]);
 
   const saveComment = async (comment: SaveCommentType) => {
@@ -152,7 +152,7 @@ export const PollCommentArea = ({
   };
 
   const deleteComment = async (commentId: string) => {
-    NProgress.start();
+    LoadingBar.start();
     try {
       await deleteCommentMutation({
         variables: {
@@ -185,7 +185,7 @@ export const PollCommentArea = ({
         </>
       );
     } finally {
-      NProgress.done();
+      LoadingBar.done();
     }
   };
 

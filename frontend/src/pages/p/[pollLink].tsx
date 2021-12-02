@@ -8,6 +8,7 @@ import {
   SaveOutlined
 } from "@ant-design/icons";
 import { ApolloError, useMutation, useQuery } from "@apollo/client";
+import LoadingBar from "@components/LoadingBar";
 import { PollCommentArea } from "@components/PollCommentArea";
 import { PollEditDialog } from "@components/PollEditDialog";
 import { CREATE_OR_UPDATE_PARTICIPATION } from "@operations/mutations/CreateOrUpdateParticipation";
@@ -35,7 +36,6 @@ import {
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import Head from "next/head";
-import NProgress from "nprogress";
 import React, { useCallback, useEffect, useState } from "react";
 import { PollOptionType, YesNoMaybe } from "__generated__/globalTypes";
 
@@ -359,7 +359,7 @@ const PollPage: NextPage = () => {
     > &
       Partial<Pick<GetPollByLink_getPollByLink_participations, "_id">>
   ) => {
-    NProgress.start();
+    LoadingBar.start();
     try {
       await createOrUpdateParticipationMutation({
         variables: {
@@ -392,12 +392,12 @@ const PollPage: NextPage = () => {
         </>
       );
     } finally {
-      NProgress.done();
+      LoadingBar.done();
     }
   };
 
   const deleteParticipation = async (participationId: string) => {
-    NProgress.start();
+    LoadingBar.start();
     try {
       await deleteParticipationMutation({
         variables: {
@@ -430,7 +430,7 @@ const PollPage: NextPage = () => {
         </>
       );
     } finally {
-      NProgress.done();
+      LoadingBar.done();
     }
   };
 

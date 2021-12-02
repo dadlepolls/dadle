@@ -9,6 +9,7 @@ import { Button, Card, Collapse, Form, Input, message } from "antd";
 import moment from "moment";
 import React, { useState } from "react";
 import { PollOptionType } from "__generated__/globalTypes";
+import LoadingBar from "./LoadingBar";
 import { OptionEditor, OptionEditorType } from "./PollEditDialog/OptionEditor";
 
 const autocreateLinkFromTitle = (title: string) => {
@@ -102,6 +103,7 @@ export const PollEditDialog = ({
   const savePoll = async (
     _poll: Partial<CreateOrUpdatePoll_createOrUpdatePoll>
   ) => {
+    LoadingBar.start();
     setPollIsSaving(true);
 
     const { __typename, ...poll } = sortPollOptions(_poll); //omit typename key and sort options
@@ -140,6 +142,7 @@ export const PollEditDialog = ({
       onSaveFailure();
     } finally {
       setPollIsSaving(false);
+      LoadingBar.done();
     }
   };
 
