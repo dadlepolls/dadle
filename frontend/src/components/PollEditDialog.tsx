@@ -75,9 +75,13 @@ export const PollEditDialog = ({
       update(cache, { data }) {
         cache.modify({
           fields: {
-            getPolls(existingPolls = []) {
+            getPolls(existingPolls: { __ref: string }[] = []) {
+              const fragmentId = `Poll:${data?.createOrUpdatePoll._id}`;
+              //dont update cache in case the fragment definition already exists
+              if (existingPolls.some((p) => p.__ref == fragmentId))
+                return existingPolls;
               const newPollRef = cache.readFragment({
-                id: `Poll:${data?.createOrUpdatePoll._id}`,
+                id: fragmentId,
                 fragment: gql`
                   fragment NewPoll on Poll {
                     _id
