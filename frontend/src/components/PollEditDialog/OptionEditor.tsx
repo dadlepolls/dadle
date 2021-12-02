@@ -57,6 +57,19 @@ const OptionEditorCalendar = ({
     return date.hours() === 0 && date.minutes() === 0 && date.seconds() === 0;
   };
 
+  const getFirstDateOrDateTimeEvent = (
+    v: Partial<GetPollByLink_getPollByLink_options>[]
+  ) =>
+    v.find(
+      (o) => o.type == PollOptionType.Date || o.type == PollOptionType.DateTime
+    );
+
+  //this assumes that the entries are sorted
+  const firstEventStart = getFirstDateOrDateTimeEvent(value)
+    ? moment(getFirstDateOrDateTimeEvent(value)?.from)
+    : moment().set({ h: 8, m: 0 });
+  if (isMidnight(firstEventStart.toDate())) firstEventStart.set({ h: 8, m: 0 });
+
   const handleEventChange = (e: {
     event: PollOptionAsEvent;
     start: stringOrDate;
@@ -92,11 +105,10 @@ const OptionEditorCalendar = ({
     onChange(opts);
   };
 
-  console.log(mapValueToCalendarEvents(value));
-
   return (
     <Calendar
-      defaultDate={moment().toDate()}
+      defaultDate={firstEventStart.toDate()}
+      scrollToTime={firstEventStart.toDate()}
       defaultView="week"
       localizer={localizer}
       resizable
