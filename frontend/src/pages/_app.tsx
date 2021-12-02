@@ -26,6 +26,11 @@ const client = new ApolloClient({
               return incoming;
             },
           },
+          options: {
+            merge(_, incoming: any[]) {
+              return incoming;
+            },
+          },
         },
       },
     },
