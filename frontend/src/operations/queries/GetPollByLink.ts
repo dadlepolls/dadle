@@ -7,6 +7,8 @@ export const GET_POLL_BY_LINK = gql`
       title
       link
       author
+      createdAt
+      updatedAt
       comments {
         _id
         by

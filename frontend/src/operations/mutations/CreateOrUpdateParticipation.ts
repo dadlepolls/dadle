@@ -10,6 +10,7 @@ export const CREATE_OR_UPDATE_PARTICIPATION = gql`
       title
       link
       author
+      updatedAt
       comments {
         _id
         by
