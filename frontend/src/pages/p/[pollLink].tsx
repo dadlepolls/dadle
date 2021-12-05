@@ -5,7 +5,9 @@ import {
   PollResponses,
   TPartialParticipationWithId
 } from "@components/PollDetailPage/PollResponses";
+import { PollResponsesMobile } from "@components/PollDetailPage/PollResponsesMobile";
 import { PollEditDialog } from "@components/PollEditDialog";
+import { useWindowIsSm } from "@components/ResponsiveContext";
 import { CREATE_OR_UPDATE_PARTICIPATION } from "@operations/mutations/CreateOrUpdateParticipation";
 import { DELETE_PARTICIPATION } from "@operations/mutations/DeleteParticipation";
 import {
@@ -30,6 +32,7 @@ import React, { useState } from "react";
 const PollPage: NextPage = () => {
   const router = useRouter();
   const { pollLink } = router.query;
+  const isSm = useWindowIsSm();
 
   const [isEditingPoll, setIsEditingPoll] = useState(false);
 
@@ -87,6 +90,10 @@ const PollPage: NextPage = () => {
   if (loading || !poll) return <div>loading...</div>;
   if (error) return <div>An Error occured: {JSON.stringify(error)}</div>;
 
+  const PollResponseComponentByMedia = isSm
+    ? PollResponsesMobile
+    : PollResponses;
+
   return (
     <>
       <Head>
@@ -125,7 +132,7 @@ const PollPage: NextPage = () => {
         ) : null}
       </PageHeader>
       <Card>
-        <PollResponses
+        <PollResponseComponentByMedia
           poll={poll}
           saveParticipationFunction={saveParticipation}
           deleteParticipationFunction={deleteParticipation}
