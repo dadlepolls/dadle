@@ -206,6 +206,73 @@ const OptionsRow = ({
   );
 };
 
+const mapChoiceToColorVariable = (c?: YesNoMaybe) => {
+  switch (c) {
+    case YesNoMaybe.Yes:
+      return "--pollpage--yes-color";
+    case YesNoMaybe.No:
+      return "--pollpage--no-color";
+    case YesNoMaybe.Maybe:
+      return "--pollpage--maybe-color";
+    default:
+      return "--pollpage--border-color";
+  }
+};
+
+const ParticipationChoiceCell = ({
+  editable = false,
+  choice,
+  onClick = () => {},
+}: {
+  editable?: boolean;
+  choice?: YesNoMaybe;
+  onClick?: () => any;
+}) => {
+  const mapChoiceToIcon = (c?: YesNoMaybe, editable: boolean = false) => {
+    switch (c) {
+      case YesNoMaybe.Yes:
+        return <CheckCircleOutlined />;
+      case YesNoMaybe.No:
+        return <CloseCircleOutlined />;
+      case YesNoMaybe.Maybe:
+        return <QuestionCircleOutlined />;
+      default:
+        return editable ? <Checkbox /> : <></>;
+    }
+  };
+
+  return (
+    <div
+      className={`${editable ? "pollpage--option-choice-editable" : ""}`}
+      style={{
+        backgroundColor: `var(${mapChoiceToColorVariable(choice)})`,
+      }}
+      onClick={(e) => {
+        e.preventDefault();
+        editable ? onClick() : null;
+      }}
+      onMouseDown={
+        (e) =>
+          e.preventDefault() /* prevent selecting text on page when double-clicking fast */
+      }
+    >
+      {mapChoiceToIcon(choice, editable)}
+    </div>
+  );
+};
+
+const deriveNextChoiceFromCurrent = (currentChoice: YesNoMaybe) => {
+  switch (currentChoice) {
+    case YesNoMaybe.Yes:
+      return YesNoMaybe.No;
+    case YesNoMaybe.No:
+      return YesNoMaybe.Maybe;
+    case YesNoMaybe.Maybe:
+    default:
+      return YesNoMaybe.Yes;
+  }
+};
+
 const ParticipationRow = ({
   options,
   participation: propParticipation,
@@ -223,44 +290,6 @@ const ParticipationRow = ({
   ) => any;
 }) => {
   const [participation, setParticipation] = useState(propParticipation);
-
-  const mapChoiceToClassName = (c?: YesNoMaybe) => {
-    switch (c) {
-      case YesNoMaybe.Yes:
-        return "pollpage--option-choice-yes";
-      case YesNoMaybe.No:
-        return "pollpage--option-choice-no";
-      case YesNoMaybe.Maybe:
-        return "pollpage--option-choice-maybe";
-      default:
-        return "pollpage--option-choice-unknown";
-    }
-  };
-
-  const mapChoiceToIcon = (c?: YesNoMaybe, editable: boolean = false) => {
-    switch (c) {
-      case YesNoMaybe.Yes:
-        return <CheckCircleOutlined />;
-      case YesNoMaybe.No:
-        return <CloseCircleOutlined />;
-      case YesNoMaybe.Maybe:
-        return <QuestionCircleOutlined />;
-      default:
-        return editable ? <Checkbox /> : <></>;
-    }
-  };
-
-  const deriveNextChoiceFromCurrent = (currentChoice: YesNoMaybe) => {
-    switch (currentChoice) {
-      case YesNoMaybe.Yes:
-        return YesNoMaybe.No;
-      case YesNoMaybe.No:
-        return YesNoMaybe.Maybe;
-      case YesNoMaybe.Maybe:
-      default:
-        return YesNoMaybe.Yes;
-    }
-  };
 
   const handleChoiceClick = (optionId: string) => {
     setParticipation((_participation) => {
@@ -295,22 +324,12 @@ const ParticipationRow = ({
       {options?.map((o, idx) => {
         const p = participation.choices.find((c) => c.option == o._id);
         return (
-          <div
+          <ParticipationChoiceCell
             key={idx}
-            className={`${mapChoiceToClassName(p?.choice)} ${
-              editable ? "pollpage--option-choice-editable" : ""
-            }`}
-            onClick={(e) => {
-              e.preventDefault();
-              editable ? handleChoiceClick(p ? p.option : o._id) : null;
-            }}
-            onMouseDown={
-              (e) =>
-                e.preventDefault() /* prevent selecting text on page when double-clicking fast */
-            }
-          >
-            {mapChoiceToIcon(p?.choice, editable)}
-          </div>
+            choice={p?.choice}
+            editable={editable}
+            onClick={() => handleChoiceClick(o._id)}
+          />
         );
       })}
     </div>
@@ -434,6 +453,12 @@ const PollResponses = ({
   );
 };
 
-export { PollResponses };
+export {
+  PollResponses,
+  getChoiceCountPerOption,
+  ParticipationChoiceCell,
+  deriveNextChoiceFromCurrent,
+  mapChoiceToColorVariable,
+};
 export type { TPartialParticipationWithId };
 
