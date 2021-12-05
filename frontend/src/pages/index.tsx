@@ -47,7 +47,7 @@ const Home: NextPage = () => {
                 {poll.title}
               </Link>
             </Typography.Text>
-            <small>&nbsp; by {poll.author}</small>
+            <small>&nbsp; von {poll.author}</small>
             {poll.updatedAt ? (
               <Tooltip title={moment(poll.updatedAt).format("DD.MM.YY HH:MM")}>
                 <Typography.Text style={{ float: "right" }}>
