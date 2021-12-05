@@ -15,6 +15,7 @@ import {
 } from "@operations/queries/__generated__/GetPollByLink";
 import { Button, Checkbox, Input, message, Popconfirm, Space } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
+import { useImmer } from "use-immer";
 import { PollOptionType, YesNoMaybe } from "__generated__/globalTypes";
 
 type TAccumulatedChoicesPerOption = Record<
@@ -289,29 +290,22 @@ const ParticipationRow = ({
     newChoices: GetPollByLink_getPollByLink_participations_choices[]
   ) => any;
 }) => {
-  const [participation, setParticipation] = useState(propParticipation);
+  const [participation, updateParticipation] = useImmer(propParticipation);
 
   const handleChoiceClick = (optionId: string) => {
-    setParticipation((_participation) => {
-      //TODO this object copy seems ugly, yet is necessary since _participations is frozen
-      const oldChoices = _participation.choices.map((c) =>
-        Object.assign({}, c)
-      );
-
-      const p = oldChoices.find((c) => c.option == optionId);
+    updateParticipation((participation) => {
+      const p = participation.choices.find((c) => c.option == optionId);
       if (p) {
-        oldChoices
+        participation.choices
           .filter((c) => c.option == optionId)
           .forEach((c) => (c.choice = deriveNextChoiceFromCurrent(c.choice)));
       } else {
-        oldChoices.push({
+        participation.choices.push({
           option: optionId,
           choice: YesNoMaybe.Yes,
           __typename: "PollChoice",
         });
       }
-
-      return { ..._participation, choices: oldChoices };
     });
   };
 
