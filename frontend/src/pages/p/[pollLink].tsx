@@ -40,6 +40,7 @@ import {
   Popconfirm,
   Space
 } from "antd";
+import moment from "moment";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import Head from "next/head";
@@ -441,7 +442,11 @@ const PollPage: NextPage = () => {
         }
       >
         <Descriptions size="small" column={3}>
-          <Descriptions.Item label="Created">tbd</Descriptions.Item>
+          {poll.createdAt ? (
+            <Descriptions.Item label="Umfrage erstellt am">
+              {moment(poll.createdAt).format("DD.MM.YY HH:MM")}
+            </Descriptions.Item>
+          ) : null}
         </Descriptions>
 
         {isEditingPoll ? (
