@@ -155,7 +155,6 @@ class PollResolver {
           (x) => x._id == givenPollOpt._id
         ) || []) {
           //update a poll option with a specific id
-          //TODO manually assigning object properties
           opt["title"] = givenPollOpt["title"];
           opt["from"] = givenPollOpt["from"];
           opt["to"] = givenPollOpt["to"];
