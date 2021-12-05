@@ -4,15 +4,21 @@ import {
   PlusOutlined,
   SaveOutlined
 } from "@ant-design/icons";
-import { ApolloError, useMutation } from "@apollo/client";
 import { CREATE_OR_UPDATE_COMMENT } from "@operations/mutations/CreateOrUpdateComment";
 import { DELETE_COMMENT } from "@operations/mutations/DeleteComment";
-import { CreateOrUpdateComment } from "@operations/mutations/__generated__/CreateOrUpdateComment";
-import { DeleteComment } from "@operations/mutations/__generated__/DeleteComment";
+import {
+  CreateOrUpdateComment,
+  CreateOrUpdateCommentVariables
+} from "@operations/mutations/__generated__/CreateOrUpdateComment";
+import {
+  DeleteComment,
+  DeleteCommentVariables
+} from "@operations/mutations/__generated__/DeleteComment";
 import { GetPollByLink_getPollByLink_comments } from "@operations/queries/__generated__/GetPollByLink";
-import { Button, Card, Input, message, Space } from "antd";
-import React, { useEffect, useState } from "react";
-import LoadingBar from "./LoadingBar";
+import { useStyledMutation } from "@util/mutationWrapper";
+import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
+import { Button, Card, Input, Space } from "antd";
+import React, { useState } from "react";
 
 type SaveCommentType = Partial<
   Pick<GetPollByLink_getPollByLink_comments, "_id">
@@ -107,58 +113,31 @@ export const PollCommentArea = ({
 
   const [commentIsSaving, setCommentIsSaving] = useState(false);
 
-  const [createOrUpdateCommentMutation] = useMutation<CreateOrUpdateComment>(
-    CREATE_OR_UPDATE_COMMENT
-  );
-  const [deleteCommentMutation] = useMutation<DeleteComment>(DELETE_COMMENT);
-
-  useEffect(() => {
-    if (commentIsSaving) LoadingBar.start();
-    else LoadingBar.done();
-  }, [commentIsSaving]);
-
+  const createOrUpdateCommentMutation = useStyledMutation<
+    CreateOrUpdateComment,
+    CreateOrUpdateCommentVariables
+  >(CREATE_OR_UPDATE_COMMENT, {
+    statusCallbackFunction: setCommentIsSaving,
+    successMessage: "Kommentar gespeichert!",
+  });
   const saveComment = async (comment: SaveCommentType) => {
-    setCommentIsSaving(true);
-    try {
-      await createOrUpdateCommentMutation({
-        variables: {
-          pollId: pollId,
-          comment: {
-            ...comment,
-            __typename: undefined,
-          },
-        },
-      });
-      message.success("Kommentar gespeichert!");
-    } catch (ex) {
-      let additionalMessage;
-      if (ex instanceof ApolloError) {
-        additionalMessage = (
-          <>
-            <br />
-            <small>{ex.message}</small>
-          </>
-        );
-      }
-      message.error(
-        <>
-          <span>Speichern fehlgeschlagen!</span>
-          {additionalMessage}
-        </>
-      );
-    } finally {
-      setCommentIsSaving(false);
-    }
+    await createOrUpdateCommentMutation({
+      pollId,
+      comment: removeTypenameFromObject({ ...comment }),
+    });
   };
 
+  const deleteCommentMutation = useStyledMutation<
+    DeleteComment,
+    DeleteCommentVariables
+  >(DELETE_COMMENT, {
+    successMessage: "Kommentar gelöscht!",
+    errorMessage: "Löschen fehlgeschlagen!",
+  });
   const deleteComment = async (commentId: string) => {
-    LoadingBar.start();
-    try {
-      await deleteCommentMutation({
-        variables: {
-          pollId: pollId,
-          commentId,
-        },
+    await deleteCommentMutation(
+      { pollId, commentId },
+      {
         update(cache) {
           const normalizedId = cache.identify({
             id: commentId,
@@ -167,26 +146,8 @@ export const PollCommentArea = ({
           cache.evict({ id: normalizedId });
           cache.gc();
         },
-      });
-    } catch (ex) {
-      let additionalMessage;
-      if (ex instanceof ApolloError) {
-        additionalMessage = (
-          <>
-            <br />
-            <small>{ex.message}</small>
-          </>
-        );
       }
-      message.error(
-        <>
-          <span>Löschen fehlgeschlagen!</span>
-          {additionalMessage}
-        </>
-      );
-    } finally {
-      LoadingBar.done();
-    }
+    );
   };
 
   return (

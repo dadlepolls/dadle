@@ -7,14 +7,19 @@ import {
   QuestionCircleOutlined,
   SaveOutlined
 } from "@ant-design/icons";
-import { ApolloError, useMutation, useQuery } from "@apollo/client";
-import LoadingBar from "@components/LoadingBar";
+import { useQuery } from "@apollo/client";
 import { PollCommentArea } from "@components/PollCommentArea";
 import { PollEditDialog } from "@components/PollEditDialog";
 import { CREATE_OR_UPDATE_PARTICIPATION } from "@operations/mutations/CreateOrUpdateParticipation";
 import { DELETE_PARTICIPATION } from "@operations/mutations/DeleteParticipation";
-import { CreateOrUpdateParticipation } from "@operations/mutations/__generated__/CreateOrUpdateParticipation";
-import { DeleteParticipation } from "@operations/mutations/__generated__/DeleteParticipation";
+import {
+  CreateOrUpdateParticipation,
+  CreateOrUpdateParticipationVariables
+} from "@operations/mutations/__generated__/CreateOrUpdateParticipation";
+import {
+  DeleteParticipation,
+  DeleteParticipationVariables
+} from "@operations/mutations/__generated__/DeleteParticipation";
 import { GET_POLL_BY_LINK } from "@operations/queries/GetPollByLink";
 import {
   GetPollByLink,
@@ -22,6 +27,8 @@ import {
   GetPollByLink_getPollByLink_participations,
   GetPollByLink_getPollByLink_participations_choices
 } from "@operations/queries/__generated__/GetPollByLink";
+import { useStyledMutation } from "@util/mutationWrapper";
+import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
 import {
   Button,
   Card,
@@ -347,11 +354,10 @@ const PollPage: NextPage = () => {
     [setParticipationBeingAdded]
   );
 
-  const [createOrUpdateParticipationMutation] =
-    useMutation<CreateOrUpdateParticipation>(CREATE_OR_UPDATE_PARTICIPATION);
-  const [deleteParticipationMutation] =
-    useMutation<DeleteParticipation>(DELETE_PARTICIPATION);
-
+  const createOrUpdateParticipationMutation = useStyledMutation<
+    CreateOrUpdateParticipation,
+    CreateOrUpdateParticipationVariables
+  >(CREATE_OR_UPDATE_PARTICIPATION, { successMessage: "Antwort gespeichert!" });
   const saveParticipation = async (
     participation: Omit<
       GetPollByLink_getPollByLink_participations,
@@ -359,51 +365,31 @@ const PollPage: NextPage = () => {
     > &
       Partial<Pick<GetPollByLink_getPollByLink_participations, "_id">>
   ) => {
-    LoadingBar.start();
-    try {
-      await createOrUpdateParticipationMutation({
-        variables: {
-          pollId: poll?._id,
-          participation: {
-            ...participation,
+    await createOrUpdateParticipationMutation({
+      pollId: poll?._id ?? "",
+      participation: {
+        ...removeTypenameFromObject({ ...participation }),
+        choices: participation.choices
+          .map((n) => ({
+            ...n,
             __typename: undefined,
-            choices: participation.choices.map((n) => ({
-              ...n,
-              __typename: undefined,
-            })),
-          },
-        },
-      });
-      message.success("Antwort gespeichert!");
-    } catch (ex) {
-      let additionalMessage;
-      if (ex instanceof ApolloError) {
-        additionalMessage = (
-          <>
-            <br />
-            <small>{ex.message}</small>
-          </>
-        );
-      }
-      message.error(
-        <>
-          <span>Speichern fehlgeschlagen!</span>
-          {additionalMessage}
-        </>
-      );
-    } finally {
-      LoadingBar.done();
-    }
+          }))
+          .filter((n) => poll?.options.some((o) => o._id == n.option)),
+      },
+    });
   };
 
+  const deleteParticipationMutation = useStyledMutation<
+    DeleteParticipation,
+    DeleteParticipationVariables
+  >(DELETE_PARTICIPATION, { successMessage: "Antwort gelöscht!" });
   const deleteParticipation = async (participationId: string) => {
-    LoadingBar.start();
-    try {
-      await deleteParticipationMutation({
-        variables: {
-          pollId: poll?._id,
-          participationId,
-        },
+    await deleteParticipationMutation(
+      {
+        pollId: poll?._id ?? "",
+        participationId,
+      },
+      {
         update(cache) {
           const normalizedId = cache.identify({
             id: participationId,
@@ -412,26 +398,8 @@ const PollPage: NextPage = () => {
           cache.evict({ id: normalizedId });
           cache.gc();
         },
-      });
-    } catch (ex) {
-      let additionalMessage;
-      if (ex instanceof ApolloError) {
-        additionalMessage = (
-          <>
-            <br />
-            <small>{ex.message}</small>
-          </>
-        );
       }
-      message.error(
-        <>
-          <span>Löschen fehlgeschlagen!</span>
-          {additionalMessage}
-        </>
-      );
-    } finally {
-      LoadingBar.done();
-    }
+    );
   };
 
   if (loading || !poll) return <div>loading...</div>;
