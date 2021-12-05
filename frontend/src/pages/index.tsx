@@ -3,7 +3,8 @@ import { useQuery } from "@apollo/client";
 import { PollEditDialog } from "@components/PollEditDialog";
 import { GET_POLLS_OVERVIEW } from "@operations/queries/GetPollsOverview";
 import { GetPollsOverview } from "@operations/queries/__generated__/GetPollsOverview";
-import { Card, Typography } from "antd";
+import { Card, Tooltip, Typography } from "antd";
+import moment from "moment";
 import type { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import Head from "next/head";
@@ -18,6 +19,8 @@ const Home: NextPage = () => {
   if (loading) return <div>loading...</div>;
   if (error) return <div>An Error occured: {JSON.stringify(error)}</div>;
 
+  const polls = data?.getPolls.map((p) => ({ ...p })) || [];
+
   return (
     <>
       <Head>
@@ -30,21 +33,30 @@ const Home: NextPage = () => {
         saveButtonContent="Umfrage erstellen"
         onSaveSuccess={(p) => router.push(`/p/${p?.link}`)}
       />
-      {data?.getPolls.map((poll, idx) => (
-        <Card
-          key={idx}
-          style={{ marginTop: "16px", cursor: "pointer" }}
-          size="small"
-          onClick={() => router.push(`/p/${poll.link}`)}
-        >
-          <Typography.Text strong={true}>
-            <Link key={idx} href={`/p/${poll.link}`}>
-              {poll.title}
-            </Link>
-          </Typography.Text>
-          <small>&nbsp; by {poll.author}</small>
-        </Card>
-      ))}
+      {polls
+        .sort((b, a) => moment(a.updatedAt).diff(moment(b.updatedAt)))
+        .map((poll, idx) => (
+          <Card
+            key={idx}
+            style={{ marginTop: "16px", cursor: "pointer" }}
+            size="small"
+            onClick={() => router.push(`/p/${poll.link}`)}
+          >
+            <Typography.Text strong={true}>
+              <Link key={idx} href={`/p/${poll.link}`}>
+                {poll.title}
+              </Link>
+            </Typography.Text>
+            <small>&nbsp; by {poll.author}</small>
+            {poll.updatedAt ? (
+              <Tooltip title={moment(poll.updatedAt).format("DD.MM.YY HH:MM")}>
+                <Typography.Text style={{ float: "right" }}>
+                  {moment(poll.updatedAt).fromNow()}
+                </Typography.Text>
+              </Tooltip>
+            ) : null}
+          </Card>
+        ))}
     </>
   );
 };
