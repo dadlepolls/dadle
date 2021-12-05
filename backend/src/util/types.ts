@@ -8,6 +8,8 @@ interface IPoll {
   options?: IPollOption[];
   participations?: IPollParticipation[];
   comments?: IPollComment[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 enum PollOptionType {

@@ -43,6 +43,12 @@ class Poll implements IPoll {
   @Field(() => [PollParticipation])
   participations?: PollParticipation[];
 
+  @Field({ nullable: true })
+  createdAt?: Date;
+
+  @Field({ nullable: true })
+  updatedAt?: Date;
+
   constructor(_id: string, title: string, link: string) {
     this._id = _id;
     this.title = title;
