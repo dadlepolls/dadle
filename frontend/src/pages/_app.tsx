@@ -1,12 +1,12 @@
 import { MailOutlined } from "@ant-design/icons";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
-import LoadingBar from "@components/LoadingBar";
 import {
   ResponsiveContextProvider,
   useWindowIsSm
 } from "@components/ResponsiveContext";
 import "@styles/globals.css";
 import "@styles/pollpage.css";
+import LoadingBar from "@util/LoadingBar";
 import { Layout, Menu } from "antd";
 import type { AppProps } from "next/app";
 import { Router } from "next/dist/client/router";

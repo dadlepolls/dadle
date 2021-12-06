@@ -8,7 +8,7 @@ import {
   TypedDocumentNode,
   useMutation
 } from "@apollo/client";
-import LoadingBar from "@components/LoadingBar";
+import LoadingBar from "@util/LoadingBar";
 import { message } from "antd";
 
 function useStyledMutation<
