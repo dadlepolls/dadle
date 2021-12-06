@@ -31,6 +31,7 @@
   },
   "scripts": {
     "nodemon": "nodemon src/index.ts",
-    "lint": "eslint src/**"
+    "lint": "eslint src/**",
+    "build": "tsc -p ."
   }
 }
