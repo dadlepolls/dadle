@@ -9,12 +9,20 @@ import express from "express";
 import "reflect-metadata";
 import dbConnect from "./db/db";
 import { buildAppSchema } from "./graphql/BuildSchema";
+import mongoose from "mongoose";
 
 const app = express();
 const port = process.env.HTTP_PORT || 3000;
 
 app.get("/", (req, res) => {
   res.status(403).send();
+});
+
+app.get("/health", (req, res) => {
+  return res.json({
+    state: "up",
+    dbState: mongoose.STATES[mongoose.connection.readyState],
+  });
 });
 
 const main = async () => {
