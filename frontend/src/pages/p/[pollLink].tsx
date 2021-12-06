@@ -24,7 +24,7 @@ import { GET_POLL_BY_LINK } from "@operations/queries/GetPollByLink";
 import { GetPollByLink } from "@operations/queries/__generated__/GetPollByLink";
 import { useStyledMutation } from "@util/mutationWrapper";
 import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
-import { Button, Card, Descriptions, PageHeader } from "antd";
+import { Button, Card, Descriptions, PageHeader, Tooltip } from "antd";
 import moment from "moment";
 import { NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
@@ -123,8 +123,21 @@ const PollPage: NextPage = () => {
           >
             <Descriptions size="small" column={3}>
               {poll.createdAt ? (
-                <Descriptions.Item label="Umfrage erstellt am">
-                  {moment(poll.createdAt).format("DD.MM.YY HH:MM")}
+                <Descriptions.Item label="Umfrage erstellt">
+                  <Tooltip
+                    title={moment(poll.createdAt).format("DD.MM.YY HH:MM:SS")}
+                  >
+                    {moment(poll.createdAt).fromNow()}
+                  </Tooltip>
+                </Descriptions.Item>
+              ) : null}
+              {poll.updatedAt ? (
+                <Descriptions.Item label="Letzte Änderung">
+                  <Tooltip
+                    title={moment(poll.updatedAt).format("DD.MM.YY HH:MM:SS")}
+                  >
+                    {moment(poll.updatedAt).fromNow()}
+                  </Tooltip>
                 </Descriptions.Item>
               ) : null}
             </Descriptions>
