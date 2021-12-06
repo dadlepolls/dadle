@@ -121,7 +121,7 @@ const PollPage: NextPage = () => {
               />
             }
           >
-            <Descriptions size="small" column={3}>
+            <Descriptions size="small" column={isSm ? 1 : 3}>
               {poll.createdAt ? (
                 <Descriptions.Item label="Umfrage erstellt">
                   <Tooltip
