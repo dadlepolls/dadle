@@ -1,5 +1,7 @@
 import { EditOutlined, SaveOutlined } from "@ant-design/icons";
 import { useQuery } from "@apollo/client";
+import { ErrorPage } from "@components/ErrorPage";
+import { LoadingCard } from "@components/LoadingCard";
 import { PollCommentArea } from "@components/PollCommentArea";
 import {
   PollResponses,
@@ -87,8 +89,7 @@ const PollPage: NextPage = () => {
     );
   };
 
-  if (loading || !poll) return <div>loading...</div>;
-  if (error) return <div>An Error occured: {JSON.stringify(error)}</div>;
+  if (error) return <ErrorPage error={error} />;
 
   const PollResponseComponentByMedia = isSm
     ? PollResponsesMobile
@@ -97,48 +98,57 @@ const PollPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{poll.title} | DadleX</title>
+        <title>DadleX</title>
       </Head>
-      <PageHeader
-        ghost={false}
-        onBack={() => router.back()}
-        title={poll?.title}
-        subTitle={poll?.author}
-        style={{ marginBottom: "16px" }}
-        extra={
-          <Button
-            hidden={isEditingPoll}
-            onClick={() => setIsEditingPoll(true)}
-            icon={<EditOutlined />}
-          />
-        }
-      >
-        <Descriptions size="small" column={3}>
-          {poll.createdAt ? (
-            <Descriptions.Item label="Umfrage erstellt am">
-              {moment(poll.createdAt).format("DD.MM.YY HH:MM")}
-            </Descriptions.Item>
-          ) : null}
-        </Descriptions>
+      {loading || !poll ? (
+        <LoadingCard />
+      ) : (
+        <>
+          <Head>
+            <title>{poll?.title} | DadleX</title>
+          </Head>
+          <PageHeader
+            ghost={false}
+            onBack={() => router.back()}
+            title={poll?.title}
+            subTitle={poll?.author}
+            style={{ marginBottom: "16px" }}
+            extra={
+              <Button
+                hidden={isEditingPoll}
+                onClick={() => setIsEditingPoll(true)}
+                icon={<EditOutlined />}
+              />
+            }
+          >
+            <Descriptions size="small" column={3}>
+              {poll.createdAt ? (
+                <Descriptions.Item label="Umfrage erstellt am">
+                  {moment(poll.createdAt).format("DD.MM.YY HH:MM")}
+                </Descriptions.Item>
+              ) : null}
+            </Descriptions>
 
-        {isEditingPoll ? (
-          <PollEditDialog
-            title="Umfrage bearbeiten"
-            poll={poll}
-            saveButtonIcon={<SaveOutlined />}
-            saveButtonContent="Änderungen speichern"
-            onSaveSuccess={() => setIsEditingPoll(false)}
-          />
-        ) : null}
-      </PageHeader>
-      <Card>
-        <PollResponseComponentByMedia
-          poll={poll}
-          saveParticipationFunction={saveParticipation}
-          deleteParticipationFunction={deleteParticipation}
-        />
-      </Card>
-      <PollCommentArea pollId={poll._id} comments={poll.comments} />
+            {isEditingPoll ? (
+              <PollEditDialog
+                title="Umfrage bearbeiten"
+                poll={poll}
+                saveButtonIcon={<SaveOutlined />}
+                saveButtonContent="Änderungen speichern"
+                onSaveSuccess={() => setIsEditingPoll(false)}
+              />
+            ) : null}
+          </PageHeader>
+          <Card>
+            <PollResponseComponentByMedia
+              poll={poll}
+              saveParticipationFunction={saveParticipation}
+              deleteParticipationFunction={deleteParticipation}
+            />
+          </Card>
+          <PollCommentArea pollId={poll._id} comments={poll.comments} />
+        </>
+      )}
     </>
   );
 };

@@ -1,5 +1,7 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@apollo/client";
+import { ErrorPage } from "@components/ErrorPage";
+import { LoadingCard } from "@components/LoadingCard";
 import { PollEditDialog } from "@components/PollEditDialog";
 import { GET_POLLS_OVERVIEW } from "@operations/queries/GetPollsOverview";
 import { GetPollsOverview } from "@operations/queries/__generated__/GetPollsOverview";
@@ -16,8 +18,8 @@ const Home: NextPage = () => {
 
   const { loading, data, error } =
     useQuery<GetPollsOverview>(GET_POLLS_OVERVIEW);
-  if (loading) return <div>loading...</div>;
-  if (error) return <div>An Error occured: {JSON.stringify(error)}</div>;
+
+  if (error) return <ErrorPage error={error} />;
 
   const polls = data?.getPolls.map((p) => ({ ...p })) || [];
 
@@ -33,6 +35,7 @@ const Home: NextPage = () => {
         saveButtonContent="Umfrage erstellen"
         onSaveSuccess={(p) => router.push(`/p/${p?.link}`)}
       />
+      {loading ? <LoadingCard /> : null}
       {polls
         .sort((b, a) => moment(a.updatedAt).diff(moment(b.updatedAt)))
         .map((poll, idx) => (
