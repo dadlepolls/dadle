@@ -4,7 +4,10 @@ module.exports = {
   async rewrites() {
     if (process.env.NODE_ENV == "development") {
       return [
-        { source: "/graphql", destination: "http://localhost:3001/graphql" },
+        {
+          source: "/api/graphql",
+          destination: "http://localhost:3001/graphql",
+        },
       ];
     } else {
       return [];
