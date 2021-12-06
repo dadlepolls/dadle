@@ -49,6 +49,11 @@ const mapOptionTypeToEditorType = (t?: PollOptionType) => {
   else return null;
 };
 
+const getWindowOrigin = () =>
+  typeof window !== "undefined" && window.location.origin
+    ? window.location.origin
+    : "";
+
 export const PollEditDialog = ({
   poll: _poll,
   title,
@@ -194,7 +199,7 @@ export const PollEditDialog = ({
                   >
                     <Input
                       type="text"
-                      addonBefore="http://dadlelink/p/" /*TODO get hostname dynamically */
+                      addonBefore={`${getWindowOrigin()}/p/`}
                       placeholder="Link zur Umfrage"
                       onChange={() => {
                         if (!linkModifiedManually)
