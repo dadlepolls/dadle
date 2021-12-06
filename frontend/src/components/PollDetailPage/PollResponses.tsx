@@ -14,6 +14,7 @@ import {
   GetPollByLink_getPollByLink_participations_choices
 } from "@operations/queries/__generated__/GetPollByLink";
 import { Button, Checkbox, Input, message, Popconfirm, Space } from "antd";
+import * as ls from "local-storage";
 import React, { useCallback, useEffect, useState } from "react";
 import { useImmer } from "use-immer";
 import { PollOptionType, YesNoMaybe } from "__generated__/globalTypes";
@@ -385,12 +386,13 @@ const PollResponses = ({
         ))}
         {participationBeingAdded ? (
           <ParticipantRow
-            name=""
+            name={participationBeingAdded.author}
             className="pollpage--participant-add-field-container"
             editable={true}
             deletable={true}
             deleteConfirmation={false}
             onSaveClick={async (e) => {
+              ls.set("username", e);
               await saveParticipation({
                 ...participationBeingAdded,
                 author: e,
@@ -407,7 +409,7 @@ const PollResponses = ({
               icon={<PlusOutlined />}
               onClick={() =>
                 setParticipationBeingAdded({
-                  author: "",
+                  author: ls.get<string>("username"),
                   choices: [],
                 })
               }

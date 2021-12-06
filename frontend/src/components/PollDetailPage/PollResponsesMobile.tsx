@@ -4,6 +4,7 @@ import {
   GetPollByLink_getPollByLink_options
 } from "@operations/queries/__generated__/GetPollByLink";
 import { Button, Col, Input, List, message, Popover, Row } from "antd";
+import * as ls from "local-storage";
 import React, { useState } from "react";
 import { useImmer } from "use-immer";
 import { PollOptionType, YesNoMaybe } from "__generated__/globalTypes";
@@ -119,7 +120,10 @@ const PollResponsesMobile = ({
   ) => Promise<any>;
   deleteParticipationFunction: (participationId: string) => Promise<any>;
 }) => {
-  const emptyEditableParticipation = { author: "", choices: [] };
+  const emptyEditableParticipation = {
+    author: ls.get<string>("username"),
+    choices: [],
+  };
   const [editableParticipation, updateEditableParticipation] =
     useImmer<TPartialParticipationWithId>(emptyEditableParticipation);
 
@@ -182,6 +186,8 @@ const PollResponsesMobile = ({
                 return;
               }
               setIsSaving(true);
+              if (!editableParticipation._id)
+                ls.set("username", editableParticipation.author);
               await saveParticipation(editableParticipation);
               setIsSaving(false);
               updateEditableParticipation(emptyEditableParticipation);

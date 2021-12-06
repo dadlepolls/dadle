@@ -18,6 +18,7 @@ import { GetPollByLink_getPollByLink_comments } from "@operations/queries/__gene
 import { useStyledMutation } from "@util/mutationWrapper";
 import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
 import { Button, Card, Input, Space } from "antd";
+import * as ls from "local-storage";
 import React, { useState } from "react";
 
 type SaveCommentType = Partial<
@@ -171,6 +172,7 @@ export const PollCommentArea = ({
           comment={commentBeingAdded}
           editable={true}
           onSaveClick={async (c) => {
+            ls.set("username", c.by);
             await saveComment(c);
             setCommentBeingAdded(null);
           }}
@@ -189,7 +191,9 @@ export const PollCommentArea = ({
             shape="round"
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => setCommentBeingAdded({ by: "", text: "" })}
+            onClick={() =>
+              setCommentBeingAdded({ by: ls.get<string>("username"), text: "" })
+            }
           >
             Neuer Kommentar
           </Button>
