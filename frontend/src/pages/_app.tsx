@@ -1,4 +1,3 @@
-import { MailOutlined } from "@ant-design/icons";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import {
   ResponsiveContextProvider,
@@ -9,7 +8,7 @@ import "@styles/pollpage.css";
 import LoadingBar from "@util/LoadingBar";
 import { Layout, Menu } from "antd";
 import type { AppProps } from "next/app";
-import { Router } from "next/dist/client/router";
+import { Router, useRouter } from "next/dist/client/router";
 import "nprogress/nprogress.css";
 
 const { Header, Content, Footer } = Layout;
@@ -46,12 +45,13 @@ Router.events.on("routeChangeComplete", () => LoadingBar.done());
 Router.events.on("routeChangeError", () => LoadingBar.done());
 
 function AppLayout({ Component, pageProps }: AppProps) {
+  const router = useRouter();
   const isSm = useWindowIsSm();
 
   return (
     <Layout className="layout">
       <Header>
-        <div
+        {/*<div
           className="logo"
           style={{
             float: "left",
@@ -60,19 +60,25 @@ function AppLayout({ Component, pageProps }: AppProps) {
             margin: "16px 24px 16px 0",
             color: "white",
             fontWeight: 500,
-          }}
+          }
         >
           <span>DadleX</span>
-        </div>
-        <Menu theme="dark" mode="horizontal">
-          <Menu.SubMenu
+        </div>*/}
+        <Menu theme="dark" mode="horizontal" selectedKeys={[]}>
+          <Menu.Item key="logo">
+            <b>DadleX</b>
+          </Menu.Item>
+          <Menu.Item key="home" onClick={() => router.push("/")}>
+            Home
+          </Menu.Item>
+          {/*<Menu.SubMenu
             key="profileSub"
             icon={<MailOutlined />}
             style={{ marginLeft: "auto" }}
             title="Hey!"
           >
             <Menu.Item key="profileDummy">Dummy</Menu.Item>
-          </Menu.SubMenu>
+          </Menu.SubMenu>*/}
         </Menu>
       </Header>
       <Content style={{ padding: isSm ? "0 16px" : "0 50px" }}>
