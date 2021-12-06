@@ -1,6 +1,9 @@
-import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
+import {
+  ApolloServerPluginLandingPageGraphQLPlayground,
+  ApolloServerPluginLandingPageProductionDefault,
+} from "apollo-server-core";
 import { ApolloServer } from "apollo-server-express";
-import dotenv from "dotenv"; 
+import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
 import "reflect-metadata";
@@ -21,7 +24,11 @@ const main = async () => {
 
   const server = new ApolloServer({
     schema,
-    plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
+    plugins: [
+      process.env.NODE_ENV == "development"
+        ? ApolloServerPluginLandingPageGraphQLPlayground()
+        : ApolloServerPluginLandingPageProductionDefault(),
+    ],
   });
   await server.start();
   server.applyMiddleware({ app, path: "/graphql" });
