@@ -1,13 +1,13 @@
 version: "3.9"
 services:
   frontend:
-    image: "dadlex-frontend"
+    image: "ghcr.io/peterkappelt/dadlex-frontend:${PACKAGE_VERSION:-latest}"
     ports:
       - "${DADLEX_FRONTEND_PORT}:3000"
     networks:
       - frontend
   backend:
-    image: "dadlex-backend"
+    image: "ghcr.io/peterkappelt/dadlex-backend:${PACKAGE_VERSION:-latest}"
     ports:
       - "${DADLEX_BACKEND_PORT}:3000"
     networks:
@@ -25,3 +25,4 @@ services:
 networks:
   frontend: null
   backend: null
+  
