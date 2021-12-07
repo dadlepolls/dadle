@@ -1,0 +1,100 @@
+name: CI - Lint and Build
+on: push
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  lint-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - name: Yarn Install
+        working-directory: ./backend
+        run: |
+          yarn install
+      - name: Lint
+        working-directory: ./backend
+        run: |
+          yarn lint
+  lint-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - name: Yarn Install
+        working-directory: ./frontend
+        run: |
+          yarn install
+      - name: Lint
+        working-directory: ./frontend
+        run: |
+          yarn lint
+  build-docker:
+    runs-on: ubuntu-latest
+    needs:
+      - lint-frontend
+      - lint-backend
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Node.JS
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - name: Install Typescript globally
+        run: |
+          yarn global add typescript @types/node ts-node
+      - name: Generate GraphQL schema file
+        working-directory: ./backend
+        run: |
+          yarn install
+          ts-node ./test/util/printGraphSchema.ts > ${{ runner.temp }}/dadlex.graphql
+      - name: Store GraphQL schema as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: ${{ runner.temp }}/dadlex.graphql
+      - name: Auto-generate schema spec for frontend
+        working-directory: ./frontend
+        run: |
+          yarn install
+          yarn run apollo codegen:generate --target=typescript --localSchemaFile=${{ runner.temp }}/dadlex.graphql
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata for Docker (frontend)
+        id: frontendmeta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+      - name: Build and push Docker image (frontend)
+        uses: docker/build-push-action@v2
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ steps.frontendmeta.outputs.tags }}
+          labels: ${{ steps.frontendmeta.outputs.labels }}
+      - name: Extract metadata for Docker (backend)
+        id: backendmeta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
+      - name: Build and push Docker image (backend)
+        uses: docker/build-push-action@v2
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ steps.backendmeta.outputs.tags }}
+          labels: ${{ steps.backendmeta.outputs.labels }}
