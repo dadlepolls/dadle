@@ -1,4 +1,12 @@
-import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+import { KeyOutlined, LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  ApolloClient,
+  ApolloProvider,
+  createHttpLink,
+  InMemoryCache
+} from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
+import { AuthContextProvider, useAuth } from "@components/AuthContext";
 import {
   ResponsiveContextProvider,
   useWindowIsSm
@@ -13,8 +21,21 @@ import "nprogress/nprogress.css";
 
 const { Header, Content, Footer } = Layout;
 
-const client = new ApolloClient({
+const httpLink = createHttpLink({
   uri: "/backend/graphql",
+});
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem("token");
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    },
+  };
+});
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache({
     typePolicies: {
       Poll: {
@@ -47,6 +68,7 @@ Router.events.on("routeChangeError", () => LoadingBar.done());
 function AppLayout({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const isSm = useWindowIsSm();
+  const { logout, user } = useAuth();
 
   return (
     <Layout className="layout">
@@ -71,14 +93,32 @@ function AppLayout({ Component, pageProps }: AppProps) {
           <Menu.Item key="home" onClick={() => router.push("/")}>
             Home
           </Menu.Item>
-          {/*<Menu.SubMenu
-            key="profileSub"
-            icon={<MailOutlined />}
-            style={{ marginLeft: "auto" }}
-            title="Hey!"
-          >
-            <Menu.Item key="profileDummy">Dummy</Menu.Item>
-          </Menu.SubMenu>*/}
+          {user ? (
+            <Menu.SubMenu
+              key="profileSub"
+              icon={<UserOutlined />}
+              style={{ marginLeft: "auto" }}
+              title={`Hey ${user.name}`}
+            >
+              <Menu.Item key="profile">Mein Profil</Menu.Item>
+              <Menu.Item
+                key="logout"
+                icon={<LogoutOutlined />}
+                onClick={() => logout()}
+              >
+                Abmelden
+              </Menu.Item>
+            </Menu.SubMenu>
+          ) : (
+            <Menu.Item
+              key="login"
+              icon={<KeyOutlined />}
+              onClick={() => (window.location.href = "/backend/auth/login")}
+              style={{ marginLeft: "auto" }}
+            >
+              Anmelden
+            </Menu.Item>
+          )}
         </Menu>
       </Header>
       <Content style={{ padding: isSm ? "0 16px" : "0 50px" }}>
@@ -102,9 +142,11 @@ function AppLayout({ Component, pageProps }: AppProps) {
 function App(props: AppProps) {
   return (
     <ApolloProvider client={client}>
-      <ResponsiveContextProvider>
-        <AppLayout {...props} />
-      </ResponsiveContextProvider>
+      <AuthContextProvider>
+        <ResponsiveContextProvider>
+          <AppLayout {...props} />
+        </ResponsiveContextProvider>
+      </AuthContextProvider>
     </ApolloProvider>
   );
 }

@@ -13,4 +13,13 @@ module.exports = {
       return [];
     }
   },
+  async redirects() {
+    return [
+      {
+        source: "/login",
+        destination: "/backend/auth/login",
+        permanent: true,
+      },
+    ];
+  },
 };
