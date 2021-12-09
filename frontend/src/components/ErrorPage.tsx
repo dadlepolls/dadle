@@ -3,7 +3,18 @@ import { Collapse, Input, Result } from "antd";
 import Head from "next/head";
 import React from "react";
 
-const ErrorPage = ({ error }: { error: ApolloError }) => {
+const ErrorPage = ({ error }: { error: ApolloError | string }) => {
+  if (typeof error === "string") {
+    error = {
+      message: error,
+      clientErrors: [],
+      extraInfo: [],
+      graphQLErrors: [],
+      networkError: null,
+      name: "",
+    };
+  }
+
   return (
     <>
       <Head>
