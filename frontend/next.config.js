@@ -5,8 +5,8 @@ module.exports = {
     if (process.env.NODE_ENV == "development") {
       return [
         {
-          source: "/api/graphql",
-          destination: "http://localhost:3001/graphql",
+          source: "/backend/:path*",
+          destination: "http://localhost:3001/:path*",
         },
       ];
     } else {

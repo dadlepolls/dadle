@@ -14,7 +14,7 @@ import "nprogress/nprogress.css";
 const { Header, Content, Footer } = Layout;
 
 const client = new ApolloClient({
-  uri: "/api/graphql",
+  uri: "/backend/graphql",
   cache: new InMemoryCache({
     typePolicies: {
       Poll: {
