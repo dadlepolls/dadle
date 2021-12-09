@@ -28,8 +28,8 @@ import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
 import { Button, Card, Descriptions, PageHeader, Tooltip } from "antd";
 import moment from "moment";
 import { NextPage } from "next";
-import { useRouter } from "next/dist/client/router";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 const PollPage: NextPage = () => {

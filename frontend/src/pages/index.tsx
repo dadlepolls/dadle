@@ -9,9 +9,9 @@ import { getUserDisplayname } from "@util/getUserDisplayname";
 import { Card, Tooltip, Typography } from "antd";
 import moment from "moment";
 import type { NextPage } from "next";
-import { useRouter } from "next/dist/client/router";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
 
 const Home: NextPage = () => {

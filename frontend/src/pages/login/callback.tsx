@@ -2,7 +2,7 @@ import { useAuth } from "@components/AuthContext";
 import { ErrorPage } from "@components/ErrorPage";
 import { LoadingCard } from "@components/LoadingCard";
 import { NextPage } from "next";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 const LoginCallbackPage: NextPage = () => {

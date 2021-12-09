@@ -16,7 +16,7 @@ import "@styles/pollpage.css";
 import LoadingBar from "@util/LoadingBar";
 import { Layout, Menu } from "antd";
 import type { AppProps } from "next/app";
-import { Router, useRouter } from "next/dist/client/router";
+import { Router, useRouter } from "next/router";
 import "nprogress/nprogress.css";
 
 const { Header, Content, Footer } = Layout;
