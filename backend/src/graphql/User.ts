@@ -64,7 +64,7 @@ class UserResolver {
     const user = await UserModel.findById(ctx.user._id);
     if (!user) throw new ApolloError("User deleted!", "USER_DELETED");
 
-    return user;
+    return user.toObject();
   }
 
   @Authorized()
@@ -81,7 +81,7 @@ class UserResolver {
 
     if (!newName) throw new ApolloError("Name can't be empty!");
     user.name = newName;
-    return await user.save();
+    return (await user.save()).toObject();
   }
 }
 

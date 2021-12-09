@@ -5,6 +5,7 @@ import {
   Arg,
   Args,
   ArgsType,
+  Ctx,
   Field,
   ID,
   InputType,
@@ -15,10 +16,11 @@ import {
   Resolver,
 } from "type-graphql";
 import { Poll as PollModel } from "../db/models";
-import { IPoll } from "../util/types";
+import { IGraphContext, IPoll, IUserOrAnon } from "../util/types";
 import { PollComment, PollCommentInput } from "./PollComment";
 import { PollOption, PollOptionInput } from "./PollOption";
 import { PollParticipation, PollParticipationInput } from "./PollParticipation";
+import { UserOrAnon } from "./UserOrAnon";
 
 @ObjectType()
 class Poll implements IPoll {
@@ -31,8 +33,8 @@ class Poll implements IPoll {
   @Field()
   link: string;
 
-  @Field({ nullable: true })
-  author?: string;
+  @Field(() => UserOrAnon)
+  author: UserOrAnon;
 
   @Field(() => [PollOption])
   options?: PollOption[];
@@ -49,8 +51,9 @@ class Poll implements IPoll {
   @Field({ nullable: true })
   updatedAt?: Date;
 
-  constructor(_id: string, title: string, link: string) {
+  constructor(_id: string, author: UserOrAnon, title: string, link: string) {
     this._id = _id;
+    this.author = author;
     this.title = title;
     this.link = link;
   }
@@ -109,7 +112,7 @@ class PollResolver {
     if (limit) {
       query.limit(limit);
     }
-    return await query.exec();
+    return (await query.exec()).map((o) => o.toObject());
   }
 
   @Query(() => Poll, { nullable: true })
@@ -118,11 +121,14 @@ class PollResolver {
     if (!polls.length) {
       throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
     }
-    return polls[0];
+    return polls[0].toObject();
   }
 
   @Mutation(() => Poll)
-  async createOrUpdatePoll(@Arg("poll") poll: PollInput) {
+  async createOrUpdatePoll(
+    @Arg("poll") poll: PollInput,
+    @Ctx() ctx: IGraphContext
+  ) {
     if (poll._id) {
       //update an existing poll
       const dbPoll = await PollModel.findOne({ _id: poll._id }).exec();
@@ -163,11 +169,14 @@ class PollResolver {
       }
 
       await dbPoll.save();
-      return dbPoll;
+      return dbPoll.toObject();
     } else {
       //create a new poll
-      //TODO take author from user session once authentication is implemented
-      const pollDoc = new PollModel({ ...poll, author: "Dummy Author" });
+      const author: IUserOrAnon = {};
+      if (ctx.user?._id) author.userId = ctx.user._id;
+      else author.anonName = "";
+
+      const pollDoc = new PollModel({ ...poll, author });
       try {
         await pollDoc.save();
       } catch (err) {
@@ -185,7 +194,7 @@ class PollResolver {
         }
       }
 
-      return pollDoc;
+      return pollDoc.toObject();
     }
   }
 
@@ -240,7 +249,7 @@ class PollResolver {
     }
 
     await dbPoll.save();
-    return dbPoll;
+    return dbPoll.toObject();
   }
 
   @Mutation(() => Poll)
@@ -248,15 +257,17 @@ class PollResolver {
     @Arg("pollId", () => ID) pollId: string,
     @Arg("participationId", () => ID) participationId: string
   ) {
-    return await PollModel.findByIdAndUpdate(
-      pollId,
-      {
-        $pull: {
-          participations: { _id: participationId },
+    return (
+      await PollModel.findByIdAndUpdate(
+        pollId,
+        {
+          $pull: {
+            participations: { _id: participationId },
+          },
         },
-      },
-      { new: true }
-    );
+        { new: true }
+      )
+    )?.toObject();
   }
 
   @Mutation(() => Poll)
@@ -281,7 +292,7 @@ class PollResolver {
     }
 
     await dbPoll.save();
-    return dbPoll;
+    return dbPoll.toObject();
   }
 
   @Mutation(() => Poll)
@@ -289,15 +300,17 @@ class PollResolver {
     @Arg("pollId", () => ID) pollId: string,
     @Arg("commentId", () => ID) commentId: string
   ) {
-    return await PollModel.findByIdAndUpdate(
-      pollId,
-      {
-        $pull: {
-          comments: { _id: commentId },
+    return (
+      await PollModel.findByIdAndUpdate(
+        pollId,
+        {
+          $pull: {
+            comments: { _id: commentId },
+          },
         },
-      },
-      { new: true }
-    );
+        { new: true }
+      )
+    )?.toObject();
   }
 }
 

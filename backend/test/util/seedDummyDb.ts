@@ -11,7 +11,7 @@ const main = async () => {
   await Poll.findByIdAndUpdate(
     "618391e2fb228fb3bc94e3e9",
     {
-      author: "Poll1-Author",
+      author: { anonName: "Poll1-Author" },
       title: "Poll1",
       link: "linkToPoll1",
       comments: [
@@ -76,7 +76,7 @@ const main = async () => {
   await Poll.findByIdAndUpdate(
     "6183999a641b2ba12d528ff6",
     {
-      author: "Poll2-Author",
+      author: { anonName: "Poll2-Author" },
       title: "Poll2",
       link: "linkToPoll2",
       comments: [

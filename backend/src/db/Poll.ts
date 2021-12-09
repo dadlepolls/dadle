@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 //import mongooseUniqueValidator from "mongoose-unique-validator";
 import { IPoll } from "../util/types";
+import { schema as UserOrAnon } from "./UserOrAnon";
 import { schema as PollCommentSchema } from "./PollComment";
 import { schema as PollOptionSchema } from "./PollOption";
 import { schema as PollParticipationSchema } from "./PollParticipation";
@@ -9,7 +10,7 @@ const schema = new Schema<IPoll>(
   {
     title: { type: Schema.Types.String, required: true },
     link: { type: Schema.Types.String, required: true, unique: true },
-    author: { type: Schema.Types.String },
+    author: { type: UserOrAnon, required: true },
     options: [PollOptionSchema],
     comments: [PollCommentSchema],
     participations: [PollParticipationSchema],

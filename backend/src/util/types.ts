@@ -4,7 +4,7 @@ interface IPoll {
   _id?: string;
   title: string;
   link: string;
-  author?: string;
+  author?: IUserOrAnon;
   options?: IPollOption[];
   participations?: IPollParticipation[];
   comments?: IPollComment[];
@@ -59,6 +59,12 @@ interface IUser {
   mail: string;
 }
 
+interface IUserOrAnon {
+  anonName?: string;
+  userId?: string;
+  user?: IUser;
+}
+
 interface IGraphContext {
   req: Express.Request;
   token?: string;
@@ -72,6 +78,7 @@ export type {
   IPollChoice,
   IPollComment,
   IUser,
+  IUserOrAnon,
   IGraphContext,
 };
 export { PollOptionType, YesNoMaybe };
