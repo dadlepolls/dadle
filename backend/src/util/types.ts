@@ -50,11 +50,28 @@ interface IPollComment {
   text: string;
 }
 
+interface IUser {
+  _id?: string;
+  provider: "microsoft";
+  idAtProvider: string;
+  nameAtProvider: string;
+  name: string;
+  mail: string;
+}
+
+interface IGraphContext {
+  req: Express.Request;
+  token?: string;
+  user?: Partial<IUser>;
+}
+
 export type {
   IPoll,
   IPollOption,
   IPollParticipation,
   IPollChoice,
   IPollComment,
+  IUser,
+  IGraphContext,
 };
 export { PollOptionType, YesNoMaybe };

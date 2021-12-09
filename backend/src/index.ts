@@ -10,9 +10,24 @@ import "reflect-metadata";
 import dbConnect from "./db/db";
 import { buildAppSchema } from "./graphql/BuildSchema";
 import mongoose from "mongoose";
+import passport from "passport";
+import { IGraphContext, IUser } from "./util/types";
+import { authRouter } from "./auth/authRouter";
+import { parseTokenMiddleware } from "./auth/token";
+
+/* eslint-disable */
+declare global {
+  namespace Express {
+    interface User extends Partial<IUser> {}
+  }
+}
+/* eslint-enable */
 
 const app = express();
+app.use(passport.initialize());
 const port = process.env.HTTP_PORT || 3000;
+
+app.use("/auth", authRouter);
 
 app.get("/", (req, res) => {
   res.status(403).send();
@@ -25,6 +40,8 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.use("/graphql", parseTokenMiddleware);
+
 const main = async () => {
   await dbConnect();
 
@@ -32,6 +49,7 @@ const main = async () => {
 
   const server = new ApolloServer({
     schema,
+    context: ({ req }): IGraphContext => ({ req, user: req.user }),
     plugins: [
       process.env.NODE_ENV == "development"
         ? ApolloServerPluginLandingPageGraphQLPlayground()
