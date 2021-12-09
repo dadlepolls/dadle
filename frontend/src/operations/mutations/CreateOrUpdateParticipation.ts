@@ -5,11 +5,20 @@ export const CREATE_OR_UPDATE_PARTICIPATION = gql`
     $pollId: ID!
     $participation: PollParticipationInput!
   ) {
-    createOrUpdateParticipation(pollId: $pollId, participation: $participation) {
+    createOrUpdateParticipation(
+      pollId: $pollId
+      participation: $participation
+    ) {
       _id
       title
       link
-      author
+      author {
+        anonName
+        user {
+          _id
+          name
+        }
+      }
       updatedAt
       comments {
         _id

@@ -6,7 +6,13 @@ export const DELETE_PARTICIPATION = gql`
       _id
       title
       link
-      author
+      author {
+        anonName
+        user {
+          _id
+          name
+        }
+      }
       updatedAt
       comments {
         _id

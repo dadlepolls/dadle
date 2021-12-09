@@ -6,7 +6,13 @@ export const GET_POLL_BY_LINK = gql`
       _id
       title
       link
-      author
+      author {
+        anonName
+        user {
+          _id
+          name
+        }
+      }
       createdAt
       updatedAt
       comments {

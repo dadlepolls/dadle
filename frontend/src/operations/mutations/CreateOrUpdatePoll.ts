@@ -6,7 +6,13 @@ export const CREATE_OR_UPDATE_POLL = gql`
       _id
       title
       link
-      author
+      author {
+        anonName
+        user {
+          _id
+          name
+        }
+      }
       updatedAt
       comments {
         _id

@@ -119,7 +119,13 @@ export const PollEditDialog = ({
                       _id
                       title
                       link
-                      author
+                      author {
+                        anonName
+                        user {
+                          _id
+                          name
+                        }
+                      }
                     }
                   `,
                 });

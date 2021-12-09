@@ -6,7 +6,13 @@ export const CREATE_OR_UPDATE_COMMENT = gql`
       _id
       title
       link
-      author
+      author {
+        anonName
+        user {
+          _id
+          name
+        }
+      }
       updatedAt
       comments {
         _id

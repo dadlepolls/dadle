@@ -6,7 +6,13 @@ export const GET_POLLS_OVERVIEW = gql`
       _id
       title
       link
-      author
+      author {
+        anonName
+        user {
+          _id
+          name
+        }
+      }
       updatedAt
     }
   }
