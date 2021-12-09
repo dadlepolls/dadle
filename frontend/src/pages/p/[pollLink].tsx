@@ -22,6 +22,7 @@ import {
 } from "@operations/mutations/__generated__/DeleteParticipation";
 import { GET_POLL_BY_LINK } from "@operations/queries/GetPollByLink";
 import { GetPollByLink } from "@operations/queries/__generated__/GetPollByLink";
+import { getUserDisplayname } from "@util/getUserDisplayname";
 import { useStyledMutation } from "@util/mutationWrapper";
 import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
 import { Button, Card, Descriptions, PageHeader, Tooltip } from "antd";
@@ -111,7 +112,7 @@ const PollPage: NextPage = () => {
             ghost={false}
             onBack={() => router.back()}
             title={poll?.title}
-            subTitle={poll?.author}
+            subTitle={poll?.author ? getUserDisplayname(poll.author) : null}
             style={{ marginBottom: "16px" }}
             extra={
               <Button

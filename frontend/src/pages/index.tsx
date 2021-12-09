@@ -5,6 +5,7 @@ import { LoadingCard } from "@components/LoadingCard";
 import { PollEditDialog } from "@components/PollEditDialog";
 import { GET_POLLS_OVERVIEW } from "@operations/queries/GetPollsOverview";
 import { GetPollsOverview } from "@operations/queries/__generated__/GetPollsOverview";
+import { getUserDisplayname } from "@util/getUserDisplayname";
 import { Card, Tooltip, Typography } from "antd";
 import moment from "moment";
 import type { NextPage } from "next";
@@ -50,7 +51,9 @@ const Home: NextPage = () => {
                 {poll.title}
               </Link>
             </Typography.Text>
-            <small>&nbsp; von {poll.author}</small>
+            {poll.author.user || poll.author.anonName ? (
+              <small>&nbsp; von {getUserDisplayname(poll.author)}</small>
+            ) : null}
             {poll.updatedAt ? (
               <Tooltip title={moment(poll.updatedAt).format("DD.MM.YY HH:MM")}>
                 <Typography.Text style={{ float: "right" }}>
