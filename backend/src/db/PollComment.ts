@@ -1,8 +1,9 @@
 import mongoose, { Schema } from "mongoose";
 import { IPollComment } from "../util/types";
+import { schema as UserOrAnonSchema } from "./UserOrAnon";
 
 const schema = new Schema<IPollComment>({
-  by: { type: Schema.Types.String, required: true },
+  author: { type: UserOrAnonSchema, required: true },
   text: { type: Schema.Types.String, required: true },
 });
 

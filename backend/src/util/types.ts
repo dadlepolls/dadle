@@ -46,7 +46,7 @@ interface IPollParticipation {
 
 interface IPollComment {
   _id?: string;
-  by: string;
+  author: IUserOrAnon;
   text: string;
 }
 

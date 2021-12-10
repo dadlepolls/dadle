@@ -15,8 +15,8 @@ const main = async () => {
       title: "Poll1",
       link: "linkToPoll1",
       comments: [
-        { by: "commentor1", text: "comment text 1" },
-        { by: "commentor2", text: "comment text 2" },
+        { author: { anonName: "commentor1" }, text: "comment text 1" },
+        { author: { anonName: "commentor2" }, text: "comment text 2" },
       ],
       options: [
         {
@@ -80,8 +80,11 @@ const main = async () => {
       title: "Poll2",
       link: "linkToPoll2",
       comments: [
-        { by: "commentor3", text: "comment text 3" },
-        { by: "commentor4", text: "comment text 4" },
+        {
+          author: { userId: "61b13e45f1ad51c2510194db" },
+          text: "comment text 3",
+        },
+        { author: { anonName: "commentor4" }, text: "comment text 4" },
       ],
       options: [
         {
