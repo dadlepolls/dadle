@@ -6,9 +6,10 @@ import React, { useContext, useEffect, useState } from "react";
 
 const AuthContext = React.createContext<{
   user?: GetMe_me;
+  isAuthenticated: boolean;
   tryLogin: () => any;
   logout: () => any;
-}>({ tryLogin: () => {}, logout: () => {} });
+}>({ tryLogin: () => {}, logout: () => {}, isAuthenticated: false });
 
 const AuthContextProvider = ({
   children,
@@ -52,6 +53,7 @@ const AuthContextProvider = ({
           setDummyState((x) => x + 1);
           message.success("Erfolgreich abgemeldet!");
         },
+        isAuthenticated: data?.me && data.me._id ? true : false,
       }}
     >
       {children}
