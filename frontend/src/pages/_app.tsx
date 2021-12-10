@@ -100,7 +100,9 @@ function AppLayout({ Component, pageProps }: AppProps) {
               style={{ marginLeft: "auto" }}
               title={`Hey ${user.name}`}
             >
-              <Menu.Item key="profile">Mein Profil</Menu.Item>
+              <Menu.Item key="profile" onClick={() => router.push("/profile")}>
+                Mein Profil
+              </Menu.Item>
               <Menu.Item
                 key="logout"
                 icon={<LogoutOutlined />}
