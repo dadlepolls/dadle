@@ -15,16 +15,14 @@ import {
   DeleteCommentVariables
 } from "@operations/mutations/__generated__/DeleteComment";
 import { GetPollByLink_getPollByLink_comments } from "@operations/queries/__generated__/GetPollByLink";
+import { getUserDisplayname } from "@util/getUserDisplayname";
 import { useStyledMutation } from "@util/mutationWrapper";
 import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
 import { Button, Card, Input, Space } from "antd";
 import * as ls from "local-storage";
 import React, { useState } from "react";
-
-type SaveCommentType = Partial<
-  Pick<GetPollByLink_getPollByLink_comments, "_id">
-> &
-  Omit<GetPollByLink_getPollByLink_comments, "_id" | "__typename">;
+import { PollCommentInput } from "__generated__/globalTypes";
+import { useAuth } from "./AuthContext";
 
 const PollComment = ({
   comment,
@@ -33,30 +31,46 @@ const PollComment = ({
   onDeleteClick = () => {},
   onSaveClick = (_) => {},
   isSaving = false,
+  showEditButton = true,
+  showDeleteButton = true,
+  canEditName = true,
+  authorNameHint,
 }: {
   comment: Partial<GetPollByLink_getPollByLink_comments>;
   editable?: boolean;
-  onSaveClick?: (comment: SaveCommentType) => any;
+  onSaveClick?: (props: {
+    _id?: string;
+    text: string;
+    authorName?: string;
+  }) => any;
   onEditClick?: () => any;
   onDeleteClick?: () => any;
   isSaving?: boolean;
+  canEditName?: boolean;
+  showEditButton?: boolean;
+  showDeleteButton?: boolean;
+  authorNameHint?: string;
 }) => {
-  const [by, setBy] = useState(comment.by || "");
+  const [by, setBy] = useState(
+    canEditName
+      ? getUserDisplayname(comment.author) ?? authorNameHint ?? ""
+      : undefined
+  );
   const [text, setText] = useState(comment.text || "");
 
   return (
     <Card
       size="small"
       title={
-        editable ? (
+        editable && canEditName ? (
           <Input
             type="text"
             placeholder="Name"
-            value={by}
+            value={by || ""}
             onChange={(e) => setBy(e.target.value)}
           />
         ) : (
-          comment.by
+          getUserDisplayname(comment.author) ?? authorNameHint
         )
       }
       style={{ marginBottom: 16 }}
@@ -67,21 +81,31 @@ const PollComment = ({
             type="primary"
             loading={isSaving}
             icon={<SaveOutlined />}
-            onClick={() => onSaveClick({ ...comment, by, text })}
+            onClick={() =>
+              onSaveClick({
+                _id: comment._id,
+                text,
+                authorName: canEditName ? by : undefined,
+              })
+            }
             style={{ marginLeft: 16 }}
           />
         ) : (
           <Space>
-            <Button
-              size="small"
-              icon={<EditOutlined />}
-              onClick={() => onEditClick()}
-            />
-            <Button
-              size="small"
-              icon={<DeleteOutlined />}
-              onClick={() => onDeleteClick()}
-            />
+            {showEditButton ? (
+              <Button
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => onEditClick()}
+              />
+            ) : null}
+            {showDeleteButton ? (
+              <Button
+                size="small"
+                icon={<DeleteOutlined />}
+                onClick={() => onDeleteClick()}
+              />
+            ) : null}
           </Space>
         )
       }
@@ -107,10 +131,11 @@ export const PollCommentArea = ({
   pollId: string;
   comments: GetPollByLink_getPollByLink_comments[];
 }) => {
+  const { user, isAuthenticated } = useAuth();
   const [editableComment, setEditableComment] =
     useState<GetPollByLink_getPollByLink_comments | null>(null);
   const [commentBeingAdded, setCommentBeingAdded] =
-    useState<SaveCommentType | null>(null);
+    useState<PollCommentInput | null>(null);
 
   const [commentIsSaving, setCommentIsSaving] = useState(false);
 
@@ -121,7 +146,7 @@ export const PollCommentArea = ({
     statusCallbackFunction: setCommentIsSaving,
     successMessage: "Kommentar gespeichert!",
   });
-  const saveComment = async (comment: SaveCommentType) => {
+  const saveComment = async (comment: PollCommentInput) => {
     await createOrUpdateCommentMutation({
       pollId,
       comment: removeTypenameFromObject({ ...comment }),
@@ -160,8 +185,17 @@ export const PollCommentArea = ({
           onDeleteClick={() => deleteComment(c._id)}
           onEditClick={() => setEditableComment(c)}
           editable={editableComment?._id == c._id}
+          showEditButton={!c.author.user?._id || c.author.user._id == user?._id}
+          showDeleteButton={
+            !!c.author.anonName || c.author.user?._id == user?._id
+          }
+          canEditName={!c.author.user?._id}
           onSaveClick={async (c) => {
-            await saveComment(c);
+            await saveComment({
+              _id: c._id,
+              text: c.text,
+              anonName: c.authorName,
+            });
             setEditableComment(null);
           }}
           isSaving={commentIsSaving}
@@ -169,11 +203,19 @@ export const PollCommentArea = ({
       ))}
       {commentBeingAdded ? (
         <PollComment
-          comment={commentBeingAdded}
+          comment={{
+            ...commentBeingAdded,
+            _id: undefined,
+          }}
           editable={true}
+          canEditName={!user?._id}
+          authorNameHint={user?.name ?? ls.get<string>("username")}
           onSaveClick={async (c) => {
-            ls.set("username", c.by);
-            await saveComment(c);
+            ls.set("username", c.authorName);
+            await saveComment({
+              text: c.text,
+              anonName: isAuthenticated ? null : c.authorName,
+            });
             setCommentBeingAdded(null);
           }}
           isSaving={commentIsSaving}
@@ -191,9 +233,7 @@ export const PollCommentArea = ({
             shape="round"
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() =>
-              setCommentBeingAdded({ by: ls.get<string>("username"), text: "" })
-            }
+            onClick={() => setCommentBeingAdded({ text: "" })}
           >
             Neuer Kommentar
           </Button>

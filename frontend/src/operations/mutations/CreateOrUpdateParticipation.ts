@@ -22,7 +22,13 @@ export const CREATE_OR_UPDATE_PARTICIPATION = gql`
       updatedAt
       comments {
         _id
-        by
+        author {
+          anonName
+          user {
+            _id
+            name
+          }
+        }
         text
       }
       options {

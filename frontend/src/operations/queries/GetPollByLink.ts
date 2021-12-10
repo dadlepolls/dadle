@@ -17,7 +17,13 @@ export const GET_POLL_BY_LINK = gql`
       updatedAt
       comments {
         _id
-        by
+        author {
+          anonName
+          user {
+            _id
+            name
+          }
+        }
         text
       }
       options {

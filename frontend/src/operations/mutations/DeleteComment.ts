@@ -16,7 +16,13 @@ export const DELETE_COMMENT = gql`
       updatedAt
       comments {
         _id
-        by
+        author {
+          anonName
+          user {
+            _id
+            name
+          }
+        }
         text
       }
       options {
