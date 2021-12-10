@@ -4,7 +4,7 @@ interface IPoll {
   _id?: string;
   title: string;
   link: string;
-  author?: IUserOrAnon;
+  author: IUserOrAnon;
   options?: IPollOption[];
   participations?: IPollParticipation[];
   comments?: IPollComment[];
