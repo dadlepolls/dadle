@@ -12,7 +12,7 @@ const LoginCallbackPage: NextPage = () => {
 
   useEffect(() => {
     if (router.isReady && !router.query.token) setIsMissingTokenInQuery(true);
-  }, [router.isReady]);
+  }, [router.isReady, router.query.token]);
 
   useEffect(() => {
     if (typeof localStorage !== undefined && router.query.token) {
@@ -20,6 +20,7 @@ const LoginCallbackPage: NextPage = () => {
       tryLogin();
       router.push("/");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, router.query.token]);
 
   if (isMissingTokenInQuery) {

@@ -9,7 +9,9 @@ const AuthContext = React.createContext<{
   isAuthenticated: boolean;
   tryLogin: () => any;
   logout: () => any;
+  // eslint-disable-next-line indent
 }>({ tryLogin: () => {}, logout: () => {}, isAuthenticated: false });
+
 
 const AuthContextProvider = ({
   children,
@@ -31,6 +33,7 @@ const AuthContextProvider = ({
   useEffect(() => {
     if (loading && !previousLoadingState) message.info("Anmeldung läuft...");
     if (loading !== previousLoadingState) setPreviousLoadingState(loading);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   useEffect(() => {
@@ -40,6 +43,7 @@ const AuthContextProvider = ({
       setPreviousError(error);
       localStorage.removeItem("token");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
   return (
