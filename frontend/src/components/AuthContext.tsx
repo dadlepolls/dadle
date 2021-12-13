@@ -2,6 +2,7 @@ import { useQuery } from "@apollo/client";
 import { GET_ME } from "@operations/queries/GetMe";
 import { GetMe, GetMe_me } from "@operations/queries/__generated__/GetMe";
 import { message } from "antd";
+import * as ls from "local-storage";
 import React, { useContext, useState } from "react";
 
 const AuthContext = React.createContext<{
@@ -26,8 +27,9 @@ const AuthContextProvider = ({
 
   const { client, data } = useQuery<GetMe>(GET_ME, {
     skip: !token,
-    onCompleted: () => {
+    onCompleted: ({ me: response }) => {
       message.success("Anmeldung erfolgreich!");
+      if (response.name) ls.set("username", response.name);
     },
     onError: (error) => {
       message.error("Anmelden fehlgeschlagen: " + error.message);

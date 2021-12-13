@@ -9,6 +9,7 @@ import {
 } from "@operations/mutations/__generated__/UpdateName";
 import { useStyledMutation } from "@util/mutationWrapper";
 import { Button, Card, Descriptions, Input, Tooltip, Typography } from "antd";
+import * as ls from "local-storage";
 import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -27,7 +28,10 @@ const Profile: NextPage = () => {
     UPDATE_NAME,
     {
       statusCallbackFunction: setIsSaving,
-      onSuccess: () => setNameIsEdited(false),
+      onSuccess: () => {
+        setNameIsEdited(false);
+        ls.set("username", name);
+      },
       successMessage: "Name aktualisiert!",
     }
   );
