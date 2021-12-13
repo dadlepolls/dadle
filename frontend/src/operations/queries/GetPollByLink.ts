@@ -1,46 +1,11 @@
 import { gql } from "@apollo/client";
+import { FULL_POLL } from "@operations/fragments/FullPoll";
 
 export const GET_POLL_BY_LINK = gql`
+  ${FULL_POLL}
   query GetPollByLink($pollLink: String!) {
     getPollByLink(pollLink: $pollLink) {
-      _id
-      title
-      link
-      author {
-        anonName
-        user {
-          _id
-          name
-        }
-      }
-      createdAt
-      updatedAt
-      comments {
-        _id
-        author {
-          anonName
-          user {
-            _id
-            name
-          }
-        }
-        text
-      }
-      options {
-        _id
-        type
-        from
-        to
-        title
-      }
-      participations {
-        _id
-        author
-        choices {
-          choice
-          option
-        }
-      }
+      ...FullPoll
     }
   }
 `;

@@ -1,6 +1,8 @@
 import { gql } from "@apollo/client";
+import { FULL_POLL } from "@operations/fragments/FullPoll";
 
 export const CREATE_OR_UPDATE_PARTICIPATION = gql`
+  ${FULL_POLL}
   mutation CreateOrUpdateParticipation(
     $pollId: ID!
     $participation: PollParticipationInput!
@@ -9,43 +11,7 @@ export const CREATE_OR_UPDATE_PARTICIPATION = gql`
       pollId: $pollId
       participation: $participation
     ) {
-      _id
-      title
-      link
-      author {
-        anonName
-        user {
-          _id
-          name
-        }
-      }
-      updatedAt
-      comments {
-        _id
-        author {
-          anonName
-          user {
-            _id
-            name
-          }
-        }
-        text
-      }
-      options {
-        _id
-        type
-        from
-        to
-        title
-      }
-      participations {
-        _id
-        author
-        choices {
-          choice
-          option
-        }
-      }
+      ...FullPoll
     }
   }
 `;
