@@ -108,6 +108,11 @@ function AppLayout({ Component, pageProps }: AppProps) {
             Home
           </Menu.Item>
           {user ? (
+            <Menu.Item key="mypolls" onClick={() => router.push("/mypolls")}>
+              Meine Umfragen
+            </Menu.Item>
+          ) : null}
+          {user ? (
             <Menu.SubMenu
               key="profileSub"
               icon={<UserOutlined />}

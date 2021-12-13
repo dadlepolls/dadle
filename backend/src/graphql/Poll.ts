@@ -1,10 +1,11 @@
 import { ApolloError } from "apollo-server-errors";
 import { Min } from "class-validator";
-import { Error } from "mongoose";
+import { Error, Types } from "mongoose";
 import {
   Arg,
   Args,
   ArgsType,
+  Authorized,
   Ctx,
   Field,
   ID,
@@ -106,6 +107,24 @@ class PollResolver {
   @Query(() => [Poll])
   async getPolls(@Args() { first, limit }: GetPollsArgs) {
     const query = PollModel.find();
+    if (first) {
+      query.skip(first);
+    }
+    if (limit) {
+      query.limit(limit);
+    }
+    return (await query.exec()).map((o) => o.toObject());
+  }
+
+  @Authorized()
+  @Query(() => [Poll])
+  async getMyPolls(
+    @Args() { first, limit }: GetPollsArgs,
+    @Ctx() ctx: IGraphContext
+  ) {
+    const query = PollModel.find({
+      "participations.author.userId": new Types.ObjectId(ctx.user?._id),
+    });
     if (first) {
       query.skip(first);
     }
@@ -225,7 +244,7 @@ class PollResolver {
         );
       }
     }
-    
+
     if (participationInput._id) {
       //participation does already exist, try to update
       const participation = dbPoll.participations?.find(
