@@ -34,7 +34,13 @@ export const FULL_POLL = gql`
     }
     participations {
       _id
-      author
+      author {
+        anonName
+        user {
+          _id
+          name
+        }
+      }
       choices {
         choice
         option

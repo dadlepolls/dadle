@@ -7,6 +7,7 @@ import {
   QuestionCircleOutlined,
   SaveOutlined
 } from "@ant-design/icons";
+import { useAuth } from "@components/AuthContext";
 import {
   GetPollByLink_getPollByLink,
   GetPollByLink_getPollByLink_options,
@@ -14,10 +15,15 @@ import {
   GetPollByLink_getPollByLink_participations_choices
 } from "@operations/queries/__generated__/GetPollByLink";
 import { Button, Checkbox, Input, message, Popconfirm, Space } from "antd";
+import produce from "immer";
 import * as ls from "local-storage";
 import React, { useCallback, useEffect, useState } from "react";
 import { useImmer } from "use-immer";
-import { PollOptionType, YesNoMaybe } from "__generated__/globalTypes";
+import {
+  PollOptionType,
+  PollParticipationInput,
+  YesNoMaybe
+} from "__generated__/globalTypes";
 
 type TAccumulatedChoicesPerOption = Record<
   string,
@@ -50,37 +56,41 @@ const getChoiceCountPerOption = (
 };
 
 const ParticipantRow = ({
-  name: _name,
+  nameHint,
   editable = false,
   deletable = true,
   deleteConfirmation = true,
   className = "",
+  allowEdit = true,
+  canEditName = true,
   onEditClick = () => {},
   onSaveClick = () => {},
   onDeleteClick = () => {},
 }: {
-  name: string;
+  nameHint: string;
   editable?: boolean;
   deletable?: boolean;
   deleteConfirmation?: boolean;
   className?: string;
+  allowEdit?: boolean;
+  canEditName?: boolean;
   onEditClick?: () => any;
   onSaveClick?: (_newName: string) => any;
   onDeleteClick?: () => any;
 }) => {
-  const [name, setName] = useState(_name);
+  const [name, setName] = useState(nameHint);
 
   return (
     <div className={`pollpage--participant ${className}`}>
       <div className="pollpage--participant-name">
-        {editable ? (
+        {editable && canEditName ? (
           <Input
             style={{ width: "300px" }}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         ) : (
-          name
+          nameHint
         )}
       </div>
       <div className="pollpage--participant-action-btn">
@@ -112,9 +122,15 @@ const ParticipantRow = ({
               icon={<SaveOutlined />}
             />
           </Space>
-        ) : (
-          <Button icon={<EditOutlined />} onClick={() => onEditClick()} />
-        )}
+        ) : allowEdit ? (
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => {
+              setName(nameHint);
+              onEditClick();
+            }}
+          />
+        ) : null}
       </div>
     </div>
   );
@@ -348,6 +364,7 @@ const PollResponses = ({
     GetPollByLink_getPollByLink_participations,
     "_id" | "__typename"
   > | null>(null);
+  const { user } = useAuth();
 
   const onChoiceChangeCallbackEditing = useCallback(
     (c) =>
@@ -370,15 +387,32 @@ const PollResponses = ({
         {poll?.participations.map((p, idx) => (
           <ParticipantRow
             key={idx}
-            name={p.author}
+            nameHint={
+              p.author.user?.name ||
+              p.author.anonName ||
+              ls.get<string>("username")
+            }
             editable={editableParticipation?._id == p._id}
+            canEditName={!editableParticipation?.author.user?._id}
             onEditClick={() => setEditableParticipation(p)}
+            allowEdit={!p.author.user?._id || p.author.user._id == user?._id}
             onSaveClick={async (e) => {
               if (!editableParticipation) return;
-              await saveParticipation({
-                ...editableParticipation,
-                author: e,
-              });
+              await saveParticipation(
+                produce(
+                  editableParticipation,
+                  (
+                    draft: Partial<typeof editableParticipation> &
+                      PollParticipationInput
+                  ) => {
+                    delete draft.author;
+                    if (!p.author.anonName)
+                      draft.anonName = user?._id ? undefined : e;
+                    else draft.anonName = e;
+                  }
+                )
+              );
+
               setEditableParticipation(null);
             }}
             onDeleteClick={() => deleteParticipation(p._id)}
@@ -386,17 +420,26 @@ const PollResponses = ({
         ))}
         {participationBeingAdded ? (
           <ParticipantRow
-            name={participationBeingAdded.author}
+            nameHint={user?.name ?? ls.get("username") ?? ""}
             className="pollpage--participant-add-field-container"
             editable={true}
             deletable={true}
             deleteConfirmation={false}
+            canEditName={!user?._id}
             onSaveClick={async (e) => {
               ls.set("username", e);
-              await saveParticipation({
-                ...participationBeingAdded,
-                author: e,
-              });
+              await saveParticipation(
+                produce(
+                  participationBeingAdded,
+                  (
+                    draft: Partial<typeof editableParticipation> &
+                      PollParticipationInput
+                  ) => {
+                    delete draft.author;
+                    draft.anonName = user?._id ? undefined : e;
+                  }
+                )
+              );
               setParticipationBeingAdded(null);
             }}
             onDeleteClick={() => setParticipationBeingAdded(null)}
@@ -409,7 +452,11 @@ const PollResponses = ({
               icon={<PlusOutlined />}
               onClick={() =>
                 setParticipationBeingAdded({
-                  author: ls.get<string>("username"),
+                  author: {
+                    anonName: ls.get<string>("username"),
+                    __typename: "UserOrAnon",
+                    user: null,
+                  },
                   choices: [],
                 })
               }

@@ -1,13 +1,20 @@
 import { SaveOutlined } from "@ant-design/icons";
+import { useAuth } from "@components/AuthContext";
+import { GetMe_me } from "@operations/queries/__generated__/GetMe";
 import {
   GetPollByLink_getPollByLink,
   GetPollByLink_getPollByLink_options
 } from "@operations/queries/__generated__/GetPollByLink";
 import { Button, Col, Input, List, message, Popover, Row } from "antd";
+import produce from "immer";
 import * as ls from "local-storage";
 import React, { useState } from "react";
 import { useImmer } from "use-immer";
-import { PollOptionType, YesNoMaybe } from "__generated__/globalTypes";
+import {
+  PollOptionType,
+  PollParticipationInput,
+  YesNoMaybe
+} from "__generated__/globalTypes";
 import {
   deriveNextChoiceFromCurrent,
   getChoiceCountPerOption,
@@ -88,7 +95,7 @@ const OptionRow = ({
                       color: "white",
                     }}
                   >
-                    {p.author}
+                    {p.author.user?.name ?? p.author.anonName}
                   </List.Item>
                 ) : null
               }
@@ -110,6 +117,17 @@ const OptionRow = ({
   );
 };
 
+const getEmptyEditableParticipation = (
+  user?: GetMe_me
+): TPartialParticipationWithId => ({
+  author: {
+    user: user?._id ? { _id: user?._id, __typename: "User", name: "" } : null,
+    anonName: user?._id ? null : ls.get<string>("username"),
+    __typename: "UserOrAnon",
+  },
+  choices: [],
+});
+
 const PollResponsesMobile = ({
   poll,
   saveParticipationFunction: saveParticipation,
@@ -120,12 +138,9 @@ const PollResponsesMobile = ({
   ) => Promise<any>;
   deleteParticipationFunction: (participationId: string) => Promise<any>;
 }) => {
-  const emptyEditableParticipation = {
-    author: ls.get<string>("username"),
-    choices: [],
-  };
+  const { user } = useAuth();
   const [editableParticipation, updateEditableParticipation] =
-    useImmer<TPartialParticipationWithId>(emptyEditableParticipation);
+    useImmer<TPartialParticipationWithId>(getEmptyEditableParticipation(user));
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -164,16 +179,18 @@ const PollResponsesMobile = ({
       ))}
       <Row style={{ marginTop: 16 }} gutter={[8, 8]}>
         <Col flex="auto">
-          <Input
-            type="text"
-            placeholder="Name"
-            value={editableParticipation.author}
-            onChange={(e) =>
-              updateEditableParticipation((p) => {
-                p.author = e.target.value;
-              })
-            }
-          />
+          {!editableParticipation.author.user?._id ? (
+            <Input
+              type="text"
+              placeholder="Name"
+              value={editableParticipation.author.anonName || ""}
+              onChange={(e) =>
+                updateEditableParticipation((p) => {
+                  p.author.anonName = e.target.value;
+                })
+              }
+            />
+          ) : null}
         </Col>
         <Col>
           <Button
@@ -187,10 +204,25 @@ const PollResponsesMobile = ({
               }
               setIsSaving(true);
               if (!editableParticipation._id)
-                ls.set("username", editableParticipation.author);
-              await saveParticipation(editableParticipation);
+                ls.set(
+                  "username",
+                  editableParticipation.author.user?.name ??
+                    editableParticipation.author.anonName
+                );
+              await saveParticipation(
+                produce(
+                  editableParticipation,
+                  (
+                    draft: Partial<TPartialParticipationWithId> &
+                      PollParticipationInput
+                  ) => {
+                    draft.anonName = draft.author?.anonName;
+                    delete draft.author;
+                  }
+                )
+              );
               setIsSaving(false);
-              updateEditableParticipation(emptyEditableParticipation);
+              updateEditableParticipation(getEmptyEditableParticipation(user));
             }}
           >
             Antwort speichern
