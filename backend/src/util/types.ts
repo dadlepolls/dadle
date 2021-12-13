@@ -40,7 +40,7 @@ interface IPollChoice {
 
 interface IPollParticipation {
   _id?: string;
-  author: string;
+  author: IUserOrAnon;
   choices: IPollChoice[];
 }
 

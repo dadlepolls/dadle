@@ -1,9 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 import { IPollParticipation } from "../util/types";
 import { schema as PollChoiceSchema } from "./PollChoice";
+import { schema as UserOrAnonSchema } from "./UserOrAnon";
 
 const schema = new Schema<IPollParticipation>({
-  author: { type: Schema.Types.String, required: true },
+  author: { type: UserOrAnonSchema, required: true },
   choices: [PollChoiceSchema],
 });
 

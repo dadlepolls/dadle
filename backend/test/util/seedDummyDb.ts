@@ -38,7 +38,7 @@ const main = async () => {
       participations: [
         {
           _id: "6183940cbc075756bf99191d",
-          author: "participant 1",
+          author: { anonName: "participant 1" },
           choices: [
             {
               option: new Types.ObjectId("618393b80741d1adcaeb9306"),
@@ -56,7 +56,7 @@ const main = async () => {
         },
         {
           _id: "6183946bf94d7ca802f3a524",
-          author: "participant 2",
+          author: { anonName: "participant 2" },
           choices: [
             {
               option: new Types.ObjectId("618393b80741d1adcaeb9306"),
@@ -108,7 +108,7 @@ const main = async () => {
       participations: [
         {
           _id: "61839aac138650d554bed41a",
-          author: "participant 3",
+          author: { userId: "61b13e45f1ad51c2510194db" },
           choices: [
             {
               option: new Types.ObjectId("618399b0efffa57f99138fe1"),
@@ -126,7 +126,7 @@ const main = async () => {
         },
         {
           _id: "61839ab089e13ef722e8430a",
-          author: "participant 2",
+          author: { anonName: "participant 2" },
           choices: [
             {
               option: new Types.ObjectId("618399b78b890e7c323a21e3"),
