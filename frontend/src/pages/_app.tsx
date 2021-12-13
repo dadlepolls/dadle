@@ -129,7 +129,7 @@ function AppLayout({ Component, pageProps }: AppProps) {
             <Menu.Item
               key="login"
               icon={<KeyOutlined />}
-              onClick={() => (window.location.href = "/backend/auth/login")}
+              onClick={() => window.location.replace("/backend/auth/login")}
               style={{ marginLeft: "auto" }}
             >
               Anmelden
