@@ -3,9 +3,12 @@ import {
   ApolloClient,
   ApolloProvider,
   createHttpLink,
-  InMemoryCache
+  from,
+  InMemoryCache,
+  ServerError
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
+import { onError } from "@apollo/client/link/error";
 import { AuthContextProvider, useAuth } from "@components/AuthContext";
 import {
   ResponsiveContextProvider,
@@ -33,9 +36,20 @@ const authLink = setContext((_, { headers }) => {
     },
   };
 });
+const errorLink = onError((error) => {
+  if (
+    error.networkError &&
+    "statusCode" in error.networkError &&
+    (error.networkError as ServerError).statusCode == 401 &&
+    localStorage.getItem("token")
+  ) {
+    localStorage.removeItem("token");
+    window.location.replace("/");
+  }
+});
 
 const client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: from([authLink, errorLink, httpLink]),
   cache: new InMemoryCache({
     typePolicies: {
       Poll: {

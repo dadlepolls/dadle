@@ -1,8 +1,8 @@
-import { ApolloError, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { GET_ME } from "@operations/queries/GetMe";
 import { GetMe, GetMe_me } from "@operations/queries/__generated__/GetMe";
 import { message } from "antd";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 
 const AuthContext = React.createContext<{
   user?: GetMe_me;
@@ -11,7 +11,6 @@ const AuthContext = React.createContext<{
   logout: () => any;
   // eslint-disable-next-line indent
 }>({ tryLogin: () => {}, logout: () => {}, isAuthenticated: false });
-
 
 const AuthContextProvider = ({
   children,
@@ -23,28 +22,19 @@ const AuthContextProvider = ({
       ? localStorage.getItem("token")
       : undefined;
 
-  const { client, loading, data, error } = useQuery<GetMe>(GET_ME, {
-    skip: !token,
-  });
   const [_, setDummyState] = useState(0); //dummy state to force update when trying login
-  const [previousLoadingState, setPreviousLoadingState] = useState(false);
-  const [previousError, setPreviousError] = useState<ApolloError | undefined>();
 
-  useEffect(() => {
-    if (loading && !previousLoadingState) message.info("Anmeldung läuft...");
-    if (loading !== previousLoadingState) setPreviousLoadingState(loading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading]);
-
-  useEffect(() => {
-    if (error && !previousError)
+  const { client, data } = useQuery<GetMe>(GET_ME, {
+    skip: !token,
+    onCompleted: () => {
+      message.success("Anmeldung erfolgreich!");
+    },
+    onError: (error) => {
       message.error("Anmelden fehlgeschlagen: " + error.message);
-    if (error && !previousError) {
-      setPreviousError(error);
       localStorage.removeItem("token");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+      setDummyState((x) => x + 1);
+    },
+  });
 
   return (
     <AuthContext.Provider
