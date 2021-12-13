@@ -18,13 +18,13 @@ class User implements IUser {
   @Field(() => ID)
   _id: string;
 
-  @Field()
+  @Field({ nullable: true })
   provider: "microsoft";
 
-  @Field()
+  @Field({ nullable: true })
   idAtProvider: string;
 
-  @Field()
+  @Field({ nullable: true })
   nameAtProvider: string;
 
   @Field()

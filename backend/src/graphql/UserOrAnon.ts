@@ -1,8 +1,15 @@
-import { Field, FieldResolver, ObjectType, Resolver, Root } from "type-graphql";
+import {
+  Ctx,
+  Field,
+  FieldResolver,
+  ObjectType,
+  Resolver,
+  Root,
+} from "type-graphql";
 import { User } from "./User";
 import { User as UserModel } from "../db/models";
 import { ApolloError } from "apollo-server-errors";
-import { IUserOrAnon } from "src/util/types";
+import { IGraphContext, IUserOrAnon } from "src/util/types";
 
 @ObjectType()
 class UserOrAnon implements IUserOrAnon {
@@ -19,12 +26,16 @@ class UserOrAnon implements IUserOrAnon {
 @Resolver(UserOrAnon)
 class UserOrAnonResolver {
   @FieldResolver()
-  async user(@Root() userOrAnon: UserOrAnon) {
+  async user(@Root() userOrAnon: UserOrAnon, @Ctx() ctx: IGraphContext) {
     if (!userOrAnon.userId) return null;
 
     const dbUser = await UserModel.findById(userOrAnon.userId);
     if (!dbUser) throw new ApolloError("User could not be found!");
-    return dbUser;
+
+    //return full profile for authenticated user
+    if (dbUser._id == ctx.user?._id) return dbUser;
+    //return non-sensible fields (name, mail) for other users
+    return { _id: dbUser._id, name: dbUser.name, mail: dbUser.mail };
   }
 }
 
