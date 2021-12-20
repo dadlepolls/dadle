@@ -2,10 +2,11 @@ import { useQuery } from "@apollo/client";
 import { useAuth } from "@components/AuthContext";
 import { ErrorPage } from "@components/ErrorPage";
 import { LoadingCard } from "@components/LoadingCard";
+import { PollResponses } from "@components/PollDetailPage/PollResponses";
 import { PollLinkCard } from "@components/PollLinkCard";
 import { GET_MY_POLLS } from "@operations/queries/GetMyPolls";
 import { GetMyPolls } from "@operations/queries/__generated__/GetMyPolls";
-import { Card, Empty, Typography } from "antd";
+import { Card, Empty, Popover, Typography } from "antd";
 import moment from "moment";
 import { NextPage } from "next";
 import Head from "next/head";
@@ -45,7 +46,15 @@ const MyPolls: NextPage = () => {
           polls
             .sort((b, a) => moment(a.updatedAt).diff(moment(b.updatedAt)))
             .map((p, idx) => (
-              <PollLinkCard key={idx} poll={p} router={router} />
+              <Popover
+                key={idx}
+                placement="bottom"
+                overlayStyle={{ maxWidth: "70%" }}
+                autoAdjustOverflow={false}
+                content={<PollResponses poll={p} readOnly />}
+              >
+                <PollLinkCard poll={p} router={router} />
+              </Popover>
             ))
         )}
       </Card>

@@ -8,6 +8,7 @@ import { NextRouter } from "next/router";
 const PollLinkCard = ({
   router,
   poll,
+  ...props //necessary, so that PollLinkCard cann be wrapped in an antd Popover
 }: {
   router: NextRouter;
   poll: GetPollsOverview_getPolls;
@@ -18,6 +19,7 @@ const PollLinkCard = ({
       size="small"
       onClick={() => router.push(`/p/${poll.link}`)}
       hoverable
+      {...props}
     >
       <Typography.Text strong={true}>
         <Link href={`/p/${poll.link}`}>{poll.title}</Link>

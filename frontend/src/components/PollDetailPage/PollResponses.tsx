@@ -349,14 +349,16 @@ const ParticipationRow = ({
 
 const PollResponses = ({
   poll,
-  saveParticipationFunction: saveParticipation,
-  deleteParticipationFunction: deleteParticipation,
+  saveParticipationFunction: saveParticipation = async () => {},
+  deleteParticipationFunction: deleteParticipation = async () => {},
+  readOnly = false,
 }: {
   poll: GetPollByLink_getPollByLink;
-  saveParticipationFunction: (
+  saveParticipationFunction?: (
     participation: TPartialParticipationWithId
   ) => Promise<any>;
-  deleteParticipationFunction: (participationId: string) => Promise<any>;
+  deleteParticipationFunction?: (participationId: string) => Promise<any>;
+  readOnly?: boolean;
 }) => {
   const [editableParticipation, setEditableParticipation] =
     useState<GetPollByLink_getPollByLink_participations | null>(null);
@@ -395,7 +397,10 @@ const PollResponses = ({
             editable={editableParticipation?._id == p._id}
             canEditName={!editableParticipation?.author.user?._id}
             onEditClick={() => setEditableParticipation(p)}
-            allowEdit={!p.author.user?._id || p.author.user._id == user?._id}
+            allowEdit={
+              !readOnly &&
+              (!p.author.user?._id || p.author.user._id == user?._id)
+            }
             onSaveClick={async (e) => {
               if (!editableParticipation) return;
               await saveParticipation(
@@ -446,21 +451,25 @@ const PollResponses = ({
           />
         ) : (
           <div className="pollpage--add-btn-container">
-            <Button
-              shape="circle"
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() =>
-                setParticipationBeingAdded({
-                  author: {
-                    anonName: ls.get<string>("username"),
-                    __typename: "UserOrAnon",
-                    user: null,
-                  },
-                  choices: [],
-                })
-              }
-            />
+            {!readOnly ? (
+              <Button
+                shape="circle"
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() =>
+                  setParticipationBeingAdded({
+                    author: {
+                      anonName: ls.get<string>("username"),
+                      __typename: "UserOrAnon",
+                      user: null,
+                    },
+                    choices: [],
+                  })
+                }
+              />
+            ) : (
+              <div></div>
+            )}
           </div>
         )}
       </div>
