@@ -35,9 +35,9 @@ const Profile: NextPage = () => {
       successMessage: "Name aktualisiert!",
     }
   );
-
+  console.log(user);
   if (!user) {
-    if (router.isReady) router.push("");
+    if (router.isReady) router.push("/");
     return <LoadingCard />;
   }
 
