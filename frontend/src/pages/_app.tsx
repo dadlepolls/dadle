@@ -154,7 +154,12 @@ function AppLayout({ Component, pageProps }: AppProps) {
         </div>
       </Content>
       <Footer style={{ textAlign: "center" }}>
-        DadleX | &copy;{new Date().getFullYear()} Peter Kappelt
+        <small>
+          <a href="https://github.com/peterkappelt/dadlex" target="_blank">
+            DadleX
+          </a>{" "}
+          | &copy;{new Date().getFullYear()}
+        </small>
       </Footer>
     </Layout>
   );
