@@ -85,7 +85,7 @@ function AppLayout({ Component, pageProps }: AppProps) {
   const { logout, user } = useAuth();
 
   return (
-    <Layout className="layout">
+    <Layout className="layout" style={{ minHeight: "100vh" }}>
       <Header>
         {/*<div
           className="logo"
