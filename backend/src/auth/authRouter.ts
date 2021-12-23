@@ -1,4 +1,7 @@
-import { User as TGraphUser } from "@microsoft/microsoft-graph-types";
+import {
+  User as TGraphUser,
+  Calendar as TGraphCalendar,
+} from "@microsoft/microsoft-graph-types";
 import { User } from "../db/models";
 import { issueToken } from "../auth/token";
 import "isomorphic-fetch";
@@ -6,6 +9,7 @@ import OAuth2Strategy, { VerifyCallback } from "passport-oauth2";
 import * as msgraph from "@microsoft/microsoft-graph-client";
 import passport from "passport";
 import express, { Request } from "express";
+import { IMicrosoftCalendar } from "src/integrations/calendar/calendar";
 
 const authRouter = express.Router();
 
@@ -29,7 +33,13 @@ passport.use(
       clientID: process.env.AUTH_MS_CLIENT_ID ?? "",
       clientSecret: process.env.AUTH_MS_CLIENT_SECRET ?? "",
       callbackURL: `${process.env.BACKEND_PUBLIC_URL}/auth/callback` ?? "",
-      scope: ["openid", "profile", "offline_access", "User.Read"],
+      scope: [
+        "openid",
+        "profile",
+        "offline_access",
+        "User.Read",
+        "Calendars.Read",
+      ],
       passReqToCallback: true,
     },
     async (
@@ -46,23 +56,45 @@ passport.use(
       if (!graphUserInfo.id)
         return cb(new Error("Couldn't retrieve user infomation"));
 
-      const dbUser = await User.findOneAndUpdate(
-        { idAtProvider: graphUserInfo.id },
-        {
-          provider: "microsoft",
-          nameAtProvider: graphUserInfo.displayName ?? "UNKNOWN",
-          mail: graphUserInfo.mail ?? "UNKNOWN",
-        },
-        { upsert: true, new: true }
-      );
-      if (!dbUser) return cb(new Error("Couldn't store user in db"));
+      const existingUser = await User.findOne({
+        idAtProvider: graphUserInfo.id,
+      });
 
-      //User.name is user configurable. Set it to the name of the provider by default if necessary
-      if (!dbUser.name) {
-        dbUser.name = dbUser.nameAtProvider;
-        await dbUser.save();
+      if (existingUser) {
+        //update user details
+        existingUser.nameAtProvider = graphUserInfo.displayName ?? "UNKNOWN";
+        existingUser.mail = graphUserInfo.mail ?? "UNKNOWN";
+        await existingUser.save();
+        return cb(null, existingUser);
+      } else {
+        //TODO separate calendar logic from user logic
+        //user doesn't exist yet in db. Retrieve all Calendars first
+        const graphCalendars: TGraphCalendar[] = (
+          await graphClient.api("/me/calendars").get()
+        ).value;
+
+        const dbUser = await User.findOneAndUpdate(
+          { idAtProvider: graphUserInfo.id },
+          {
+            provider: "microsoft",
+            name: graphUserInfo.displayName ?? "UNKNOWN",
+            nameAtProvider: graphUserInfo.displayName ?? "UNKNOWN",
+            mail: graphUserInfo.mail ?? "UNKNOWN",
+            calendars: graphCalendars.map<IMicrosoftCalendar>((c) => ({
+              provider: "microsoft",
+              enabled: true,
+              friendlyName: c.name || "",
+              usernameAtProvider: graphUserInfo.userPrincipalName || "",
+              refreshToken,
+              calendarId: c.id || "",
+            })),
+          },
+          { upsert: true, new: true }
+        );
+
+        if (!dbUser) return cb(new Error("Couldn't store user in db"));
+        return cb(null, dbUser);
       }
-      cb(null, dbUser);
     }
   )
 );

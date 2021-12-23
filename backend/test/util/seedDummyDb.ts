@@ -81,7 +81,7 @@ const main = async () => {
       link: "linkToPoll2",
       comments: [
         {
-          author: { userId: "61b13e45f1ad51c2510194db" },
+          author: { userId: "61c1a93cf1ad51c251022660" },
           text: "comment text 3",
         },
         { author: { anonName: "commentor4" }, text: "comment text 4" },
@@ -108,7 +108,7 @@ const main = async () => {
       participations: [
         {
           _id: "61839aac138650d554bed41a",
-          author: { userId: "61b13e45f1ad51c2510194db" },
+          author: { userId: "61c1a93cf1ad51c251022660" },
           choices: [
             {
               option: new Types.ObjectId("618399b0efffa57f99138fe1"),

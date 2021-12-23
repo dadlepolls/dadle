@@ -3,10 +3,16 @@ import { buildSchema } from "type-graphql";
 import { PollResolver } from "./Poll";
 import { UserResolver } from "./User";
 import { UserOrAnonResolver } from "./UserOrAnon";
+import { CalendarResolver } from "./Calendar";
 
 const buildAppSchema = async () =>
   await buildSchema({
-    resolvers: [PollResolver, UserResolver, UserOrAnonResolver],
+    resolvers: [
+      PollResolver,
+      UserResolver,
+      UserOrAnonResolver,
+      CalendarResolver,
+    ],
     authChecker: graphAuthChecker,
   });
 

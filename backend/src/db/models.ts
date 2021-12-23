@@ -4,6 +4,7 @@ import { model as PollOption } from "./PollOption";
 import { model as PollChoice } from "./PollChoice";
 import { model as PollParticipation } from "./PollParticipation";
 import { model as User } from "./User";
+import { model as Calendar } from "./Calendar";
 import { model as UserOrAnon } from "./UserOrAnon";
 
 export {
@@ -14,4 +15,5 @@ export {
   PollParticipation,
   User,
   UserOrAnon,
+  Calendar,
 };

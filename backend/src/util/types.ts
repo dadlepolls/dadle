@@ -1,4 +1,5 @@
 import { Types as MongooseSchemaTypes } from "mongoose";
+import { ICalendar } from "src/integrations/calendar/calendar";
 
 interface IPoll {
   _id?: string;
@@ -57,6 +58,7 @@ interface IUser {
   nameAtProvider: string;
   name: string;
   mail: string;
+  calendars?: [ICalendar];
 }
 
 interface IUserOrAnon {

@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { IUser } from "../util/types";
+import { schema as CalendarSchema } from "./Calendar";
 
 const schema = new Schema<IUser>(
   {
@@ -13,6 +14,7 @@ const schema = new Schema<IUser>(
     nameAtProvider: { type: Schema.Types.String, required: true },
     name: { type: Schema.Types.String, required: true },
     mail: { type: Schema.Types.String, required: true },
+    calendars: [CalendarSchema],
   },
   {
     timestamps: {
