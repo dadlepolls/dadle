@@ -2,7 +2,7 @@ import { SaveOutlined } from "@ant-design/icons";
 import { useQuery } from "@apollo/client";
 import { useAuth } from "@components/AuthContext";
 import { LoadingCard } from "@components/LoadingCard";
-import { useWindowIsSm } from "@components/ResponsiveContext";
+import { useMobileComponentsPrefered } from "@components/ResponsiveContext";
 import { UPDATE_NAME } from "@operations/mutations/UpdateName";
 import {
   UpdateName,
@@ -30,7 +30,7 @@ import React, { useState } from "react";
 const Profile: NextPage = () => {
   const router = useRouter();
   const { user } = useAuth();
-  const isSm = useWindowIsSm();
+  const mobileDisplay = useMobileComponentsPrefered();
 
   const [name, setName] = useState(user?.name ?? "");
   const [nameIsEdited, setNameIsEdited] = useState(false);
@@ -68,7 +68,7 @@ const Profile: NextPage = () => {
           <Typography.Title
             level={3}
           >{`Howdy, ${user.name}!`}</Typography.Title>
-          <Descriptions column={isSm ? 1 : 3}>
+          <Descriptions column={mobileDisplay ? 1 : 3}>
             <Descriptions.Item
               label="Anmeldedienst"
               style={{ textTransform: "capitalize" }}

@@ -10,6 +10,7 @@ import {
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
 import { AuthContextProvider, useAuth } from "@components/AuthContext";
+import { MobileDesktopSwitcher } from "@components/MobileDesktopSwitcher";
 import {
   ResponsiveContextProvider,
   useWindowIsSm
@@ -154,6 +155,8 @@ function AppLayout({ Component, pageProps }: AppProps) {
         </div>
       </Content>
       <Footer style={{ textAlign: "center" }}>
+        <MobileDesktopSwitcher />
+        <br />
         <small>
           <a href="https://github.com/peterkappelt/dadlex" target="_blank">
             DadleX

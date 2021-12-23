@@ -9,7 +9,7 @@ import {
 } from "@components/PollDetailPage/PollResponses";
 import { PollResponsesMobile } from "@components/PollDetailPage/PollResponsesMobile";
 import { PollEditDialog } from "@components/PollEditDialog";
-import { useWindowIsSm } from "@components/ResponsiveContext";
+import { useMobileComponentsPrefered } from "@components/ResponsiveContext";
 import { CREATE_OR_UPDATE_PARTICIPATION } from "@operations/mutations/CreateOrUpdateParticipation";
 import { DELETE_PARTICIPATION } from "@operations/mutations/DeleteParticipation";
 import {
@@ -35,7 +35,7 @@ import React, { useState } from "react";
 const PollPage: NextPage = () => {
   const router = useRouter();
   const { pollLink } = router.query;
-  const isSm = useWindowIsSm();
+  const mobileDisplay = useMobileComponentsPrefered();
 
   const [isEditingPoll, setIsEditingPoll] = useState(false);
 
@@ -92,7 +92,7 @@ const PollPage: NextPage = () => {
 
   if (error) return <ErrorPage error={error} />;
 
-  const PollResponseComponentByMedia = isSm
+  const PollResponseComponentByMedia = mobileDisplay
     ? PollResponsesMobile
     : PollResponses;
 
@@ -122,7 +122,7 @@ const PollPage: NextPage = () => {
               />
             }
           >
-            <Descriptions size="small" column={isSm ? 1 : 3}>
+            <Descriptions size="small" column={mobileDisplay ? 1 : 3}>
               {poll.createdAt ? (
                 <Descriptions.Item label="Umfrage erstellt">
                   <Tooltip
