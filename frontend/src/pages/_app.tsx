@@ -158,7 +158,11 @@ function AppLayout({ Component, pageProps }: AppProps) {
         <MobileDesktopSwitcher />
         <br />
         <small>
-          <a href="https://github.com/peterkappelt/dadlex" target="_blank">
+          <a
+            href="https://github.com/peterkappelt/dadlex"
+            target="_blank"
+            rel="noreferrer"
+          >
             DadleX
           </a>{" "}
           | &copy;{new Date().getFullYear()}
