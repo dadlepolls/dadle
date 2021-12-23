@@ -15,11 +15,11 @@ const PollLinkCard = ({
 }): JSX.Element => {
   return (
     <Card
+      {...props}
       style={{ marginTop: "16px", cursor: "pointer" }}
       size="small"
       onClick={() => router.push(`/p/${poll.link}`)}
       hoverable
-      {...props}
     >
       <Typography.Text strong={true}>
         <Link href={`/p/${poll.link}`}>{poll.title}</Link>
