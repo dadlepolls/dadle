@@ -1,3 +1,5 @@
+import { IEvent } from "src/util/types";
+
 type ICalendar = IMicrosoftCalendar;
 
 interface IGenericCalendar {
@@ -13,4 +15,13 @@ interface IMicrosoftCalendar extends IGenericCalendar {
   calendarId: string;
 }
 
-export type { ICalendar, IGenericCalendar, IMicrosoftCalendar };
+interface ICalendarProvider {
+  retrieveEvents: (rangeStart: Date, rangeEnd: Date) => Promise<IEvent[]>;
+}
+
+export type {
+  ICalendar,
+  IGenericCalendar,
+  IMicrosoftCalendar,
+  ICalendarProvider,
+};

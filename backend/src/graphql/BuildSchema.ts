@@ -4,6 +4,7 @@ import { PollResolver } from "./Poll";
 import { UserResolver } from "./User";
 import { UserOrAnonResolver } from "./UserOrAnon";
 import { CalendarResolver } from "./Calendar";
+import { PollAvailabilityHintResolver } from "./AvailabilityHint";
 
 const buildAppSchema = async () =>
   await buildSchema({
@@ -12,6 +13,7 @@ const buildAppSchema = async () =>
       UserResolver,
       UserOrAnonResolver,
       CalendarResolver,
+      PollAvailabilityHintResolver,
     ],
     authChecker: graphAuthChecker,
   });

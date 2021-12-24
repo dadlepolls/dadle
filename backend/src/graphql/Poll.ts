@@ -18,6 +18,7 @@ import {
 } from "type-graphql";
 import { Poll as PollModel } from "../db/models";
 import { IGraphContext, IPoll, IUserOrAnon } from "../util/types";
+import { AvailabilityHint } from "./AvailabilityHint";
 import { PollComment, PollCommentInput } from "./PollComment";
 import { PollOption, PollOptionInput } from "./PollOption";
 import { PollParticipation, PollParticipationInput } from "./PollParticipation";
@@ -51,6 +52,12 @@ class Poll implements IPoll {
 
   @Field({ nullable: true })
   updatedAt?: Date;
+
+  @Field(() => [AvailabilityHint], {
+    description:
+      "Get availability hints for options. Only for authenticated users. Query may take long, so omit this field for other operations",
+  })
+  availabilityHints?: AvailabilityHint[];
 
   constructor(_id: string, author: UserOrAnon, title: string, link: string) {
     this._id = _id;
@@ -422,4 +429,4 @@ class PollResolver {
   }
 }
 
-export { PollResolver };
+export { Poll, PollResolver };

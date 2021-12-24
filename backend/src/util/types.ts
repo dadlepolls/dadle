@@ -73,6 +73,24 @@ interface IGraphContext {
   user?: Partial<IUser>;
 }
 
+enum EventStatus {
+  Confirmed = 1, //user confirmed event participation (show as busy)
+  Tentative, //user intents to participate event (show as maybe)
+  Free, //user is free during event
+}
+
+interface IEvent {
+  title: string;
+  from: Date;
+  to: Date;
+  status: EventStatus;
+}
+
+interface IAvailabilityHint {
+  option: string;
+  overlappingEvents: Pick<IEvent, "title" | "status">[];
+}
+
 export type {
   IPoll,
   IPollOption,
@@ -82,5 +100,7 @@ export type {
   IUser,
   IUserOrAnon,
   IGraphContext,
+  IEvent,
+  IAvailabilityHint,
 };
-export { PollOptionType, YesNoMaybe };
+export { PollOptionType, YesNoMaybe, EventStatus };
