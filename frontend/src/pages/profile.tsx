@@ -22,16 +22,21 @@ import * as ls from "local-storage";
 import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const Profile: NextPage = () => {
   const router = useRouter();
   const { user, authLoading } = useAuth();
   const mobileDisplay = useMobileComponentsPrefered();
 
-  const [name, setName] = useState(user?.name ?? "");
+  const [name, setName] = useState("");
   const [nameIsEdited, setNameIsEdited] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) setName(user.name);
+    return () => {};
+  }, [user?.name]);
 
   const updateName = useStyledMutation<UpdateName, UpdateNameVariables>(
     UPDATE_NAME,
