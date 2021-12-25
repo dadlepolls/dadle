@@ -7,6 +7,7 @@ interface IGenericCalendar {
   _id?: string;
   refreshToken: string;
   enabled: boolean;
+  healthy?: boolean;
   friendlyName: string;
   usernameAtProvider: string;
 }

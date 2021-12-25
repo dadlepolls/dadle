@@ -1,11 +1,16 @@
 import { ApolloError } from "apollo-server-errors";
-import { ICalendar } from "src/integrations/calendar/calendar";
-import { IGraphContext } from "src/util/types";
 import {
+  getProviderForCalendar,
+  ICalendar,
+} from "../integrations/calendar/calendar";
+import { IGraphContext } from "../util/types";
+import {
+  Arg,
   Authorized,
   Ctx,
   Field,
   ID,
+  Mutation,
   ObjectType,
   Query,
   Resolver,
@@ -22,6 +27,9 @@ class Calendar implements Partial<ICalendar> {
 
   @Field()
   enabled: boolean;
+
+  @Field({ nullable: true })
+  healthy?: boolean;
 
   @Field()
   friendlyName: string;
@@ -59,6 +67,41 @@ class CalendarResolver {
     if (!user) throw new ApolloError("User deleted!", "USER_DELETED");
 
     return user.calendars;
+  }
+
+  @Authorized()
+  @Mutation(() => Calendar)
+  async checkCalendarHealth(
+    @Arg("calendarId", () => ID) calendarId: string,
+    @Ctx() ctx: IGraphContext
+  ) {
+    if (!ctx.user?._id)
+      throw new ApolloError(
+        "User not authenticated!",
+        "USER_NOT_AUTHENTICATED"
+      );
+
+    const user = await UserModel.findById(ctx.user._id);
+    if (!user) throw new ApolloError("User deleted!", "USER_DELETED");
+
+    const calendar = user.calendars?.find((c) => c._id == calendarId);
+    if (!calendar)
+      throw new ApolloError("Calendar not found!", "CALENDAR_NOT_FOUND");
+
+    const provider = getProviderForCalendar(calendar);
+
+    try {
+      //try retrieving some events
+      await provider.retrieveEvents(
+        new Date(),
+        new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)
+      );
+      calendar.healthy = true;
+    } catch (err) {
+      calendar.healthy = false;
+    }
+
+    return calendar;
   }
 
   @Authorized()
