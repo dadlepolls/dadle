@@ -7,11 +7,17 @@ import React, { useContext, useState } from "react";
 
 const AuthContext = React.createContext<{
   user?: GetMe_me;
+  authLoading: boolean;
   isAuthenticated: boolean;
   tryLogin: () => any;
   logout: () => any;
   // eslint-disable-next-line indent
-}>({ tryLogin: () => {}, logout: () => {}, isAuthenticated: false });
+}>({
+  authLoading: true,
+  tryLogin: () => {},
+  logout: () => {},
+  isAuthenticated: false,
+});
 
 const AuthContextProvider = ({
   children,
@@ -25,16 +31,20 @@ const AuthContextProvider = ({
 
   const [_, setDummyState] = useState(0); //dummy state to force update when trying login
 
+  const [authLoading, setAuthLoading] = useState(true);
+
   const { client, data } = useQuery<GetMe>(GET_ME, {
     skip: !token,
     onCompleted: ({ me: response }) => {
       message.success("Anmeldung erfolgreich!");
       if (response.name) ls.set("username", response.name);
+      setAuthLoading(false);
     },
     onError: (error) => {
       message.error("Anmelden fehlgeschlagen: " + error.message);
       localStorage.removeItem("token");
       setDummyState((x) => x + 1);
+      setAuthLoading(false);
     },
   });
 
@@ -42,6 +52,7 @@ const AuthContextProvider = ({
     <AuthContext.Provider
       value={{
         user: data?.me,
+        authLoading,
         tryLogin: () => setDummyState((x) => x + 1),
         logout: () => {
           localStorage.removeItem("token");
