@@ -10,6 +10,11 @@ const schema = new Schema<IPoll>(
   {
     title: { type: Schema.Types.String, required: true },
     link: { type: Schema.Types.String, required: true, unique: true },
+    timezone: {
+      type: Schema.Types.String,
+      required: true,
+      default: "Europe/Berlin",
+    },
     author: { type: UserOrAnonSchema, required: true },
     options: [PollOptionSchema],
     comments: [PollCommentSchema],

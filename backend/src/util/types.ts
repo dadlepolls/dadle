@@ -5,6 +5,7 @@ interface IPoll {
   _id?: string;
   title: string;
   link: string;
+  timezone: string;
   author: IUserOrAnon;
   options?: IPollOption[];
   participations?: IPollParticipation[];

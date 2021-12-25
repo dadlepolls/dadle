@@ -1,5 +1,7 @@
 import { ApolloError } from "apollo-server-errors";
 import { Min } from "class-validator";
+import moment from "moment";
+import "moment-timezone";
 import { Error, Types } from "mongoose";
 import {
   Arg,
@@ -35,6 +37,9 @@ class Poll implements IPoll {
   @Field()
   link: string;
 
+  @Field()
+  timezone: string;
+
   @Field(() => UserOrAnon)
   author: UserOrAnon;
 
@@ -59,11 +64,18 @@ class Poll implements IPoll {
   })
   availabilityHints?: AvailabilityHint[];
 
-  constructor(_id: string, author: UserOrAnon, title: string, link: string) {
+  constructor(
+    _id: string,
+    author: UserOrAnon,
+    title: string,
+    link: string,
+    timezone: string
+  ) {
     this._id = _id;
     this.author = author;
     this.title = title;
     this.link = link;
+    this.timezone = timezone;
   }
 }
 
@@ -78,12 +90,21 @@ class PollInput {
   @Field()
   link: string;
 
+  @Field({ nullable: true })
+  timezone?: string;
+
   @Field(() => [PollOptionInput])
   options: PollOptionInput[];
 
-  constructor(title: string, link: string, options: PollOptionInput[]) {
+  constructor(
+    title: string,
+    link: string,
+    timezone: string,
+    options: PollOptionInput[]
+  ) {
     this.title = title;
     this.link = link;
+    this.timezone = timezone;
     this.options = options;
   }
 }
@@ -155,6 +176,11 @@ class PollResolver {
     @Arg("poll") poll: PollInput,
     @Ctx() ctx: IGraphContext
   ) {
+    //validate that timezone is correct
+    if (!poll.timezone) delete poll.timezone;  //take nullish value and delete
+    if (poll.timezone && !moment.tz.zone(poll.timezone))
+      throw new ApolloError("Invalid timezone given!", "INVALID_REQUEST");
+
     if (poll._id) {
       //update an existing poll
       const dbPoll = await PollModel.findOne({ _id: poll._id }).exec();

@@ -5,6 +5,7 @@ export const FULL_POLL = gql`
     _id
     title
     link
+    timezone
     author {
       anonName
       user {

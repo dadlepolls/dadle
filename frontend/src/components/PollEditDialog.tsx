@@ -95,6 +95,7 @@ export const PollEditDialog = ({
         poll: {
           title: "",
           link: "",
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
           ...poll,
           options: poll.options.map((o) => {
             //omit typename key for each option
