@@ -26,7 +26,7 @@ import React, { useState } from "react";
 
 const Profile: NextPage = () => {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, authLoading } = useAuth();
   const mobileDisplay = useMobileComponentsPrefered();
 
   const [name, setName] = useState(user?.name ?? "");
@@ -46,7 +46,7 @@ const Profile: NextPage = () => {
   );
 
   if (!user) {
-    if (router.isReady) router.push("/");
+    if (router.isReady && !authLoading) router.push("/");
     return <LoadingCard />;
   }
 
