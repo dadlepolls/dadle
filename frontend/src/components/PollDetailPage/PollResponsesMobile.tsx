@@ -1,6 +1,7 @@
 import { SaveOutlined } from "@ant-design/icons";
 import { useAuth } from "@components/AuthContext";
 import { GetMe_me } from "@operations/queries/__generated__/GetMe";
+import { GetPollAvailabilityHints_getPollByLink } from "@operations/queries/__generated__/GetPollAvailabilityHints";
 import {
   GetPollByLink_getPollByLink,
   GetPollByLink_getPollByLink_options
@@ -132,7 +133,8 @@ const PollResponsesMobile = ({
   poll,
   saveParticipationFunction: saveParticipation,
 }: {
-  poll: GetPollByLink_getPollByLink;
+  poll: GetPollByLink_getPollByLink &
+    Partial<GetPollAvailabilityHints_getPollByLink>;
   saveParticipationFunction: (
     participation: TPartialParticipationWithId
   ) => Promise<any>;

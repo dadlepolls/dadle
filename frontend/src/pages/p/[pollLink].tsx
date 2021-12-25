@@ -1,5 +1,6 @@
 import { EditOutlined, SaveOutlined } from "@ant-design/icons";
 import { useQuery } from "@apollo/client";
+import { useAuth } from "@components/AuthContext";
 import { ErrorPage } from "@components/ErrorPage";
 import { LoadingCard } from "@components/LoadingCard";
 import { PollCommentArea } from "@components/PollCommentArea";
@@ -20,12 +21,14 @@ import {
   DeleteParticipation,
   DeleteParticipationVariables
 } from "@operations/mutations/__generated__/DeleteParticipation";
+import { GET_POLL_AVAILABILITY_HINTS } from "@operations/queries/GetPollAvailabilityHints";
 import { GET_POLL_BY_LINK } from "@operations/queries/GetPollByLink";
+import { GetPollAvailabilityHints } from "@operations/queries/__generated__/GetPollAvailabilityHints";
 import { GetPollByLink } from "@operations/queries/__generated__/GetPollByLink";
 import { getUserDisplayname } from "@util/getUserDisplayname";
 import { useStyledMutation } from "@util/mutationWrapper";
 import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
-import { Button, Card, Descriptions, PageHeader, Tooltip } from "antd";
+import { Button, Card, Descriptions, message, PageHeader, Tooltip } from "antd";
 import moment from "moment";
 import { NextPage } from "next";
 import Head from "next/head";
@@ -36,6 +39,7 @@ const PollPage: NextPage = () => {
   const router = useRouter();
   const { pollLink } = router.query;
   const mobileDisplay = useMobileComponentsPrefered();
+  const { user } = useAuth();
 
   const [isEditingPoll, setIsEditingPoll] = useState(false);
 
@@ -44,6 +48,19 @@ const PollPage: NextPage = () => {
     variables: { pollLink },
   });
   const { getPollByLink: poll } = data || {};
+
+  //query availability hints separately so that main display won't be blocked by slow query
+  const { data: availabilityHintData } = useQuery<GetPollAvailabilityHints>(
+    GET_POLL_AVAILABILITY_HINTS,
+    {
+      skip: !pollLink || !user,
+      variables: { pollLink },
+      onError: (error) =>
+        message.error(
+          "Abrufen der Verfügbarkeit fehlgeschlagen: " + error.message
+        ),
+    }
+  );
 
   const createOrUpdateParticipationMutation = useStyledMutation<
     CreateOrUpdateParticipation,
@@ -155,7 +172,11 @@ const PollPage: NextPage = () => {
           </PageHeader>
           <Card>
             <PollResponseComponentByMedia
-              poll={poll}
+              poll={{
+                ...poll,
+                availabilityHints:
+                  availabilityHintData?.getPollByLink?.availabilityHints,
+              }}
               saveParticipationFunction={saveParticipation}
               deleteParticipationFunction={deleteParticipation}
             />

@@ -9,17 +9,30 @@ import {
 } from "@ant-design/icons";
 import { useAuth } from "@components/AuthContext";
 import {
+  GetPollAvailabilityHints_getPollByLink,
+  GetPollAvailabilityHints_getPollByLink_availabilityHints
+} from "@operations/queries/__generated__/GetPollAvailabilityHints";
+import {
   GetPollByLink_getPollByLink,
   GetPollByLink_getPollByLink_options,
   GetPollByLink_getPollByLink_participations,
   GetPollByLink_getPollByLink_participations_choices
 } from "@operations/queries/__generated__/GetPollByLink";
-import { Button, Checkbox, Input, message, Popconfirm, Space } from "antd";
+import {
+  Button,
+  Checkbox,
+  Input,
+  message,
+  Popconfirm,
+  Popover,
+  Space
+} from "antd";
 import produce from "immer";
 import * as ls from "local-storage";
 import React, { useCallback, useEffect, useState } from "react";
 import { useImmer } from "use-immer";
 import {
+  EventStatus,
   PollOptionType,
   PollParticipationInput,
   YesNoMaybe
@@ -224,8 +237,22 @@ const OptionsRow = ({
   );
 };
 
-const mapChoiceToColorVariable = (c?: YesNoMaybe) => {
-  switch (c) {
+const mapChoiceToColorVariable = (
+  choice?: YesNoMaybe,
+  availabilityHint?: YesNoMaybe
+) => {
+  if (!choice && availabilityHint) {
+    //user gave no choice, but there is an availability hint
+    switch (availabilityHint) {
+      case YesNoMaybe.Yes:
+        return "--pollpage--yes-hint-color";
+      case YesNoMaybe.No:
+        return "--pollpage--no-hint-color";
+      case YesNoMaybe.Maybe:
+        return "--pollpage--maybe-hint-color";
+    }
+  }
+  switch (choice) {
     case YesNoMaybe.Yes:
       return "--pollpage--yes-color";
     case YesNoMaybe.No:
@@ -240,10 +267,14 @@ const mapChoiceToColorVariable = (c?: YesNoMaybe) => {
 const ParticipationChoiceCell = ({
   editable = false,
   choice,
+  suggestionWhenEmpty,
+  overlappingEvents,
   onClick = () => {},
 }: {
   editable?: boolean;
   choice?: YesNoMaybe;
+  suggestionWhenEmpty?: YesNoMaybe;
+  overlappingEvents?: string[];
   onClick?: () => any;
 }) => {
   const mapChoiceToIcon = (c?: YesNoMaybe, editable: boolean = false) => {
@@ -260,26 +291,36 @@ const ParticipationChoiceCell = ({
   };
 
   return (
-    <div
-      className={`${editable ? "pollpage--option-choice-editable" : ""}`}
-      style={{
-        backgroundColor: `var(${mapChoiceToColorVariable(choice)})`,
-      }}
-      onClick={(e) => {
-        e.preventDefault();
-        editable ? onClick() : null;
-      }}
-      onMouseDown={
-        (e) =>
-          e.preventDefault() /* prevent selecting text on page when double-clicking fast */
-      }
+    <Popover
+      visible={overlappingEvents?.length && editable ? undefined : false} //hide when there is no hint
+      title="Kalender-Überlappungen"
+      placement="bottom"
+      content={<span>{overlappingEvents?.join(", ")}</span>}
     >
-      {mapChoiceToIcon(choice, editable)}
-    </div>
+      <div
+        className={`${editable ? "pollpage--option-choice-editable" : ""}`}
+        style={{
+          backgroundColor: `var(${mapChoiceToColorVariable(
+            choice,
+            editable ? suggestionWhenEmpty : undefined
+          )})`,
+        }}
+        onClick={(e) => {
+          e.preventDefault();
+          editable ? onClick() : null;
+        }}
+        onMouseDown={
+          (e) =>
+            e.preventDefault() /* prevent selecting text on page when double-clicking fast */
+        }
+      >
+        {mapChoiceToIcon(choice, editable)}
+      </div>
+    </Popover>
   );
 };
 
-const deriveNextChoiceFromCurrent = (currentChoice: YesNoMaybe) => {
+const deriveNextChoiceFromCurrent = (currentChoice?: YesNoMaybe) => {
   switch (currentChoice) {
     case YesNoMaybe.Yes:
       return YesNoMaybe.No;
@@ -294,6 +335,7 @@ const deriveNextChoiceFromCurrent = (currentChoice: YesNoMaybe) => {
 const ParticipationRow = ({
   options,
   participation: propParticipation,
+  availabilityHints,
   editable = false,
   onChoiceChange = () => {},
 }: {
@@ -302,12 +344,27 @@ const ParticipationRow = ({
     GetPollByLink_getPollByLink_participations,
     "_id" | "__typename"
   >;
+  availabilityHints?: GetPollAvailabilityHints_getPollByLink_availabilityHints[];
   editable?: boolean;
   onChoiceChange?: (
     newChoices: GetPollByLink_getPollByLink_participations_choices[]
   ) => any;
 }) => {
   const [participation, updateParticipation] = useImmer(propParticipation);
+
+  //only show availability hints if some are given (not the case for unauthenticated users)
+  const showAvailabilityHints =
+    availabilityHints && availabilityHints.length > 0;
+
+  const determineAvailabilitySuggestion = (
+    hint?: GetPollAvailabilityHints_getPollByLink_availabilityHints
+  ) => {
+    if (hint?.overlappingEvents.some((e) => e.status == EventStatus.Confirmed))
+      return YesNoMaybe.No;
+    if (hint?.overlappingEvents.some((e) => e.status == EventStatus.Tentative))
+      return YesNoMaybe.Maybe;
+    return YesNoMaybe.Yes;
+  };
 
   const handleChoiceClick = (optionId: string) => {
     updateParticipation((participation) => {
@@ -319,7 +376,9 @@ const ParticipationRow = ({
       } else {
         participation.choices.push({
           option: optionId,
-          choice: YesNoMaybe.Yes,
+          choice: determineAvailabilitySuggestion(
+            availabilityHints?.find((h) => h.option == optionId)
+          ),
           __typename: "PollChoice",
         });
       }
@@ -338,6 +397,20 @@ const ParticipationRow = ({
           <ParticipationChoiceCell
             key={idx}
             choice={p?.choice}
+            suggestionWhenEmpty={
+              editable && showAvailabilityHints
+                ? determineAvailabilitySuggestion(
+                    availabilityHints?.find((h) => h.option == o._id)
+                  )
+                : undefined
+            }
+            overlappingEvents={
+              editable && showAvailabilityHints
+                ? availabilityHints
+                    ?.find((h) => h.option == o._id)
+                    ?.overlappingEvents.map((e) => e.title)
+                : undefined
+            }
             editable={editable}
             onClick={() => handleChoiceClick(o._id)}
           />
@@ -353,7 +426,8 @@ const PollResponses = ({
   deleteParticipationFunction: deleteParticipation = async () => {},
   readOnly = false,
 }: {
-  poll: GetPollByLink_getPollByLink;
+  poll: GetPollByLink_getPollByLink &
+    Partial<GetPollAvailabilityHints_getPollByLink>;
   saveParticipationFunction?: (
     participation: TPartialParticipationWithId
   ) => Promise<any>;
@@ -485,6 +559,7 @@ const PollResponses = ({
               key={idx}
               participation={p}
               options={poll.options}
+              availabilityHints={poll.availabilityHints}
               editable={editableParticipation?._id == p._id}
               onChoiceChange={onChoiceChangeCallbackEditing}
             />
@@ -493,6 +568,7 @@ const PollResponses = ({
             <ParticipationRow
               participation={participationBeingAdded}
               options={poll?.options}
+              availabilityHints={poll.availabilityHints}
               editable={true}
               onChoiceChange={onChoiceChangeCallbackAdding}
             />
