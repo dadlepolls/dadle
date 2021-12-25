@@ -75,6 +75,8 @@ const PollPage: NextPage = () => {
     {
       skip: !pollLink || !user,
       variables: { pollLink },
+      fetchPolicy: "network-only",
+      nextFetchPolicy: "network-only",
       onError: (error) =>
         message.error(
           "Abrufen der Verfügbarkeit fehlgeschlagen: " + error.message
