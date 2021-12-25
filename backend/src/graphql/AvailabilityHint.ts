@@ -100,6 +100,8 @@ class PollAvailabilityHintResolver {
         }
       });
 
+    if (!pollOptionsAsEvents.length) return []; //no options with Date or DateTime type => no availability hints
+
     const earliestDate = pollOptionsAsEvents
       .map((e) => e.from)
       .reduce((earliest, current) => {
