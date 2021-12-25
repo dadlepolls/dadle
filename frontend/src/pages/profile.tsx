@@ -1,6 +1,6 @@
 import { SaveOutlined } from "@ant-design/icons";
-import { useQuery } from "@apollo/client";
 import { useAuth } from "@components/AuthContext";
+import { CalendarList } from "@components/CalendarList";
 import { LoadingCard } from "@components/LoadingCard";
 import { useMobileComponentsPrefered } from "@components/ResponsiveContext";
 import { UPDATE_NAME } from "@operations/mutations/UpdateName";
@@ -8,14 +8,11 @@ import {
   UpdateName,
   UpdateNameVariables
 } from "@operations/mutations/__generated__/UpdateName";
-import { GET_MY_CALENDARS } from "@operations/queries/GetMyCalendars";
-import { GetMyCalendars } from "@operations/queries/__generated__/GetMyCalendars";
 import { useStyledMutation } from "@util/mutationWrapper";
 import {
   Button,
   Card,
   Descriptions,
-  Empty,
   Input,
   Space,
   Tooltip,
@@ -36,9 +33,6 @@ const Profile: NextPage = () => {
   const [nameIsEdited, setNameIsEdited] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { loading: calendarsLoading, data: calendarsData } =
-    useQuery<GetMyCalendars>(GET_MY_CALENDARS);
-
   const updateName = useStyledMutation<UpdateName, UpdateNameVariables>(
     UPDATE_NAME,
     {
@@ -55,8 +49,6 @@ const Profile: NextPage = () => {
     if (router.isReady) router.push("/");
     return <LoadingCard />;
   }
-
-  const { getMyCalendars: calendars } = calendarsData || {};
 
   return (
     <>
@@ -112,32 +104,9 @@ const Profile: NextPage = () => {
             </Descriptions.Item>
           </Descriptions>
         </Card>
-        {calendarsLoading ? (
-          <LoadingCard title="Lade Kalender..." />
-        ) : (
-          <Card title="Meine verknüpften Kalender">
-            {calendars?.length ? (
-              <Space direction="vertical">
-                {calendars.map((c, idx) => (
-                  <Card key={idx} size="small" title={c.friendlyName}>
-                    <ul>
-                      <li>Aktiviert: {c.enabled ? "Ja" : "Nein"}</li>
-                      <li>
-                        Anbieter:{" "}
-                        <span style={{ textTransform: "capitalize" }}>
-                          {c.provider}
-                        </span>
-                      </li>
-                      <li>Nutzername beim Anbieter: {c.usernameAtProvider}</li>
-                    </ul>
-                  </Card>
-                ))}
-              </Space>
-            ) : (
-              <Empty description="Du hast bisher keine Kalender verknüpft" />
-            )}
-          </Card>
-        )}
+        <Card title="Meine verknüpften Kalender">
+          <CalendarList />
+        </Card>
       </Space>
     </>
   );
