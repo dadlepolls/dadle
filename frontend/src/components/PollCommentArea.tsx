@@ -73,11 +73,9 @@ const PollComment = ({
           getUserDisplayname(comment.author) ?? authorNameHint
         )
       }
-      style={{ marginBottom: 16 }}
       extra={
         editable ? (
           <Button
-            size="small"
             type="primary"
             loading={isSaving}
             icon={<SaveOutlined />}
@@ -94,14 +92,12 @@ const PollComment = ({
           <Space>
             {showEditButton ? (
               <Button
-                size="small"
                 icon={<EditOutlined />}
                 onClick={() => onEditClick()}
               />
             ) : null}
             {showDeleteButton ? (
               <Button
-                size="small"
                 icon={<DeleteOutlined />}
                 onClick={() => onDeleteClick()}
               />
@@ -177,7 +173,7 @@ export const PollCommentArea = ({
   };
 
   return (
-    <Card title="Kommentare" style={{ marginTop: 16 }}>
+    <Space direction="vertical" style={{ width: "100%" }} size={16}>
       {comments.map((c, idx) => (
         <PollComment
           key={idx}
@@ -224,6 +220,7 @@ export const PollCommentArea = ({
         <div
           style={{
             marginBottom: 16,
+            marginTop: 16,
             display: "flex",
             alignItems: "flex-end",
             flexDirection: "column",
@@ -239,6 +236,6 @@ export const PollCommentArea = ({
           </Button>
         </div>
       )}
-    </Card>
+    </Space>
   );
 };
