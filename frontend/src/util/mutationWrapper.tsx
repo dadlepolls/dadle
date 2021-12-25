@@ -29,7 +29,7 @@ function useStyledMutation<
   }: {
     showLoadingBar?: boolean;
     statusCallbackFunction?: (b: boolean) => any;
-    successMessage?: string | JSX.Element;
+    successMessage?: string | JSX.Element | undefined | null;
     onSuccess?: (d?: TData | null) => any | Promise<any>;
     errorMessage?: string | JSX.Element;
     onError?: () => any | Promise<any>;
@@ -57,7 +57,9 @@ function useStyledMutation<
         variables,
       });
       await onSuccess(res.data);
-      message.success(successMessage);
+      if (successMessage) message.success(successMessage);
+
+      return res;
     } catch (ex) {
       let additionalMessage;
       if (ex instanceof ApolloError) {
