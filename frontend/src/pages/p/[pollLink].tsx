@@ -24,7 +24,10 @@ import {
 import { GET_POLL_AVAILABILITY_HINTS } from "@operations/queries/GetPollAvailabilityHints";
 import { GET_POLL_BY_LINK } from "@operations/queries/GetPollByLink";
 import { GetPollAvailabilityHints } from "@operations/queries/__generated__/GetPollAvailabilityHints";
-import { GetPollByLink } from "@operations/queries/__generated__/GetPollByLink";
+import {
+  GetPollByLink,
+  GetPollByLink_getPollByLink
+} from "@operations/queries/__generated__/GetPollByLink";
 import { getUserDisplayname } from "@util/getUserDisplayname";
 import { useStyledMutation } from "@util/mutationWrapper";
 import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
@@ -34,6 +37,23 @@ import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { PollOptionType } from "__generated__/globalTypes";
+
+const sortPollOptions = (poll: GetPollByLink_getPollByLink) => {
+  const { options: originalOptions, ...pollData } = poll;
+  const options = [...(originalOptions || [])].sort((a, b) => {
+    if (
+      a.type == PollOptionType.Arbitrary &&
+      b.type == PollOptionType.Arbitrary
+    )
+      return 0;
+    if (a.type == PollOptionType.Arbitrary) return -1;
+    if (b.type == PollOptionType.Arbitrary) return 1;
+    if (!a.from || !b.from) return 0;
+    return moment(a.from).diff(moment(b.from));
+  });
+  return { ...pollData, options };
+};
 
 const PollPage: NextPage = () => {
   const router = useRouter();
@@ -173,7 +193,7 @@ const PollPage: NextPage = () => {
           <Card>
             <PollResponseComponentByMedia
               poll={{
-                ...poll,
+                ...sortPollOptions(poll),
                 availabilityHints:
                   availabilityHintData?.getPollByLink?.availabilityHints,
               }}

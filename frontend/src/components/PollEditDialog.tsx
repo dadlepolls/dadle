@@ -8,7 +8,6 @@ import {
 import { GetPollByLink_getPollByLink } from "@operations/queries/__generated__/GetPollByLink";
 import { useStyledMutation } from "@util/mutationWrapper";
 import { Button, Card, Collapse, Form, Input } from "antd";
-import moment from "moment";
 import React, { useState } from "react";
 import { PollOptionType } from "__generated__/globalTypes";
 import { OptionEditor, OptionEditorType } from "./PollEditDialog/OptionEditor";
@@ -23,24 +22,6 @@ const autocreateLinkFromTitle = (title: string) => {
     .replaceAll("ü", "ue")
     .replaceAll("Ü", "UE")
     .replaceAll(/(?![\w-])./g, "");
-};
-
-const sortPollOptions = (
-  poll: Partial<CreateOrUpdatePoll_createOrUpdatePoll>
-) => {
-  const { options: originalOptions, ...pollData } = poll;
-  const options = [...(originalOptions || [])].sort((a, b) => {
-    if (
-      a.type == PollOptionType.Arbitrary &&
-      b.type == PollOptionType.Arbitrary
-    )
-      return 0;
-    if (a.type == PollOptionType.Arbitrary) return -1;
-    if (b.type == PollOptionType.Arbitrary) return 1;
-    if (!a.from || !b.from) return 0;
-    return moment(a.from).diff(moment(b.from));
-  });
-  return { ...pollData, options };
 };
 
 const mapOptionTypeToEditorType = (t?: PollOptionType) => {
@@ -89,7 +70,7 @@ export const PollEditDialog = ({
   const savePoll = async (
     _poll: Partial<CreateOrUpdatePoll_createOrUpdatePoll>
   ) => {
-    const { __typename, ...poll } = sortPollOptions(_poll); //omit typename key and sort options
+    const { __typename, ...poll } = _poll; //omit typename key
     await createOrUpdatePollMutation(
       {
         poll: {
@@ -97,11 +78,12 @@ export const PollEditDialog = ({
           link: "",
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
           ...poll,
-          options: poll.options.map((o) => {
-            //omit typename key for each option
-            const { __typename, ...rest } = o;
-            return rest;
-          }),
+          options:
+            poll.options?.map((o) => {
+              //omit typename key for each option
+              const { __typename, ...rest } = o;
+              return rest;
+            }) || [],
         },
       },
       {
