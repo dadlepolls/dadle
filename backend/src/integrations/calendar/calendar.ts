@@ -1,4 +1,5 @@
 import { IEvent } from "src/util/types";
+import { MicrosoftCalendarProvider } from "./MicrosoftCalendarProvider";
 
 type ICalendar = IMicrosoftCalendar;
 
@@ -18,6 +19,14 @@ interface IMicrosoftCalendar extends IGenericCalendar {
 interface ICalendarProvider {
   retrieveEvents: (rangeStart: Date, rangeEnd: Date) => Promise<IEvent[]>;
 }
+
+const getProviderForCalendar = (calendar: ICalendar): ICalendarProvider => {
+  if (calendar.provider == "microsoft")
+    return new MicrosoftCalendarProvider(calendar);
+  else throw new Error(`Unknown provider for calendar with id ${calendar._id}`);
+};
+
+export { getProviderForCalendar };
 
 export type {
   ICalendar,

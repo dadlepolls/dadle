@@ -1,6 +1,8 @@
 import mongoose, { Schema } from "mongoose";
-import { ICalendarProvider } from "../integrations/calendar/calendar";
-import { MicrosoftCalendarProvider } from "../integrations/calendar/MicrosoftCalendarProvider";
+import {
+  getProviderForCalendar,
+  ICalendarProvider,
+} from "../integrations/calendar/calendar";
 import { IUser } from "../util/types";
 import { schema as CalendarSchema } from "./Calendar";
 
@@ -36,10 +38,7 @@ schema.methods.getCalendarProviders = function (
 ) {
   return this.calendars
     ?.filter((c) => c.enabled || !onlyIncludeEnabled)
-    .map<ICalendarProvider>((c) => {
-      if (c.provider == "microsoft") return new MicrosoftCalendarProvider(c);
-      else throw new Error(`Unknown provider for calendar with id ${c._id}`);
-    });
+    .map<ICalendarProvider>(getProviderForCalendar);
 };
 
 let model: mongoose.Model<IUserDocument>;
