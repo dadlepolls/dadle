@@ -18,6 +18,8 @@ import { Event } from "./Event";
 import { Poll } from "./Poll";
 import { User as UserModel } from "../db/models";
 import { ApolloError } from "apollo-server-express";
+import moment from "moment";
+import "moment-timezone";
 
 type TFromTo = Pick<IEvent, "from" | "to">;
 
@@ -78,19 +80,18 @@ class PollAvailabilityHintResolver {
       )
       .map<IPollOptionNormalizedAsEvent>((o) => {
         if (o.type == PollOptionType.Date) {
-          //TODO respect users local timezone
-          const from = o.from!;
-          const to = new Date(new Date(from).getTime() + 60 * 60 * 24 * 1000);
+          const from = moment.tz(o.from!, poll.timezone).startOf("day");
+          const to = from.clone().add(24, "hours");
           return {
             optionId: o._id,
-            from,
-            to,
+            from: from.toDate(),
+            to: to.toDate(),
           };
         } else if (o.type == PollOptionType.DateTime) {
           return {
             optionId: o._id,
-            from: o.from!,
-            to: o.to!,
+            from: moment.tz(o.from!, poll.timezone).toDate(),
+            to: moment.tz(o.to!, poll.timezone).toDate(),
           };
         } else {
           throw new Error(
