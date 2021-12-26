@@ -179,7 +179,7 @@ class MicrosoftCalendarProvider implements ICalendarProvider {
       if (!req.query.token)
         return res
           .status(400)
-          .send('Provide token with "frontend" claim for adding a calendar');
+          .send("Provide token with 'frontend' claim for adding a calendar");
       const token = verifyToken(String(req.query.token));
       if (!token.sub) return res.status(400).send("Token is missing subject");
 

@@ -80,7 +80,7 @@ class PollAvailabilityHintResolver {
       )
       .map<IPollOptionNormalizedAsEvent>((o) => {
         if (o.type == PollOptionType.Date) {
-          const from = moment.tz(o.from!, poll.timezone).startOf("day");
+          const from = moment.tz(o.from ?? "", poll.timezone).startOf("day");
           const to = from.clone().add(24, "hours");
           return {
             optionId: o._id,
@@ -90,8 +90,8 @@ class PollAvailabilityHintResolver {
         } else if (o.type == PollOptionType.DateTime) {
           return {
             optionId: o._id,
-            from: moment.tz(o.from!, poll.timezone).toDate(),
-            to: moment.tz(o.to!, poll.timezone).toDate(),
+            from: moment.tz(o.from ?? "", poll.timezone).toDate(),
+            to: moment.tz(o.to ?? "", poll.timezone).toDate(),
           };
         } else {
           throw new Error(

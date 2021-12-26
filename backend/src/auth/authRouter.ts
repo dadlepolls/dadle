@@ -1,7 +1,4 @@
-import {
-  User as TGraphUser,
-  Calendar as TGraphCalendar,
-} from "@microsoft/microsoft-graph-types";
+import { User as TGraphUser } from "@microsoft/microsoft-graph-types";
 import { User } from "../db/models";
 import { issueToken } from "../auth/token";
 import "isomorphic-fetch";
@@ -9,8 +6,6 @@ import OAuth2Strategy, { VerifyCallback } from "passport-oauth2";
 import * as msgraph from "@microsoft/microsoft-graph-client";
 import passport from "passport";
 import express, { Request } from "express";
-import { IMicrosoftCalendar } from "../integrations/calendar/calendar";
-import { MicrosoftCalendarProvider } from "../integrations/calendar/MicrosoftCalendarProvider";
 
 const authRouter = express.Router();
 

@@ -34,7 +34,7 @@ const schema = new Schema<IUser>(
 
 schema.methods.getCalendarProviders = function (
   this: IUser,
-  onlyIncludeEnabled: boolean = true
+  onlyIncludeEnabled = true
 ) {
   return this.calendars
     ?.filter((c) => c.enabled || !onlyIncludeEnabled)
