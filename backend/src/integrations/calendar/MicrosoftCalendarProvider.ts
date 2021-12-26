@@ -1,10 +1,20 @@
 import { ICalendarProvider, IMicrosoftCalendar } from "./calendar";
-import { Event as TGraphEvent } from "@microsoft/microsoft-graph-types";
+import {
+  Event as TGraphEvent,
+  Calendar as TGraphCalendar,
+  User as TGraphUser,
+} from "@microsoft/microsoft-graph-types";
 import axios from "axios";
 import moment from "moment";
 import "moment-timezone";
 import * as msgraph from "@microsoft/microsoft-graph-client";
 import { EventStatus, IEvent } from "../../util/types";
+import express, { Request } from "express";
+import passport from "passport";
+import OAuth2Strategy, { VerifyCallback } from "passport-oauth2";
+import { issueToken, verifyToken } from "../../auth/token";
+import { JwtPayload } from "jsonwebtoken";
+import { User } from "../../db/models";
 
 class MicrosoftCalendarProvider implements ICalendarProvider {
   private calendarInfo;
@@ -39,7 +49,170 @@ class MicrosoftCalendarProvider implements ICalendarProvider {
     });
   }
 
-  /*private */ public async retrieveAccessToken(): Promise<string> {
+  public static async discoverCalendars(graphClient: msgraph.Client) {
+    const graphCalendars: TGraphCalendar[] = (
+      await graphClient.api("/me/calendars").get()
+    ).value;
+    return graphCalendars;
+  }
+
+  public static apiRouter() {
+    const router = express.Router();
+
+    //tenant id is given, we assume that ms calendar shall be enabled
+    if (process.env.CAL_MS_TENANT_ID) {
+      if (!process.env.BACKEND_PUBLIC_URL || !process.env.FRONTEND_PUBLIC_URL)
+        throw new Error(
+          "BACKEND_PUBLIC_URL and FRONTEND_PUBLIC_URL must be specified when authentication is enabled"
+        );
+    }
+
+    passport.use(
+      "cal_microsoft",
+      new OAuth2Strategy(
+        {
+          authorizationURL: `https://login.microsoftonline.com/${
+            process.env.CAL_MS_TENANT_ID ?? "common"
+          }/oauth2/v2.0/authorize`,
+          tokenURL: `https://login.microsoftonline.com/${
+            process.env.CAL_MS_TENANT_ID ?? "common"
+          }/oauth2/v2.0/token`,
+          clientID: process.env.CAL_MS_CLIENT_ID ?? "",
+          clientSecret: process.env.CAL_MS_CLIENT_SECRET ?? "",
+          callbackURL:
+            `${process.env.BACKEND_PUBLIC_URL}/cal/microsoft/callback` ?? "",
+          scope: [
+            "openid",
+            "profile",
+            "offline_access",
+            "User.Read",
+            "Calendars.Read",
+          ],
+          passReqToCallback: true,
+        },
+        async (
+          req: Request,
+          accessToken: string,
+          refreshToken: string,
+          profile: Record<string, unknown>,
+          cb: VerifyCallback
+        ) => {
+          //parsed state is a signed token containing the user id this operation is made for
+          let parsedState: JwtPayload;
+          try {
+            parsedState = verifyToken(String(req.query.state), {
+              claims: ["cal_microsoft"],
+            });
+            if (!parsedState.sub) throw new Error();
+          } catch (_) {
+            return cb(new Error("invalid state token given"));
+          }
+
+          //user that these calendars will belong to
+          const dbUser = await User.findById(parsedState.sub);
+          if (!dbUser) return cb(new Error("User was deleted"));
+
+          //graph client to get user info
+          const graphClient = msgraph.Client.init({
+            authProvider: (done) => done(null, accessToken),
+          });
+
+          //fetch user info
+          const graphUserInfo: TGraphUser = await graphClient.api("/me").get();
+          if (!graphUserInfo.id)
+            return cb(new Error("Couldn't retrieve user infomation"));
+
+          //fetch user's calendars from microsoft graph
+          let cals: TGraphCalendar[];
+          try {
+            cals = await this.discoverCalendars(graphClient);
+          } catch (err) {
+            return cb(new Error("Couldn't retrieve user calendars"));
+          }
+
+          //calendars that already exist for this provider
+          const existingCalendars = (dbUser.calendars || []).filter(
+            (c) => c.provider == "microsoft"
+          ) as IMicrosoftCalendar[];
+
+          //array of calendars (ms calendar ids) that have been added to the collection
+          const freshlyAddedCalendars: string[] = [];
+
+          for (const cal of cals) {
+            const existing = existingCalendars.find(
+              (c) => c.calendarId == cal.id
+            );
+            if (existing) {
+              //update names and refresh token if calendar already exists
+              existing.friendlyName = cal.name || "";
+              existing.usernameAtProvider =
+                graphUserInfo.userPrincipalName || "";
+              existing.refreshToken = refreshToken;
+            } else {
+              dbUser.calendars?.push({
+                provider: "microsoft",
+                enabled: true,
+                friendlyName: cal.name || "",
+                usernameAtProvider: graphUserInfo.userPrincipalName || "",
+                refreshToken,
+                calendarId: cal.id || "",
+              });
+              if (cal.id) freshlyAddedCalendars.push(cal.id);
+            }
+          }
+
+          dbUser.markModified("calendars");
+          await dbUser.save();
+
+          return cb(null, dbUser, {
+            freshlyAddedCalendars: (dbUser.calendars || [])
+              .filter((c) =>
+                freshlyAddedCalendars.some((f) => f == c.calendarId)
+              )
+              .map((c) => c._id ?? ""), //map the ms calendar ids to our db calendar ids
+          });
+        }
+      )
+    );
+
+    router.get("/add", (req, res, next) => {
+      if (!req.query.token)
+        return res
+          .status(400)
+          .send('Provide token with "frontend" claim for adding a calendar');
+      const token = verifyToken(String(req.query.token));
+      if (!token.sub) return res.status(400).send("Token is missing subject");
+
+      passport.authenticate("cal_microsoft", {
+        state: issueToken(token.sub, {
+          claims: ["cal_microsoft"],
+          expiresIn: "10m",
+        }),
+      })(req, res, next);
+    });
+
+    router.get(
+      "/callback",
+      passport.authenticate("cal_microsoft", {
+        failureRedirect: `${process.env.FRONTEND_PUBLIC_URL}/profile?calendarAddFailure=true`,
+        session: false,
+      }),
+      (req, res) => {
+        const authInfo = req.authInfo as { freshlyAddedCalendars?: string[] };
+        return res.redirect(
+          `${
+            process.env.FRONTEND_PUBLIC_URL
+          }/profile?freshlyAddedCalendars=${JSON.stringify(
+            authInfo.freshlyAddedCalendars
+          )}`
+        );
+      }
+    );
+
+    return router;
+  }
+
+  private async retrieveAccessToken(): Promise<string> {
     const params = {
       client_id: this.clientId,
       client_secret: this.clientSecret,

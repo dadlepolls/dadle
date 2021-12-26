@@ -9,7 +9,8 @@ import OAuth2Strategy, { VerifyCallback } from "passport-oauth2";
 import * as msgraph from "@microsoft/microsoft-graph-client";
 import passport from "passport";
 import express, { Request } from "express";
-import { IMicrosoftCalendar } from "src/integrations/calendar/calendar";
+import { IMicrosoftCalendar } from "../integrations/calendar/calendar";
+import { MicrosoftCalendarProvider } from "../integrations/calendar/MicrosoftCalendarProvider";
 
 const authRouter = express.Router();
 
@@ -69,9 +70,8 @@ passport.use(
       } else {
         //TODO separate calendar logic from user logic
         //user doesn't exist yet in db. Retrieve all Calendars first
-        const graphCalendars: TGraphCalendar[] = (
-          await graphClient.api("/me/calendars").get()
-        ).value;
+        const graphCalendars =
+          await MicrosoftCalendarProvider.discoverCalendars(graphClient);
 
         const dbUser = await User.findOneAndUpdate(
           { idAtProvider: graphUserInfo.id },

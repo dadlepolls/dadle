@@ -1,6 +1,7 @@
-import { SaveOutlined } from "@ant-design/icons";
+import { LinkOutlined, SaveOutlined, WindowsOutlined } from "@ant-design/icons";
 import { useAuth } from "@components/AuthContext";
 import { CalendarList } from "@components/CalendarList";
+import { FreshlyAddedCalendarModal } from "@components/FreshlyAddedCalendarModal";
 import { LoadingCard } from "@components/LoadingCard";
 import { useMobileComponentsPrefered } from "@components/ResponsiveContext";
 import { UPDATE_NAME } from "@operations/mutations/UpdateName";
@@ -13,7 +14,10 @@ import {
   Button,
   Card,
   Descriptions,
+  Dropdown,
   Input,
+  Menu,
+  message,
   Space,
   Tooltip,
   Typography
@@ -26,17 +30,46 @@ import React, { useEffect, useState } from "react";
 
 const Profile: NextPage = () => {
   const router = useRouter();
-  const { user, authLoading } = useAuth();
+  const { user, authLoading, token } = useAuth();
   const mobileDisplay = useMobileComponentsPrefered();
 
   const [name, setName] = useState("");
   const [nameIsEdited, setNameIsEdited] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [freshlyAddedCalendars, setFreshlyAddedCalendars] = useState<string[]>(
+    []
+  );
 
   useEffect(() => {
     if (user) setName(user.name);
     return () => {};
   }, [user?.name]);
+
+  useEffect(() => {
+    //check if there was a failure while adding calendar, show message
+    if (router.isReady && router.query.calendarAddFailure) {
+      message.error("Verknüpfen des Kalenders fehlgeschlagen!");
+      removeQueryParams();
+    }
+  }, [router.isReady, router.query.calendarAddFailure]);
+
+  useEffect(() => {
+    //show dialog for freshly added calendars
+    if (!router.isReady) return;
+    try {
+      if (!router.query.freshlyAddedCalendars) return;
+      const parsedCals = JSON.parse(String(router.query.freshlyAddedCalendars));
+      if (!Array.isArray(parsedCals)) return;
+      if (!parsedCals.length) return;
+      setFreshlyAddedCalendars(parsedCals);
+    } catch (_) {
+    } finally {
+      removeQueryParams();
+    }
+  }, [router.isReady, router.query.freshlyAddedCalendars]);
+
+  const removeQueryParams = () =>
+    router.replace("/profile", undefined, { shallow: true });
 
   const updateName = useStyledMutation<UpdateName, UpdateNameVariables>(
     UPDATE_NAME,
@@ -109,8 +142,33 @@ const Profile: NextPage = () => {
             </Descriptions.Item>
           </Descriptions>
         </Card>
-        <Card title="Meine verknüpften Kalender">
+        <Card
+          title="Meine verknüpften Kalender"
+          extra={
+            <Dropdown
+              overlay={
+                <Menu
+                  onClick={(c) =>
+                    window.location.assign(
+                      `/backend/cal/${c.key}/add?token=${token}`
+                    )
+                  }
+                >
+                  <Menu.Item key="microsoft" icon={<WindowsOutlined />}>
+                    Microsoft 365&reg;-Kalender
+                  </Menu.Item>
+                </Menu>
+              }
+            >
+              <Button icon={<LinkOutlined />}>Kalender verknüpfen</Button>
+            </Dropdown>
+          }
+        >
           <CalendarList />
+          <FreshlyAddedCalendarModal
+            freshlyAddedCalendars={freshlyAddedCalendars}
+            onDone={() => setFreshlyAddedCalendars([])}
+          />
         </Card>
       </Space>
     </>
