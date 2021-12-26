@@ -68,11 +68,7 @@ passport.use(
         await existingUser.save();
         return cb(null, existingUser);
       } else {
-        //TODO separate calendar logic from user logic
         //user doesn't exist yet in db. Retrieve all Calendars first
-        const graphCalendars =
-          await MicrosoftCalendarProvider.discoverCalendars(graphClient);
-
         const dbUser = await User.findOneAndUpdate(
           { idAtProvider: graphUserInfo.id },
           {
@@ -80,14 +76,7 @@ passport.use(
             name: graphUserInfo.displayName ?? "UNKNOWN",
             nameAtProvider: graphUserInfo.displayName ?? "UNKNOWN",
             mail: graphUserInfo.mail ?? "UNKNOWN",
-            calendars: graphCalendars.map<IMicrosoftCalendar>((c) => ({
-              provider: "microsoft",
-              enabled: true,
-              friendlyName: c.name || "",
-              usernameAtProvider: graphUserInfo.userPrincipalName || "",
-              refreshToken,
-              calendarId: c.id || "",
-            })),
+            calendars: [],
           },
           { upsert: true, new: true }
         );
