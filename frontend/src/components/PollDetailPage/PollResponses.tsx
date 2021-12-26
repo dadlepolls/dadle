@@ -398,18 +398,22 @@ const ParticipationRow = ({
             key={idx}
             choice={p?.choice}
             suggestionWhenEmpty={
+              /*eslint-disable indent */
               editable && showAvailabilityHints
                 ? determineAvailabilitySuggestion(
                     availabilityHints?.find((h) => h.option == o._id)
                   )
                 : undefined
+              /*eslint-enable indent */
             }
             overlappingEvents={
+              /*eslint-disable indent */
               editable && showAvailabilityHints
                 ? availabilityHints
                     ?.find((h) => h.option == o._id)
                     ?.overlappingEvents.map((e) => e.title)
                 : undefined
+              /*eslint-enable indent */
             }
             editable={editable}
             onClick={() => handleChoiceClick(o._id)}

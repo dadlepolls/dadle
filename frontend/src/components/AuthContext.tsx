@@ -34,13 +34,14 @@ const AuthContext = React.createContext<{
   isAuthenticated: boolean;
   tryLogin: () => any;
   logout: () => any;
-  // eslint-disable-next-line indent
+  /* eslint-disable indent */
 }>({
   authLoading: true,
   tryLogin: () => {},
   logout: () => {},
   isAuthenticated: false,
 });
+/* eslint-enable indent */
 
 const AuthContextProvider = ({
   children,
@@ -53,6 +54,7 @@ const AuthContextProvider = ({
       : undefined;
 
   const [_, setDummyState] = useState(0); //dummy state to force update when trying login
+  //eslint-disable-next-line react-hooks/exhaustive-deps
   const forceReRender = () => setDummyState((x) => x + 1);
   const [authLoading, setAuthLoading] = useState(true);
 

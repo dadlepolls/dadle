@@ -187,6 +187,7 @@ const CalendarList = ({
 
         const actions: React.ReactNode[] = [
           <Switch
+            key="enable"
             size="small"
             loading={calendarsWithPendingEnabledChange.some(
               (p) => p == cal._id
@@ -201,11 +202,11 @@ const CalendarList = ({
         if (showHealthCheckButtons)
           actions.push(
             <Tooltip
+              key="check"
               title={healthCheckResult ? null : "Verknüpfung überprüfen"}
             >
               <Button
                 size="small"
-                key="check"
                 loading={healthCheckResult?.loading}
                 icon={getIconForHealthCheck(healthCheckResult)}
                 type={
@@ -226,6 +227,7 @@ const CalendarList = ({
         if (showDeleteButtons)
           actions.push(
             <Popconfirm
+              key="delete"
               title="Soll die Kalenderverknüpfung wirklich gelöscht werden?"
               onConfirm={async () => onDeleteClick(cal._id)}
               okText="Ja"
@@ -234,7 +236,6 @@ const CalendarList = ({
             >
               <Button
                 size="small"
-                key="delete"
                 loading={calendarsBeingDeleted.some((c) => c == cal._id)}
                 icon={<DeleteOutlined />}
               />

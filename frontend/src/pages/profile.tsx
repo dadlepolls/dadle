@@ -26,7 +26,7 @@ import * as ls from "local-storage";
 import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 const Profile: NextPage = () => {
   const router = useRouter();
@@ -40,10 +40,15 @@ const Profile: NextPage = () => {
     []
   );
 
+  const removeQueryParams = useCallback(
+    () => router.replace("/profile", undefined, { shallow: true }),
+    [router]
+  );
+
   useEffect(() => {
     if (user) setName(user.name);
     return () => {};
-  }, [user?.name]);
+  }, [user, user?.name]);
 
   useEffect(() => {
     //check if there was a failure while adding calendar, show message
@@ -51,6 +56,7 @@ const Profile: NextPage = () => {
       message.error("Verknüpfen des Kalenders fehlgeschlagen!");
       removeQueryParams();
     }
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, router.query.calendarAddFailure]);
 
   useEffect(() => {
@@ -63,13 +69,12 @@ const Profile: NextPage = () => {
       if (!parsedCals.length) return;
       setFreshlyAddedCalendars(parsedCals);
     } catch (_) {
+      //eslint-disable-next-lint no-empty
     } finally {
       removeQueryParams();
     }
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, router.query.freshlyAddedCalendars]);
-
-  const removeQueryParams = () =>
-    router.replace("/profile", undefined, { shallow: true });
 
   const updateName = useStyledMutation<UpdateName, UpdateNameVariables>(
     UPDATE_NAME,
