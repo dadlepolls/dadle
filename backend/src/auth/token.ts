@@ -7,8 +7,13 @@ import { RequestHandler } from "express";
  * openssl genrsa -out secrets/tokens.key 2048
  * openssl rsa -in secrets/tokens.key -pubout -out secrets/tokens.pub
  */
-const privKey = fs.readFileSync("./secrets/tokens.key");
-const pubKey = fs.readFileSync("./secrets/tokens.pub");
+let privKey: Buffer, pubKey: Buffer;
+try {
+  privKey = fs.readFileSync("./secrets/tokens.key");
+  pubKey = fs.readFileSync("./secrets/tokens.pub");
+} catch (_) {
+  console.warn("Fatal: Private and Public Keys for tokens could not be found");
+}
 
 const issueToken = (
   userId: string,
@@ -17,6 +22,7 @@ const issueToken = (
     expiresIn: "1h",
   }
 ) => {
+  if (!privKey) throw new Error("Private key does not exist");
   return jwt.sign({}, privKey, {
     algorithm: "RS256",
     subject: userId,
@@ -30,6 +36,7 @@ const verifyToken = (
   token: string,
   options: { claims: string[] } = { claims: ["frontend"] }
 ): jwt.JwtPayload => {
+  if (!pubKey) throw new Error("Public key does not exist");
   return jwt.verify(token, pubKey, {
     algorithms: ["RS256"],
     audience: options.claims,
