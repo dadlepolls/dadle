@@ -29,6 +29,7 @@ Router.events.on("routeChangeComplete", () => {
 
 const AuthContext = React.createContext<{
   user?: GetMe_me;
+  token?: string | null;
   authLoading: boolean;
   isAuthenticated: boolean;
   tryLogin: () => any;
@@ -82,6 +83,7 @@ const AuthContextProvider = ({
     <AuthContext.Provider
       value={{
         user: data?.me,
+        token,
         authLoading,
         tryLogin: forceReRender,
         logout: () => {
