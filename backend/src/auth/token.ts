@@ -10,20 +10,29 @@ import { RequestHandler } from "express";
 const privKey = fs.readFileSync("./secrets/tokens.key");
 const pubKey = fs.readFileSync("./secrets/tokens.pub");
 
-const issueToken = (userId: string) => {
+const issueToken = (
+  userId: string,
+  options: { claims: string[]; expiresIn: string | number } = {
+    claims: ["frontend"],
+    expiresIn: "1h",
+  }
+) => {
   return jwt.sign({}, privKey, {
     algorithm: "RS256",
     subject: userId,
-    expiresIn: "1h",
+    expiresIn: options.expiresIn,
     issuer: "DadleX-Backend",
-    audience: "graph",
+    audience: options.claims,
   });
 };
 
-const verifyToken = (token: string): jwt.JwtPayload => {
+const verifyToken = (
+  token: string,
+  options: { claims: string[] } = { claims: ["frontend"] }
+): jwt.JwtPayload => {
   return jwt.verify(token, pubKey, {
     algorithms: ["RS256"],
-    audience: "graph",
+    audience: options.claims,
   }) as jwt.JwtPayload;
 };
 
