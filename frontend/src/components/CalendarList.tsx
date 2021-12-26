@@ -58,7 +58,15 @@ const getIconForHealthCheck = (checkResult?: TCalendarHealthCheck) => {
   return <CloseCircleOutlined />;
 };
 
-const CalendarList = () => {
+const CalendarList = ({
+  filter = () => true,
+  showHealthCheckButtons = true,
+  showDeleteButtons = true,
+}: {
+  filter?: (calendarId: string) => boolean;
+  showHealthCheckButtons?: boolean;
+  showDeleteButtons?: boolean;
+}) => {
   const { loading: calendarsLoading, data: calendarsData } =
     useQuery<GetMyCalendars>(GET_MY_CALENDARS);
 
@@ -88,7 +96,8 @@ const CalendarList = () => {
     CheckCalendarHealth,
     CheckCalendarHealthVariables
   >(CHECK_CALENDAR_HEALTH, { successMessage: null });
-  const { getMyCalendars: calendars } = calendarsData || { getMyCalendars: [] };
+  const calendars =
+    calendarsData?.getMyCalendars.filter((c) => filter(c._id)) ?? [];
 
   const onDeleteClick = async (calendarId: string) => {
     updateCalendarsBeingDeleted((l) => {
@@ -175,56 +184,65 @@ const CalendarList = () => {
         const healthCheckResult = calendarHealthChecks.find(
           (h) => h.calId == cal._id
         );
-        return (
-          <List.Item
-            actions={[
-              <Switch
+
+        const actions: React.ReactNode[] = [
+          <Switch
+            size="small"
+            loading={calendarsWithPendingEnabledChange.some(
+              (p) => p == cal._id
+            )}
+            checked={cal.enabled}
+            onChange={async (enabled) => {
+              onCalendarEnabledChange(cal._id, enabled);
+            }}
+          />,
+        ];
+
+        if (showHealthCheckButtons)
+          actions.push(
+            <Tooltip
+              title={healthCheckResult ? null : "Verknüpfung überprüfen"}
+            >
+              <Button
                 size="small"
-                loading={calendarsWithPendingEnabledChange.some(
-                  (p) => p == cal._id
-                )}
-                checked={cal.enabled}
-                onChange={async (enabled) => {
-                  onCalendarEnabledChange(cal._id, enabled);
-                }}
-              />,
-              <Tooltip
-                title={healthCheckResult ? null : "Verknüpfung überprüfen"}
-              >
-                <Button
-                  size="small"
-                  key="check"
-                  loading={healthCheckResult?.loading}
-                  icon={getIconForHealthCheck(healthCheckResult)}
-                  type={
-                    healthCheckResult && healthCheckResult.healthy
-                      ? "primary"
-                      : "default"
-                  }
-                  danger={
-                    healthCheckResult &&
-                    typeof healthCheckResult.healthy !== "undefined" &&
-                    !healthCheckResult.healthy
-                  }
-                  onClick={async () => onHealthCheckClick(cal._id)}
-                />
-              </Tooltip>,
-              <Popconfirm
-                title="Soll die Kalenderverknüpfung wirklich gelöscht werden?"
-                onConfirm={async () => onDeleteClick(cal._id)}
-                okText="Ja"
-                cancelText="Abbrechen"
-                placement="left"
-              >
-                <Button
-                  size="small"
-                  key="delete"
-                  loading={calendarsBeingDeleted.some((c) => c == cal._id)}
-                  icon={<DeleteOutlined />}
-                />
-              </Popconfirm>,
-            ]}
-          >
+                key="check"
+                loading={healthCheckResult?.loading}
+                icon={getIconForHealthCheck(healthCheckResult)}
+                type={
+                  healthCheckResult && healthCheckResult.healthy
+                    ? "primary"
+                    : "default"
+                }
+                danger={
+                  healthCheckResult &&
+                  typeof healthCheckResult.healthy !== "undefined" &&
+                  !healthCheckResult.healthy
+                }
+                onClick={async () => onHealthCheckClick(cal._id)}
+              />
+            </Tooltip>
+          );
+
+        if (showDeleteButtons)
+          actions.push(
+            <Popconfirm
+              title="Soll die Kalenderverknüpfung wirklich gelöscht werden?"
+              onConfirm={async () => onDeleteClick(cal._id)}
+              okText="Ja"
+              cancelText="Abbrechen"
+              placement="left"
+            >
+              <Button
+                size="small"
+                key="delete"
+                loading={calendarsBeingDeleted.some((c) => c == cal._id)}
+                icon={<DeleteOutlined />}
+              />
+            </Popconfirm>
+          );
+
+        return (
+          <List.Item actions={actions}>
             <List.Item.Meta
               avatar={
                 <Avatar icon={getIconForCalendarProvider(cal.provider)} />
