@@ -68,7 +68,7 @@ class MicrosoftCalendarProvider implements ICalendarProvider {
     if (process.env.CAL_MS_TENANT_ID) {
       if (!process.env.BACKEND_PUBLIC_URL || !process.env.FRONTEND_PUBLIC_URL)
         throw new Error(
-          "BACKEND_PUBLIC_URL and FRONTEND_PUBLIC_URL must be specified when authentication is enabled"
+          "BACKEND_PUBLIC_URL and FRONTEND_PUBLIC_URL must be specified when microsoft calendar is enabled"
         );
     }
 
