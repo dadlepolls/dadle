@@ -12,7 +12,11 @@ import { EventStatus, IEvent } from "../../util/types";
 import express, { Request } from "express";
 import passport from "passport";
 import OAuth2Strategy, { VerifyCallback } from "passport-oauth2";
-import { issueToken, verifyToken } from "../../auth/token";
+import {
+  issueToken,
+  parseTokenMiddleware,
+  verifyToken,
+} from "../../auth/token";
 import { JwtPayload } from "jsonwebtoken";
 import { User } from "../../db/models";
 import { CalendarProviders } from "./CalendarProviders";
@@ -176,16 +180,11 @@ class MicrosoftCalendarProvider implements ICalendarProvider {
       )
     );
 
-    router.get("/add", (req, res, next) => {
-      if (!req.query.token)
-        return res
-          .status(400)
-          .send("Provide token with 'frontend' claim for adding a calendar");
-      const token = verifyToken(String(req.query.token));
-      if (!token.sub) return res.status(400).send("Token is missing subject");
+    router.get("/add", parseTokenMiddleware, (req, res, next) => {
+      if (!req.user?._id) return res.status(401).send("User id missing");
 
       passport.authenticate("cal_microsoft", {
-        state: issueToken(token.sub, {
+        state: issueToken(req.user._id, {
           claims: ["cal_microsoft"],
           expiresIn: "10m",
         }),
