@@ -14,7 +14,7 @@ import passport from "passport";
 import { IGraphContext, IUser } from "./util/types";
 import { authRouter } from "./auth/authRouter";
 import { parseTokenMiddleware } from "./auth/token";
-import { MicrosoftCalendarProvider } from "./integrations/calendar/MicrosoftCalendarProvider";
+import { CalendarProviders } from "./integrations/calendar/CalendarProviders";
 
 /* eslint-disable */
 declare global {
@@ -30,7 +30,7 @@ const port = process.env.HTTP_PORT || 3000;
 
 app.use("/auth", authRouter);
 
-app.use("/cal/microsoft", MicrosoftCalendarProvider.apiRouter());
+app.use("/cal", CalendarProviders.getProviderRouter());
 
 app.get("/", (req, res) => {
   res.status(403).send();

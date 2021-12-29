@@ -15,6 +15,7 @@ import OAuth2Strategy, { VerifyCallback } from "passport-oauth2";
 import { issueToken, verifyToken } from "../../auth/token";
 import { JwtPayload } from "jsonwebtoken";
 import { User } from "../../db/models";
+import { CalendarProviders } from "./CalendarProviders";
 
 class MicrosoftCalendarProvider implements ICalendarProvider {
   private calendarInfo;
@@ -280,5 +281,11 @@ class MicrosoftCalendarProvider implements ICalendarProvider {
     return events;
   }
 }
+
+CalendarProviders.registerProviderRouter(
+  "microsoft",
+  "Microsoft 365",
+  MicrosoftCalendarProvider.apiRouter()
+);
 
 export { MicrosoftCalendarProvider };
