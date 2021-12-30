@@ -44,9 +44,10 @@ const verifyToken = (
 };
 
 const parseTokenMiddleware: RequestHandler = (req, res, next) => {
-  const providedToken = req.get("authorization")
-    ? String(req.get("authorization")).replace("Bearer ", "")
-    : String(req.query.token);
+  let providedToken: string | undefined;
+  if (req.query.token) providedToken = String(req.query.token);
+  if (req.get("authorization"))
+    providedToken = String(req.get("authorization")).replace("Bearer ", "");
 
   if (providedToken) {
     try {
