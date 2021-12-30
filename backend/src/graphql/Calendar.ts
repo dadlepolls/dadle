@@ -18,12 +18,12 @@ import {
 import { User as UserModel } from "../db/models";
 
 @ObjectType()
-class Calendar implements Partial<ICalendar> {
+class Calendar implements Omit<Partial<ICalendar>, "provider"> {
   @Field(() => ID)
   _id: string;
 
   @Field()
-  provider: "microsoft";
+  provider: "google" | "microsoft";
 
   @Field()
   enabled: boolean;

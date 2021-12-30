@@ -4,6 +4,7 @@ class CalendarProviders {
   private static router: Router | undefined;
   private static routerNames: Map<string, string> = new Map();
 
+  //eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
   public static getProviderRouter() {

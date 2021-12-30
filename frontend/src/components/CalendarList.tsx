@@ -2,6 +2,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   DeleteOutlined,
+  GoogleOutlined,
   LinkOutlined,
   QuestionOutlined,
   WindowsOutlined
@@ -47,6 +48,8 @@ const getIconForCalendarProvider = (provider: string) => {
   switch (provider) {
     case "microsoft":
       return <WindowsOutlined />;
+    case "google":
+      return <GoogleOutlined />;
     default:
       return <QuestionOutlined />;
   }

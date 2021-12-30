@@ -1,4 +1,9 @@
-import { LinkOutlined, SaveOutlined, WindowsOutlined } from "@ant-design/icons";
+import {
+  GoogleOutlined,
+  LinkOutlined,
+  SaveOutlined,
+  WindowsOutlined
+} from "@ant-design/icons";
 import { useAuth } from "@components/AuthContext";
 import { CalendarList } from "@components/CalendarList";
 import { FreshlyAddedCalendarModal } from "@components/FreshlyAddedCalendarModal";
@@ -161,6 +166,9 @@ const Profile: NextPage = () => {
                 >
                   <Menu.Item key="microsoft" icon={<WindowsOutlined />}>
                     Microsoft 365&reg;-Kalender
+                  </Menu.Item>
+                  <Menu.Item key="google" icon={<GoogleOutlined />}>
+                    Google-Kalender
                   </Menu.Item>
                 </Menu>
               }

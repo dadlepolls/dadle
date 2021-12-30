@@ -1,7 +1,8 @@
 import { IEvent } from "src/util/types";
 import { MicrosoftCalendarProvider } from "./MicrosoftCalendarProvider";
+import { GoogleCalendarProvider } from "./GoogleCalendarProvider";
 
-type ICalendar = IMicrosoftCalendar;
+type ICalendar = IMicrosoftCalendar | IGoogleCalendar;
 
 interface IGenericCalendar {
   _id?: string;
@@ -17,6 +18,11 @@ interface IMicrosoftCalendar extends IGenericCalendar {
   calendarId: string;
 }
 
+interface IGoogleCalendar extends IGenericCalendar {
+  provider: "google";
+  calendarId: string;
+}
+
 interface ICalendarProvider {
   retrieveEvents: (rangeStart: Date, rangeEnd: Date) => Promise<IEvent[]>;
 }
@@ -24,7 +30,9 @@ interface ICalendarProvider {
 const getProviderForCalendar = (calendar: ICalendar): ICalendarProvider => {
   if (calendar.provider == "microsoft")
     return new MicrosoftCalendarProvider(calendar);
-  else throw new Error(`Unknown provider for calendar with id ${calendar._id}`);
+  else if (calendar.provider == "google")
+    return new GoogleCalendarProvider(calendar);
+  else throw new Error("Unknown provider for calendar");
 };
 
 export { getProviderForCalendar };
@@ -33,5 +41,6 @@ export type {
   ICalendar,
   IGenericCalendar,
   IMicrosoftCalendar,
+  IGoogleCalendar,
   ICalendarProvider,
 };
