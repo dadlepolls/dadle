@@ -82,8 +82,9 @@ class MicrosoftCalendarProvider implements ICalendarProvider {
           tokenURL: `https://login.microsoftonline.com/${
             process.env.CAL_MS_TENANT_ID ?? "common"
           }/oauth2/v2.0/token`,
-          clientID: process.env.CAL_MS_CLIENT_ID ?? "",
-          clientSecret: process.env.CAL_MS_CLIENT_SECRET ?? "",
+          clientID: process.env.CAL_MS_CLIENT_ID ?? "unknown_client_id",
+          clientSecret:
+            process.env.CAL_MS_CLIENT_SECRET ?? "unknown_client_secret",
           callbackURL:
             `${process.env.BACKEND_PUBLIC_URL}/cal/microsoft/callback` ?? "",
           scope: [

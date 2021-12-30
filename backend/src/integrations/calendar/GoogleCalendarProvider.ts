@@ -96,8 +96,8 @@ class GoogleCalendarProvider implements ICalendarProvider {
       new GoogleStrategy(
         {
           passReqToCallback: true,
-          clientID: process.env.CAL_GOOGLE_CLIENT_ID ?? "",
-          clientSecret: process.env.CAL_GOOGLE_CLIENT_SECRET ?? "",
+          clientID: process.env.CAL_GOOGLE_CLIENT_ID ?? "unknown_client_id",
+          clientSecret: process.env.CAL_GOOGLE_CLIENT_SECRET ?? "unknown_client_secret",
           callbackURL:
             `${process.env.BACKEND_PUBLIC_URL}/cal/google/callback` ?? "",
           scope: [
