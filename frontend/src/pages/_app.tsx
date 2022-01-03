@@ -165,7 +165,7 @@ function AppLayout({ Component, pageProps }: AppProps) {
           >
             DadleX
           </a>{" "}
-          | &copy;{new Date().getFullYear()}
+          | &copy; 2021 - {new Date().getFullYear()}
         </small>
       </Footer>
     </Layout>
