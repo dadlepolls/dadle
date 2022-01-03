@@ -82,6 +82,7 @@ const OptionRow = ({
           </span>
         ) : null}
         <Popover
+          visible={responses.yes > 0 || responses.maybe > 0 ? undefined : false}
           content={
             <List
               size="small"
