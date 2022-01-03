@@ -10,15 +10,21 @@
 
 .pollpage--container {
   display: flex;
-  flex-direction: row;
-  width: 100%;
   justify-content: center;
-  align-items: flex-end;
+  width: 100%;
+}
+
+.pollpage--scroll-container {
+  display: flex;
+  flex-direction: row;
+  max-width: 100%;
+  justify-content: flex-start;
+  align-items: stretch;
+  overflow-x: auto;
 }
 
 .pollpage--participations-container {
   width: auto;
-  overflow-x: auto;
   padding-right: 10px;
   padding-top: 10px;
 }
@@ -142,6 +148,16 @@
   line-height: 20px;
   font-size: 18px;
   font-weight: 700;
+}
+
+.pollpage--participants-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background-color: white;
+  position: sticky;
+  left: 0;
+  z-index: 2;
 }
 
 .pollpage--participants {

@@ -463,122 +463,126 @@ const PollResponses = ({
 
   return (
     <div className="pollpage--container">
-      <div className="pollpage--participants">
-        {poll?.participations.map((p, idx) => (
-          <ParticipantRow
-            key={idx}
-            nameHint={
-              p.author.user?.name ||
-              p.author.anonName ||
-              ls.get<string>("username")
-            }
-            editable={editableParticipation?._id == p._id}
-            canEditName={!editableParticipation?.author.user?._id}
-            onEditClick={() => setEditableParticipation(p)}
-            allowEdit={
-              !readOnly &&
-              (!p.author.user?._id || p.author.user._id == user?._id)
-            }
-            onSaveClick={async (e) => {
-              if (!editableParticipation) return;
-              await saveParticipation(
-                produce(
-                  editableParticipation,
-                  (
-                    draft: Partial<typeof editableParticipation> &
-                      PollParticipationInput
-                  ) => {
-                    delete draft.author;
-                    if (!p.author.anonName)
-                      draft.anonName = user?._id ? undefined : e;
-                    else draft.anonName = e;
-                  }
-                )
-              );
-
-              setEditableParticipation(null);
-            }}
-            onDeleteClick={() => deleteParticipation(p._id)}
-          />
-        ))}
-        {participationBeingAdded ? (
-          <ParticipantRow
-            nameHint={user?.name ?? ls.get("username") ?? ""}
-            className="pollpage--participant-add-field-container"
-            editable={true}
-            deletable={true}
-            deleteConfirmation={false}
-            canEditName={!user?._id}
-            onSaveClick={async (e) => {
-              ls.set("username", e);
-              await saveParticipation(
-                produce(
-                  participationBeingAdded,
-                  (
-                    draft: Partial<typeof editableParticipation> &
-                      PollParticipationInput
-                  ) => {
-                    delete draft.author;
-                    draft.anonName = user?._id ? undefined : e;
-                  }
-                )
-              );
-              setParticipationBeingAdded(null);
-            }}
-            onDeleteClick={() => setParticipationBeingAdded(null)}
-          />
-        ) : (
-          <div className="pollpage--add-btn-container">
-            {!readOnly ? (
-              <Button
-                shape="circle"
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() =>
-                  setParticipationBeingAdded({
-                    author: {
-                      anonName: ls.get<string>("username"),
-                      __typename: "UserOrAnon",
-                      user: null,
-                    },
-                    choices: [],
-                  })
+      <div className="pollpage--scroll-container">
+        <div className="pollpage--participants-container">
+          <div className="pollpage--participants">
+            {poll?.participations.map((p, idx) => (
+              <ParticipantRow
+                key={idx}
+                nameHint={
+                  p.author.user?.name ||
+                  p.author.anonName ||
+                  ls.get<string>("username")
                 }
+                editable={editableParticipation?._id == p._id}
+                canEditName={!editableParticipation?.author.user?._id}
+                onEditClick={() => setEditableParticipation(p)}
+                allowEdit={
+                  !readOnly &&
+                  (!p.author.user?._id || p.author.user._id == user?._id)
+                }
+                onSaveClick={async (e) => {
+                  if (!editableParticipation) return;
+                  await saveParticipation(
+                    produce(
+                      editableParticipation,
+                      (
+                        draft: Partial<typeof editableParticipation> &
+                          PollParticipationInput
+                      ) => {
+                        delete draft.author;
+                        if (!p.author.anonName)
+                          draft.anonName = user?._id ? undefined : e;
+                        else draft.anonName = e;
+                      }
+                    )
+                  );
+
+                  setEditableParticipation(null);
+                }}
+                onDeleteClick={() => deleteParticipation(p._id)}
+              />
+            ))}
+            {participationBeingAdded ? (
+              <ParticipantRow
+                nameHint={user?.name ?? ls.get("username") ?? ""}
+                className="pollpage--participant-add-field-container"
+                editable={true}
+                deletable={true}
+                deleteConfirmation={false}
+                canEditName={!user?._id}
+                onSaveClick={async (e) => {
+                  ls.set("username", e);
+                  await saveParticipation(
+                    produce(
+                      participationBeingAdded,
+                      (
+                        draft: Partial<typeof editableParticipation> &
+                          PollParticipationInput
+                      ) => {
+                        delete draft.author;
+                        draft.anonName = user?._id ? undefined : e;
+                      }
+                    )
+                  );
+                  setParticipationBeingAdded(null);
+                }}
+                onDeleteClick={() => setParticipationBeingAdded(null)}
               />
             ) : (
-              <div></div>
+              <div className="pollpage--add-btn-container">
+                {!readOnly ? (
+                  <Button
+                    shape="circle"
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() =>
+                      setParticipationBeingAdded({
+                        author: {
+                          anonName: ls.get<string>("username"),
+                          __typename: "UserOrAnon",
+                          user: null,
+                        },
+                        choices: [],
+                      })
+                    }
+                  />
+                ) : (
+                  <div></div>
+                )}
+              </div>
             )}
           </div>
-        )}
-      </div>
-      <div className="pollpage--participations-container">
-        <OptionsRow
-          key="optionstitles"
-          options={poll?.options || []}
-          choiceCountPerOption={getChoiceCountPerOption(poll)}
-        />
-        <div className="pollpage--participations">
-          {poll.participations.map((p, idx) => (
-            <ParticipationRow
-              key={idx}
-              participation={p}
-              options={poll.options}
-              availabilityHints={poll.availabilityHints}
-              editable={editableParticipation?._id == p._id}
-              onChoiceChange={onChoiceChangeCallbackEditing}
-            />
-          ))}
-          {participationBeingAdded ? (
-            <ParticipationRow
-              participation={participationBeingAdded}
-              options={poll?.options}
-              availabilityHints={poll.availabilityHints}
-              editable={true}
-              onChoiceChange={onChoiceChangeCallbackAdding}
-            />
-          ) : (
-            <div className="pollpage--participation-choice-row pollpage--participation-choice-row-empty" />
-          )}
+        </div>
+        <div className="pollpage--participations-container">
+          <OptionsRow
+            key="optionstitles"
+            options={poll?.options || []}
+            choiceCountPerOption={getChoiceCountPerOption(poll)}
+          />
+          <div className="pollpage--participations">
+            {poll.participations.map((p, idx) => (
+              <ParticipationRow
+                key={idx}
+                participation={p}
+                options={poll.options}
+                availabilityHints={poll.availabilityHints}
+                editable={editableParticipation?._id == p._id}
+                onChoiceChange={onChoiceChangeCallbackEditing}
+              />
+            ))}
+            {participationBeingAdded ? (
+              <ParticipationRow
+                participation={participationBeingAdded}
+                options={poll?.options}
+                availabilityHints={poll.availabilityHints}
+                editable={true}
+                onChoiceChange={onChoiceChangeCallbackAdding}
+              />
+            ) : (
+              <div className="pollpage--participation-choice-row pollpage--participation-choice-row-empty" />
+            )}
+          </div>
         </div>
       </div>
     </div>
