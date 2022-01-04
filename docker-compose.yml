@@ -19,6 +19,11 @@ services:
       - AUTH_MS_TENANT_ID
       - AUTH_MS_CLIENT_ID
       - AUTH_MS_CLIENT_SECRET
+      - CAL_MS_TENANT_ID
+      - CAL_MS_CLIENT_ID
+      - CAL_MS_CLIENT_SECRET
+      - CAL_GOOGLE_CLIENT_ID
+      - CAL_GOOGLE_CLIENT_SECRET
     volumes:
       - ./data/backend-secrets:/app/secrets
     depends_on:
