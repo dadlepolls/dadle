@@ -18,11 +18,23 @@ import {
 } from "__generated__/globalTypes";
 import {
   deriveNextChoiceFromCurrent,
+  determineAvailabilitySuggestion,
   getChoiceCountPerOption,
   mapChoiceToColorVariable,
   ParticipationChoiceCell,
   TPartialParticipationWithId
 } from "./PollResponses";
+
+const getAvailabilityHintText = (numberOfOverlappingElements: number) => {
+  const quantifier = numberOfOverlappingElements
+    ? numberOfOverlappingElements
+    : "Keine";
+  const text = `${quantifier} ${
+    numberOfOverlappingElements == 1 ? "Überlappung" : "Überlappungen"
+  }`;
+
+  return <span>{text}</span>;
+};
 
 const OptionRow = ({
   option,
@@ -32,7 +44,8 @@ const OptionRow = ({
   onChoiceCellClick,
 }: {
   option: GetPollByLink_getPollByLink_options;
-  poll: GetPollByLink_getPollByLink;
+  poll: GetPollByLink_getPollByLink &
+    Partial<GetPollAvailabilityHints_getPollByLink>;
   responsesPerChoice: ReturnType<typeof getChoiceCountPerOption>;
   choice?: YesNoMaybe;
   onChoiceCellClick: () => any;
@@ -44,6 +57,10 @@ const OptionRow = ({
   const typeIsDateOrDateTime =
     option.type == PollOptionType.Date ||
     option.type == PollOptionType.DateTime;
+
+  const availabilityHint = poll.availabilityHints?.find(
+    (h) => h.option == option._id
+  );
 
   return (
     <div className="pollpage-mobile--option-row">
@@ -109,10 +126,27 @@ const OptionRow = ({
             {responses.maybe ? `(+${responses.maybe}) ` : null}Zusagen
           </b>
         </Popover>
+        {availabilityHint ? (
+          <Popover
+            visible={
+              availabilityHint.overlappingEvents.length ? undefined : false
+            }
+            content={availabilityHint.overlappingEvents
+              .map((e) => e.title)
+              .join(", ")}
+          >
+            {getAvailabilityHintText(availabilityHint.overlappingEvents.length)}
+          </Popover>
+        ) : null}
       </div>
       <ParticipationChoiceCell
         choice={choice}
         editable={true}
+        suggestionWhenEmpty={
+          availabilityHint
+            ? determineAvailabilitySuggestion(availabilityHint)
+            : undefined
+        }
         onClick={onChoiceCellClick}
       />
     </div>

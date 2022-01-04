@@ -332,6 +332,16 @@ const deriveNextChoiceFromCurrent = (currentChoice?: YesNoMaybe) => {
   }
 };
 
+const determineAvailabilitySuggestion = (
+  hint?: GetPollAvailabilityHints_getPollByLink_availabilityHints
+) => {
+  if (hint?.overlappingEvents.some((e) => e.status == EventStatus.Confirmed))
+    return YesNoMaybe.No;
+  if (hint?.overlappingEvents.some((e) => e.status == EventStatus.Tentative))
+    return YesNoMaybe.Maybe;
+  return YesNoMaybe.Yes;
+};
+
 const ParticipationRow = ({
   options,
   participation: propParticipation,
@@ -355,16 +365,6 @@ const ParticipationRow = ({
   //only show availability hints if some are given (not the case for unauthenticated users)
   const showAvailabilityHints =
     availabilityHints && availabilityHints.length > 0;
-
-  const determineAvailabilitySuggestion = (
-    hint?: GetPollAvailabilityHints_getPollByLink_availabilityHints
-  ) => {
-    if (hint?.overlappingEvents.some((e) => e.status == EventStatus.Confirmed))
-      return YesNoMaybe.No;
-    if (hint?.overlappingEvents.some((e) => e.status == EventStatus.Tentative))
-      return YesNoMaybe.Maybe;
-    return YesNoMaybe.Yes;
-  };
 
   const handleChoiceClick = (optionId: string) => {
     updateParticipation((participation) => {
@@ -595,6 +595,7 @@ export {
   ParticipationChoiceCell,
   deriveNextChoiceFromCurrent,
   mapChoiceToColorVariable,
+  determineAvailabilitySuggestion,
 };
 export type { TPartialParticipationWithId };
 
