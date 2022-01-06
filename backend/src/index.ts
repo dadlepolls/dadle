@@ -26,7 +26,7 @@ declare global {
 
 const app = express();
 app.use(passport.initialize());
-const port = process.env.HTTP_PORT || 3000;
+const port = process.env.HTTP_PORT || 3001;
 
 app.use("/auth", authRouter);
 
