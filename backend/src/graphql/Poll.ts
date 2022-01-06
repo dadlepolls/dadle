@@ -87,8 +87,8 @@ class PollInput {
   @Field()
   title: string;
 
-  @Field()
-  link: string;
+  @Field({ nullable: true })
+  link?: string;
 
   @Field({ nullable: true })
   timezone?: string;
@@ -194,20 +194,21 @@ class PollResolver {
           "INSUFFICIENT_PERMISSIONS"
         );
 
-      //manually update the new poll options since they require more logic, just copy the new poll props
-      const { options: givenPollOptions, ...newPollProps } = poll;
-
-      //take all poll props except the PollOptions
-      let k: keyof typeof newPollProps;
-      for (k in newPollProps) dbPoll[k] = newPollProps[k];
+      if (poll.link)
+        throw new ApolloError(
+          "Can't edit link of an existing poll",
+          "INVALID_REQUEST"
+        );
+      if (poll.title) dbPoll.title = poll.title;
+      if (poll.timezone) dbPoll.timezone = poll.timezone;
 
       //remove any poll options that don't exist in the new options
       dbPoll.options = dbPoll.options?.filter(
-        (x) => x._id && givenPollOptions.some((o) => x._id == o._id)
+        (x) => x._id && poll.options.some((o) => x._id == o._id)
       );
 
       //manually update the poll options
-      for (const givenPollOpt of givenPollOptions) {
+      for (const givenPollOpt of poll.options) {
         if (
           !givenPollOpt._id ||
           !dbPoll.options?.some((x) => x._id == givenPollOpt._id)
@@ -225,6 +226,7 @@ class PollResolver {
           opt["type"] = givenPollOpt["type"];
         }
       }
+      dbPoll.markModified("options");
 
       await dbPoll.save();
       return dbPoll.toObject();
@@ -233,6 +235,24 @@ class PollResolver {
       const author: IUserOrAnon = {};
       if (ctx.user?._id) author.userId = ctx.user._id;
       else author.anonName = "";
+
+      if (!poll.link)
+        poll.link = poll.title
+          .replace(/ /g, "-")
+          .replace(/ä/g, "ae")
+          .replace(/Ä/g, "AE")
+          .replace(/ö/g, "oe")
+          .replace(/Ö/g, "OE")
+          .replace(/ü/g, "ue")
+          .replace(/Ü/g, "UE")
+          .replace(/(?![\w-])./g, "");
+
+      //validate that link is unique
+      if (await PollModel.findOne({ link: poll.link }).exec())
+        throw new ApolloError(
+          "Poll validation failed: Link must be unique",
+          "POLL_VALIDATION_FAILED"
+        );
 
       const pollDoc = new PollModel({ ...poll, author });
       try {

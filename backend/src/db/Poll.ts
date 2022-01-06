@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-//import mongooseUniqueValidator from "mongoose-unique-validator";
 import { IPoll } from "../util/types";
 import { schema as UserOrAnonSchema } from "./UserOrAnon";
 import { schema as PollCommentSchema } from "./PollComment";
@@ -9,6 +8,7 @@ import { schema as PollParticipationSchema } from "./PollParticipation";
 const schema = new Schema<IPoll>(
   {
     title: { type: Schema.Types.String, required: true },
+    //caution: uniqueness of link has to be validate in controller, unique is only a mongo flag
     link: { type: Schema.Types.String, required: true, unique: true },
     timezone: {
       type: Schema.Types.String,
@@ -27,8 +27,6 @@ const schema = new Schema<IPoll>(
     },
   }
 );
-//TODO validate unique links
-//schema.plugin(mongooseUniqueValidator);
 
 let model: mongoose.Model<IPoll>;
 if (mongoose.models.Poll) {
