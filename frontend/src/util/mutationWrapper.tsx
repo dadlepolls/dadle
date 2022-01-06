@@ -67,6 +67,15 @@ function useStyledMutation<
           <>
             <br />
             <small>{ex.message}</small>
+            {ex.graphQLErrors.map((e, idx) => {
+              if (e.extensions.message)
+                return (
+                  <small key={idx}>
+                    <br />
+                    {e.extensions.message}
+                  </small>
+                );
+            })}
           </>
         );
       }
