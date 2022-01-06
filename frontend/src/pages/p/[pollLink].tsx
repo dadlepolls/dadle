@@ -154,11 +154,13 @@ const PollPage: NextPage = () => {
             subTitle={poll?.author ? getUserDisplayname(poll.author) : null}
             style={{ marginBottom: "16px" }}
             extra={
-              <Button
-                hidden={isEditingPoll}
-                onClick={() => setIsEditingPoll(true)}
-                icon={<EditOutlined />}
-              />
+              !poll.author.user?._id || poll.author.user._id == user?._id ? (
+                <Button
+                  hidden={isEditingPoll}
+                  onClick={() => setIsEditingPoll(true)}
+                  icon={<EditOutlined />}
+                />
+              ) : null
             }
           >
             <Descriptions size="small" column={mobileDisplay ? 1 : 3}>

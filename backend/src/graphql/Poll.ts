@@ -177,7 +177,7 @@ class PollResolver {
     @Ctx() ctx: IGraphContext
   ) {
     //validate that timezone is correct
-    if (!poll.timezone) delete poll.timezone;  //take nullish value and delete
+    if (!poll.timezone) delete poll.timezone; //take nullish value and delete
     if (poll.timezone && !moment.tz.zone(poll.timezone))
       throw new ApolloError("Invalid timezone given!", "INVALID_REQUEST");
 
@@ -187,6 +187,12 @@ class PollResolver {
       if (!dbPoll) {
         throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
       }
+
+      if (dbPoll.author.userId && dbPoll.author.userId != ctx.user?._id)
+        throw new ApolloError(
+          "Can't edit polls of other users",
+          "INSUFFICIENT_PERMISSIONS"
+        );
 
       //manually update the new poll options since they require more logic, just copy the new poll props
       const { options: givenPollOptions, ...newPollProps } = poll;
