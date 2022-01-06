@@ -238,6 +238,7 @@ const PollPage: NextPage = () => {
               <PollEditDialog
                 title="Umfrage bearbeiten"
                 poll={poll}
+                allowLinkEditing={false}
                 saveButtonIcon={<SaveOutlined />}
                 saveButtonContent="Änderungen speichern"
                 onSaveSuccess={() => setIsEditingPoll(false)}

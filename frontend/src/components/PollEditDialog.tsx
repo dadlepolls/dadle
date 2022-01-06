@@ -7,22 +7,11 @@ import {
 } from "@operations/mutations/__generated__/CreateOrUpdatePoll";
 import { GetPollByLink_getPollByLink } from "@operations/queries/__generated__/GetPollByLink";
 import { useStyledMutation } from "@util/mutationWrapper";
-import { Button, Card, Collapse, Form, Input } from "antd";
+import { Button, Card, Collapse, Form, Input, Select } from "antd";
+import produce from "immer";
 import React, { useState } from "react";
 import { PollOptionType } from "__generated__/globalTypes";
 import { OptionEditor, OptionEditorType } from "./PollEditDialog/OptionEditor";
-
-const autocreateLinkFromTitle = (title: string) => {
-  return title
-    .replaceAll(" ", "-")
-    .replaceAll("ä", "ae")
-    .replaceAll("Ä", "AE")
-    .replaceAll("ö", "oe")
-    .replaceAll("Ö", "OE")
-    .replaceAll("ü", "ue")
-    .replaceAll("Ü", "UE")
-    .replaceAll(/(?![\w-])./g, "");
-};
 
 const mapOptionTypeToEditorType = (t?: PollOptionType) => {
   if (t == PollOptionType.Arbitrary) return OptionEditorType.Arbitrary;
@@ -38,6 +27,7 @@ const getWindowOrigin = () =>
 export const PollEditDialog = ({
   poll: _poll,
   title,
+  allowLinkEditing = true,
   saveButtonContent = "Speichern",
   saveButtonIcon,
   onSaveSuccess = (_) => {},
@@ -45,6 +35,7 @@ export const PollEditDialog = ({
 }: {
   poll?: Partial<GetPollByLink_getPollByLink>;
   title: string;
+  allowLinkEditing?: boolean;
   saveButtonIcon?: JSX.Element;
   saveButtonContent?: JSX.Element | string;
   onSaveSuccess?: (poll?: CreateOrUpdatePoll_createOrUpdatePoll) => any;
@@ -68,14 +59,22 @@ export const PollEditDialog = ({
   });
 
   const savePoll = async (
-    _poll: Partial<CreateOrUpdatePoll_createOrUpdatePoll>
+    _poll: Partial<CreateOrUpdatePoll_createOrUpdatePoll> & {
+      linkMode?: string;
+    } & { __typename?: string }
   ) => {
-    const { __typename, ...poll } = _poll; //omit typename key
+    const poll = produce(_poll, (draft) => {
+      if ("__typename" in draft) delete draft.__typename;
+      if ("linkMode" in draft) {
+        if (draft.linkMode == "auto") draft.link = undefined;
+        delete draft.linkMode;
+      }
+    });
+
     await createOrUpdatePollMutation(
       {
         poll: {
           title: "",
-          link: "",
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
           ...poll,
           options:
@@ -121,6 +120,20 @@ export const PollEditDialog = ({
     );
   };
 
+  const autocreateLink = (title: string) => {
+    form.setFieldsValue({
+      link: title
+        .replaceAll(" ", "-")
+        .replaceAll("ä", "ae")
+        .replaceAll("Ä", "AE")
+        .replaceAll("ö", "oe")
+        .replaceAll("Ö", "OE")
+        .replaceAll("ü", "ue")
+        .replaceAll("Ü", "UE")
+        .replaceAll(/(?![\w-])./g, ""),
+    });
+  };
+
   return (
     <Card style={{ width: "100%" }} title={title}>
       <Form
@@ -153,14 +166,11 @@ export const PollEditDialog = ({
             type="text"
             placeholder="Name der Umfrage"
             onChange={(e) => {
-              if (!linkModifiedManually)
-                form.setFieldsValue({
-                  link: autocreateLinkFromTitle(e.target.value),
-                });
+              if (!linkModifiedManually) autocreateLink(e.target.value);
             }}
           />
         </Form.Item>
-        <Form.Item noStyle dependencies={["title"]}>
+        <Form.Item noStyle dependencies={["title", "linkMode"]}>
           {({ getFieldValue }) =>
             getFieldValue("title") ? (
               <Collapse ghost>
@@ -169,33 +179,61 @@ export const PollEditDialog = ({
                   header="Erweiterte Einstellungen"
                   forceRender={true}
                 >
-                  <Form.Item
-                    required={true}
-                    label="Link zur Umfrage"
-                    name="link"
-                    rules={[
-                      {
-                        required: true,
-                        message:
-                          "Es muss ein Link für die Umfrage angegeben werden!",
-                      },
-                      {
-                        pattern: /^[\w-]+$/g,
-                        message:
-                          "Der Link darf nur Buchstaben, Zahlen, Bindestriche und Unterstriche enthalten!",
-                      },
-                    ]}
-                  >
-                    <Input
-                      type="text"
-                      addonBefore={`${getWindowOrigin()}/p/`}
-                      placeholder="Link zur Umfrage"
-                      onChange={() => {
-                        if (!linkModifiedManually)
-                          setLinkModifiedManually(true);
-                      }}
-                    />
-                  </Form.Item>
+                  {allowLinkEditing ? (
+                    <Form.Item
+                      required={true}
+                      label="Link zur Umfrage"
+                      name="link"
+                      dependencies={["linkMode"]}
+                      rules={[
+                        {
+                          required: true,
+                          message:
+                            "Es muss ein Link für die Umfrage angegeben werden!",
+                        },
+                        {
+                          pattern: /^[\w-]+$/g,
+                          message:
+                            "Der Link darf nur Buchstaben, Zahlen, Bindestriche und Unterstriche enthalten!",
+                        },
+                      ]}
+                    >
+                      <Input
+                        type="text"
+                        addonBefore={
+                          <Form.Item
+                            name="linkMode"
+                            noStyle
+                            initialValue={"auto"}
+                          >
+                            <Select
+                              onChange={(opt) => {
+                                if (opt == "auto") {
+                                  //reset link when changing to auto
+                                  setLinkModifiedManually(false);
+                                  autocreateLink(getFieldValue("title"));
+                                }
+                              }}
+                            >
+                              <Select.Option value="auto">
+                                Automatisch erzeugen
+                              </Select.Option>
+                              <Select.Option value="manual">
+                                Link anpassen
+                              </Select.Option>
+                            </Select>
+                          </Form.Item>
+                        }
+                        disabled={getFieldValue("linkMode") == "auto"}
+                        placeholder="Link zur Umfrage"
+                        prefix={`${getWindowOrigin()}/p/`}
+                        onChange={() => {
+                          if (!linkModifiedManually)
+                            setLinkModifiedManually(true);
+                        }}
+                      />
+                    </Form.Item>
+                  ) : null}
                 </Collapse.Panel>
               </Collapse>
             ) : null
