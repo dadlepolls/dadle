@@ -256,6 +256,25 @@ class PollResolver {
     }
   }
 
+  @Mutation(() => Boolean, { nullable: true })
+  async deletePoll(
+    @Arg("pollId", () => ID) pollId: string,
+    @Ctx() ctx: IGraphContext
+  ) {
+    const poll = await PollModel.findOne({ _id: pollId }).exec();
+    if (!poll) throw new ApolloError("Couldn't find poll", "POLL_NOT_FOUND");
+
+    if (poll.author.userId && poll.author.userId != ctx.user?._id)
+      throw new ApolloError(
+        "Can't delete poll of other users!",
+        "INSUFFICIENT_PERMISSIONS"
+      );
+
+    await poll.delete();
+
+    return true;
+  }
+
   @Mutation(() => Poll)
   async createOrUpdateParticipation(
     @Arg("pollId", () => ID) pollId: string,

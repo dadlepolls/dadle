@@ -1,4 +1,4 @@
-import { EditOutlined, SaveOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
 import { useQuery } from "@apollo/client";
 import { useAuth } from "@components/AuthContext";
 import { ErrorPage } from "@components/ErrorPage";
@@ -13,6 +13,7 @@ import { PollEditDialog } from "@components/PollEditDialog";
 import { useMobileComponentsPrefered } from "@components/ResponsiveContext";
 import { CREATE_OR_UPDATE_PARTICIPATION } from "@operations/mutations/CreateOrUpdateParticipation";
 import { DELETE_PARTICIPATION } from "@operations/mutations/DeleteParticipation";
+import { DELETE_POLL } from "@operations/mutations/DeletePoll";
 import {
   CreateOrUpdateParticipation,
   CreateOrUpdateParticipationVariables
@@ -21,6 +22,10 @@ import {
   DeleteParticipation,
   DeleteParticipationVariables
 } from "@operations/mutations/__generated__/DeleteParticipation";
+import {
+  DeletePoll,
+  DeletePollVariables
+} from "@operations/mutations/__generated__/DeletePoll";
 import { GET_POLL_AVAILABILITY_HINTS } from "@operations/queries/GetPollAvailabilityHints";
 import { GET_POLL_BY_LINK } from "@operations/queries/GetPollByLink";
 import { GetPollAvailabilityHints } from "@operations/queries/__generated__/GetPollAvailabilityHints";
@@ -31,7 +36,16 @@ import {
 import { getUserDisplayname } from "@util/getUserDisplayname";
 import { useStyledMutation } from "@util/mutationWrapper";
 import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
-import { Button, Card, Descriptions, message, PageHeader, Tooltip } from "antd";
+import {
+  Button,
+  Card,
+  Descriptions,
+  message,
+  PageHeader,
+  Popconfirm,
+  Space,
+  Tooltip
+} from "antd";
 import moment from "moment";
 import { NextPage } from "next";
 import Head from "next/head";
@@ -83,6 +97,31 @@ const PollPage: NextPage = () => {
         ),
     }
   );
+
+  const deletePollMutation = useStyledMutation<DeletePoll, DeletePollVariables>(
+    DELETE_POLL,
+    {
+      successMessage: "Umfrage erfolgreich gelöscht!",
+      errorMessage: "Umfrage konnte nicht gelöscht werden!",
+    }
+  );
+  const deletePoll = async () => {
+    if (!poll?._id) return;
+    await deletePollMutation(
+      { pollId: poll._id },
+      {
+        update(cache) {
+          const normalizedId = cache.identify({
+            id: poll._id,
+            __typename: "Poll",
+          });
+          cache.evict({ id: normalizedId });
+          cache.gc();
+        },
+      }
+    );
+    router.replace("/");
+  };
 
   const createOrUpdateParticipationMutation = useStyledMutation<
     CreateOrUpdateParticipation,
@@ -155,11 +194,22 @@ const PollPage: NextPage = () => {
             style={{ marginBottom: "16px" }}
             extra={
               !poll.author.user?._id || poll.author.user._id == user?._id ? (
-                <Button
-                  hidden={isEditingPoll}
-                  onClick={() => setIsEditingPoll(true)}
-                  icon={<EditOutlined />}
-                />
+                <Space>
+                  <Button
+                    hidden={isEditingPoll}
+                    onClick={() => setIsEditingPoll(true)}
+                    icon={<EditOutlined />}
+                  />
+                  <Popconfirm
+                    title="Soll die Umfrage wirklich gelöscht werden?"
+                    okText="Ja"
+                    cancelText="Abbrechen"
+                    placement="bottomLeft"
+                    onConfirm={() => deletePoll()}
+                  >
+                    <Button icon={<DeleteOutlined />} hidden={isEditingPoll} />
+                  </Popconfirm>
+                </Space>
               ) : null
             }
           >
