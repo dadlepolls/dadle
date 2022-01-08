@@ -1,0 +1,159 @@
+type Query {
+  me: User!
+  getPolls(first: Int = 0, limit: Int): [Poll!]!
+  getMyPolls(first: Int = 0, limit: Int): [Poll!]!
+  getPollByLink(pollLink: String!): Poll
+  getMyCalendars: [Calendar!]!
+}
+
+type User {
+  _id: ID!
+  provider: String
+  idAtProvider: String
+  nameAtProvider: String
+  mail: String!
+  name: String!
+}
+
+type Poll {
+  _id: ID!
+  title: String!
+  link: String!
+  timezone: String!
+  author: UserOrAnon!
+  options: [PollOption!]!
+  comments: [PollComment!]!
+  participations: [PollParticipation!]!
+  createdAt: DateTime
+  updatedAt: DateTime
+
+  """
+  Get availability hints for options. Only for authenticated users. Query may take long, so omit this field for other operations
+  """
+  availabilityHints: [AvailabilityHint!]!
+}
+
+type UserOrAnon {
+  anonName: String
+  userId: String
+  user: User
+}
+
+type PollOption {
+  _id: ID!
+  type: PollOptionType!
+  from: DateTime
+  to: DateTime
+  title: String
+}
+
+enum PollOptionType {
+  Date
+  DateTime
+  Arbitrary
+}
+
+"""
+The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
+scalar DateTime
+
+type PollComment {
+  _id: ID!
+  author: UserOrAnon!
+  text: String!
+}
+
+type PollParticipation {
+  _id: ID!
+  author: UserOrAnon!
+  choices: [PollChoice!]!
+}
+
+type PollChoice {
+  """references the ID of a PollOption of this very Poll"""
+  option: ID!
+  choice: YesNoMaybe!
+}
+
+enum YesNoMaybe {
+  Yes
+  No
+  Maybe
+}
+
+type AvailabilityHint {
+  option: ID!
+  overlappingEvents: [Event!]!
+}
+
+type Event {
+  title: String!
+  status: EventStatus!
+}
+
+enum EventStatus {
+  Confirmed
+  Tentative
+  Free
+}
+
+type Calendar {
+  _id: ID!
+  provider: String!
+  enabled: Boolean!
+  healthy: Boolean
+  friendlyName: String!
+  usernameAtProvider: String!
+}
+
+type Mutation {
+  updateName(newName: String!): User!
+  createOrUpdatePoll(poll: PollInput!): Poll!
+  deletePoll(pollId: ID!): Boolean
+  createOrUpdateParticipation(participation: PollParticipationInput!, pollId: ID!): Poll!
+  deleteParticipation(participationId: ID!, pollId: ID!): Poll!
+  createOrUpdateComment(comment: PollCommentInput!, pollId: ID!): Poll!
+  deleteComment(commentId: ID!, pollId: ID!): Poll!
+  checkCalendarHealth(calendarId: ID!): Calendar!
+  setCalendarEnabled(enabled: Boolean!, calendarId: ID!): Calendar!
+  deleteCalendar(calendarId: ID!): Boolean
+}
+
+input PollInput {
+  _id: ID
+  title: String!
+  link: String
+  timezone: String
+  options: [PollOptionInput!]!
+}
+
+input PollOptionInput {
+  _id: ID
+  type: PollOptionType!
+  from: DateTime
+  to: DateTime
+  title: String
+}
+
+input PollParticipationInput {
+  _id: ID
+
+  """Name of participation author, in case user is not authenticated"""
+  anonName: String
+  choices: [PollChoiceInput!]!
+}
+
+input PollChoiceInput {
+  """references the ID of a PollOption of this very Poll"""
+  option: ID!
+  choice: YesNoMaybe!
+}
+
+input PollCommentInput {
+  _id: ID
+
+  """Name of comment author, in case user is not authenticated"""
+  anonName: String
+  text: String!
+}

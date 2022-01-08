@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "graph-types-codegen": "apollo codegen:generate --target=typescript --localSchemaFile=../backend/schema.graphql"
+    "graph-types-codegen": "apollo codegen:generate --target=typescript --localSchemaFile=../backend/dadlex-schema.graphql"
   },
   "dependencies": {
     "@apollo/client": "^3.4.16",
