@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/backend/:match*",
+      "destination": "https://dadlex-backend-staging.withexanion.net/:match*"
+    }
+  ]
+}
