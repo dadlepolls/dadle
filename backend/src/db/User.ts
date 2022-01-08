@@ -10,7 +10,7 @@ interface IUserDocument extends IUser, Document {
   getCalendarProviders: (onlyIncludeEnabled?: boolean) => ICalendarProvider[];
 }
 
-const schema = new Schema<IUser>(
+const schema = new Schema<IUserDocument>(
   {
     provider: { type: Schema.Types.String, required: true },
     idAtProvider: {
