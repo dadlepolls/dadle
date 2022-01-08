@@ -1,6 +1,6 @@
 {
   "name": "dadlex-backend",
-  "version": "0.0.1-dev",
+  "version": "0.1.0",
   "description": "Backend for DadleX",
   "main": "src/index.ts",
   "author": "Peter Kappelt <kappelt.peter@gmail.com>",
