@@ -164,8 +164,10 @@ function AppLayout({ Component, pageProps }: AppProps) {
             rel="noreferrer"
           >
             DadleX
-          </a>{" "}
-          | &copy; 2021 - {new Date().getFullYear()}
+          </a>
+          &nbsp;{process.env.NEXT_PUBLIC_APP_VERSION ?? "version_unknown"} |
+          &copy;&nbsp;2021&nbsp;-&nbsp;
+          {new Date().getFullYear()}
         </small>
       </Footer>
     </Layout>
