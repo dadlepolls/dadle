@@ -1,15 +1,20 @@
-import { gql } from "@apollo/client";
+import { gql, useApolloClient } from "@apollo/client";
 import { CREATE_OR_UPDATE_POLL } from "@operations/mutations/CreateOrUpdatePoll";
 import {
   CreateOrUpdatePoll,
   CreateOrUpdatePollVariables,
   CreateOrUpdatePoll_createOrUpdatePoll
 } from "@operations/mutations/__generated__/CreateOrUpdatePoll";
+import { CHECK_LINK_AVAILABILITY } from "@operations/queries/CheckLinkAvailability";
+import {
+  CheckLinkAvailability,
+  CheckLinkAvailabilityVariables
+} from "@operations/queries/__generated__/CheckLinkAvailability";
 import { GetPollByLink_getPollByLink } from "@operations/queries/__generated__/GetPollByLink";
 import { useStyledMutation } from "@util/mutationWrapper";
 import { Button, Card, Collapse, Form, Input, Select } from "antd";
 import produce from "immer";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { PollOptionType } from "__generated__/globalTypes";
 import { OptionEditor, OptionEditorType } from "./PollEditDialog/OptionEditor";
 
@@ -47,6 +52,8 @@ export const PollEditDialog = ({
     !!_poll?.link
   ); //link is not marked as "modified manually" if there is not link given at the first place
   const [pollIsSaving, setPollIsSaving] = useState(false);
+
+  const apolloClient = useApolloClient();
 
   const createOrUpdatePollMutation = useStyledMutation<
     CreateOrUpdatePoll,
@@ -119,6 +126,23 @@ export const PollEditDialog = ({
       }
     );
   };
+
+  const checkLinkAvailability = useCallback(
+    async (link: string) => {
+      const response = await apolloClient.query<
+        CheckLinkAvailability,
+        CheckLinkAvailabilityVariables
+      >({
+        query: CHECK_LINK_AVAILABILITY,
+        fetchPolicy: "network-only",
+        variables: {
+          link,
+        },
+      });
+      return response.data.checkPollLinkAvailability;
+    },
+    [apolloClient]
+  );
 
   const autocreateLink = (title: string) => {
     form.setFieldsValue({
@@ -195,6 +219,18 @@ export const PollEditDialog = ({
                           pattern: /^[\w-]+$/g,
                           message:
                             "Der Link darf nur Buchstaben, Zahlen, Bindestriche und Unterstriche enthalten!",
+                        },
+                        {
+                          validator: async (_, value) => {
+                            if (await checkLinkAvailability(value))
+                              return Promise.resolve();
+                            else
+                              return Promise.reject(
+                                new Error(
+                                  "Der Link ist schon vergeben, bitte wähle einen anderen!"
+                                )
+                              );
+                          },
                         },
                       ]}
                     >
