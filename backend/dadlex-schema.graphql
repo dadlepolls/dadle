@@ -3,6 +3,11 @@ type Query {
   getPolls(first: Int = 0, limit: Int): [Poll!]!
   getMyPolls(first: Int = 0, limit: Int): [Poll!]!
   getPollByLink(pollLink: String!): Poll
+
+  """
+  Check if a poll link is currently available for use. Returns true if available
+  """
+  checkPollLinkAvailability(link: String!): Boolean!
   getMyCalendars: [Calendar!]!
 }
 

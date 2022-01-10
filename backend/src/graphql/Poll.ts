@@ -171,6 +171,14 @@ class PollResolver {
     return polls[0].toObject();
   }
 
+  @Query(() => Boolean, {
+    description:
+      "Check if a poll link is currently available for use. Returns true if available",
+  })
+  async checkPollLinkAvailability(@Arg("link") link: string) {
+    return (await PollModel.findOne({ link }).exec()) ? false : true;
+  }
+
   @Mutation(() => Poll)
   async createOrUpdatePoll(
     @Arg("poll") poll: PollInput,
