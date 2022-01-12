@@ -222,7 +222,7 @@ class MicrosoftCalendarProvider implements ICalendarProvider {
       grant_type: "refresh_token",
     };
     const response = await axios.post(
-      "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+      `https://login.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`,
       Object.keys(params)
         .map(
           (key) =>
@@ -233,7 +233,6 @@ class MicrosoftCalendarProvider implements ICalendarProvider {
     );
 
     if (!response.data || !response.data.access_token) {
-      console.error(response);
       throw new Error("No access_token in response");
     }
 
