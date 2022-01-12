@@ -1,6 +1,7 @@
 import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import * as fs from "fs";
 import { RequestHandler } from "express";
+import logger from "../log";
 
 /**
  * hint:
@@ -12,7 +13,7 @@ try {
   privKey = fs.readFileSync("./secrets/tokens.key");
   pubKey = fs.readFileSync("./secrets/tokens.pub");
 } catch (_) {
-  console.warn("Fatal: Private and Public Keys for tokens could not be found");
+  logger.error("Fatal: Private and Public Keys for tokens could not be found");
 }
 
 const issueToken = (
