@@ -52,6 +52,9 @@ export const PollEditDialog = ({
     !!_poll?.link
   ); //link is not marked as "modified manually" if there is not link given at the first place
   const [pollIsSaving, setPollIsSaving] = useState(false);
+  //accordion with "advanced settings" is expanded
+  const [advancedSettingsExpanded, setAdvancedSettingsExpanded] =
+    useState(false);
 
   const apolloClient = useApolloClient();
 
@@ -173,6 +176,15 @@ export const PollEditDialog = ({
           const { editorType, ...newPollData } = e; //omit editor type, since it's a form key but not required for poll
           savePoll({ _id: _poll?._id, ...newPollData });
         }}
+        onFinishFailed={({ errorFields }) => {
+          if (
+            errorFields.some((field) =>
+              field.name.some((name) => name == "link")
+            )
+          )
+            setAdvancedSettingsExpanded(true);
+          else setAdvancedSettingsExpanded(false);
+        }}
       >
         <Form.Item
           required={true}
@@ -197,7 +209,12 @@ export const PollEditDialog = ({
         <Form.Item noStyle dependencies={["title", "linkMode"]}>
           {({ getFieldValue }) =>
             getFieldValue("title") ? (
-              <Collapse ghost>
+              <Collapse
+                ghost
+                accordion
+                activeKey={advancedSettingsExpanded ? "1" : undefined}
+                onChange={(k) => setAdvancedSettingsExpanded(!!k)}
+              >
                 <Collapse.Panel
                   key="1"
                   header="Erweiterte Einstellungen"
