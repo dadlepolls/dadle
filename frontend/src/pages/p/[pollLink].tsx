@@ -81,7 +81,9 @@ const PollPage: NextPage = () => {
     skip: !pollLink,
     variables: { pollLink },
   });
-  const { getPollByLink: poll } = data || {};
+  const poll = data?.getPollByLink
+    ? sortPollOptions(data.getPollByLink)
+    : undefined;
 
   //query availability hints separately so that main display won't be blocked by slow query
   const { data: availabilityHintData } = useQuery<GetPollAvailabilityHints>(
@@ -248,7 +250,7 @@ const PollPage: NextPage = () => {
           <Card>
             <PollResponseComponentByMedia
               poll={{
-                ...sortPollOptions(poll),
+                ...poll,
                 availabilityHints:
                   availabilityHintData?.getPollByLink?.availabilityHints,
               }}

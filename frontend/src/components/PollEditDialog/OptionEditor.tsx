@@ -4,7 +4,7 @@ import { Button, Form, Input, Radio, Tooltip } from "antd";
 import { Rule } from "antd/lib/form";
 import moment from "moment";
 import "moment/locale/de";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Calendar as RBCalendar,
   Event,
@@ -65,10 +65,13 @@ const OptionEditorCalendar = ({
     );
 
   //this assumes that the entries are sorted
-  const firstEventStart = getFirstDateOrDateTimeEvent(value)
-    ? moment(getFirstDateOrDateTimeEvent(value)?.from)
-    : moment().set({ h: 8, m: 0 });
-  if (isMidnight(firstEventStart.toDate())) firstEventStart.set({ h: 8, m: 0 });
+  const firstEventStart = useMemo(() => {
+    const first = getFirstDateOrDateTimeEvent(value)
+      ? moment(getFirstDateOrDateTimeEvent(value)?.from)
+      : moment().set({ h: 8, m: 0 });
+    if (isMidnight(first.toDate())) first.set({ h: 8, m: 0 });
+    return first;
+  }, [value]);
 
   const handleEventChange = (e: {
     event: PollOptionAsEvent;
@@ -107,8 +110,8 @@ const OptionEditorCalendar = ({
 
   return (
     <Calendar
-      defaultDate={firstEventStart.toDate()}
-      scrollToTime={firstEventStart.toDate()}
+      defaultDate={firstEventStart ? firstEventStart.toDate() : undefined}
+      scrollToTime={firstEventStart ? firstEventStart.toDate() : undefined}
       defaultView="week"
       localizer={localizer}
       resizable
