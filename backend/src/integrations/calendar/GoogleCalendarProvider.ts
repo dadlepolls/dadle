@@ -15,7 +15,7 @@ import {
 import { IEvent, EventStatus } from "../../util/types";
 import { CalendarProviders } from "./CalendarProviders";
 import { User } from "../../db/models";
-import { google } from "googleapis";
+import { calendar_v3, google } from "googleapis";
 import { OAuth2Client } from "google-auth-library";
 import moment from "moment";
 
@@ -44,6 +44,18 @@ class GoogleCalendarProvider implements ICalendarProvider {
     this.oauthClient.setCredentials({ refresh_token: calendar.refreshToken });
   }
 
+  parseEventDateTime(datetime?: calendar_v3.Schema$EventDateTime): Date {
+    const timeString = datetime?.dateTime || datetime?.date;
+
+    if (!timeString)
+      throw new Error("Can't parse event date time in Google Calendar!");
+    if (datetime.timeZone)
+      return moment.tz(timeString, datetime.timeZone).toDate();
+    else {
+      return moment(timeString).toDate();
+    }
+  }
+
   async retrieveEvents(rangeStart: Date, rangeEnd: Date) {
     const cal = google.calendar({
       version: "v3",
@@ -67,12 +79,10 @@ class GoogleCalendarProvider implements ICalendarProvider {
       else return EventStatus.Free;
     };
 
-    return gEvents.data.items.map<IEvent>((e) => ({
+    return events.map<IEvent>((e) => ({
       title: e.summary ?? "",
-      from: moment
-        .tz(e.start?.dateTime ?? "", e.start?.timeZone ?? "")
-        .toDate(),
-      to: moment.tz(e.end?.dateTime ?? "", e.end?.timeZone ?? "").toDate(),
+      from: this.parseEventDateTime(e.start),
+      to: this.parseEventDateTime(e.end),
       status: determineEventStatus(e.status),
     }));
   }
@@ -97,7 +107,8 @@ class GoogleCalendarProvider implements ICalendarProvider {
         {
           passReqToCallback: true,
           clientID: process.env.CAL_GOOGLE_CLIENT_ID ?? "unknown_client_id",
-          clientSecret: process.env.CAL_GOOGLE_CLIENT_SECRET ?? "unknown_client_secret",
+          clientSecret:
+            process.env.CAL_GOOGLE_CLIENT_SECRET ?? "unknown_client_secret",
           callbackURL:
             `${process.env.BACKEND_PUBLIC_URL}/cal/google/callback` ?? "",
           scope: [
