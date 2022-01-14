@@ -112,7 +112,7 @@ const OptionEditorCalendar = ({
       defaultView="week"
       localizer={localizer}
       resizable
-      style={{ height: "550px" }}
+      style={{ height: 550, minWidth: 600 }}
       events={mapValueToCalendarEvents(value)}
       onEventDrop={handleEventChange}
       onEventResize={handleEventChange}
@@ -268,35 +268,43 @@ export const OptionEditor = ({
         display: "flex",
         alignItems: "center",
         flexDirection: "column",
+        overflowX: "auto",
       }}
     >
       <Form.Item noStyle name="editorType">
         <OptionEditorTypeSelector typeChangeDisabled={typeChangeDisabled} />
       </Form.Item>
-      <div style={{ width: "100%", marginTop: 16 }}>
-        <Form.Item dependencies={["editorType"]} noStyle>
-          {({ getFieldValue }) => {
-            const editorType = getFieldValue("editorType");
-            if (editorType == OptionEditorType.Arbitrary)
-              return (
-                <Form.Item name="options" rules={optionsValidatorRules}>
-                  <OptionEditorArbitrary />
-                </Form.Item>
-              );
-            else if (editorType == OptionEditorType.Calendar)
-              return (
-                <Form.Item name="options" rules={optionsValidatorRules}>
-                  <OptionEditorCalendar pollTitle={pollTitle} />
-                </Form.Item>
-              );
-            else
-              return (
-                <Form.Item name="options" rules={optionsValidatorRules}>
-                  <input type="hidden" />
-                </Form.Item>
-              );
+      <div style={{ width: "100%", overflowX: "auto" }}>
+        <div
+          style={{
+            width: "100%",
+            marginTop: 16,
           }}
-        </Form.Item>
+        >
+          <Form.Item dependencies={["editorType"]} noStyle>
+            {({ getFieldValue }) => {
+              const editorType = getFieldValue("editorType");
+              if (editorType == OptionEditorType.Arbitrary)
+                return (
+                  <Form.Item name="options" rules={optionsValidatorRules}>
+                    <OptionEditorArbitrary />
+                  </Form.Item>
+                );
+              else if (editorType == OptionEditorType.Calendar)
+                return (
+                  <Form.Item name="options" rules={optionsValidatorRules}>
+                    <OptionEditorCalendar pollTitle={pollTitle} />
+                  </Form.Item>
+                );
+              else
+                return (
+                  <Form.Item name="options" rules={optionsValidatorRules}>
+                    <input type="hidden" />
+                  </Form.Item>
+                );
+            }}
+          </Form.Item>
+        </div>
       </div>
     </div>
   );
