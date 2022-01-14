@@ -62,16 +62,23 @@ class GoogleCalendarProvider implements ICalendarProvider {
       auth: this.oauthClient,
     });
 
-    const gEvents = await cal.events.list({
-      calendarId: this.googleCalendarId,
-      timeMin: rangeStart.toISOString(),
-      timeMax: rangeEnd.toISOString(),
-    });
-
-    if (!gEvents.data.items)
-      throw new Error(
-        `Couldn't fetch events from Google Calendar ${this.googleCalendarId}`
-      );
+    const events: calendar_v3.Schema$Event[] = [];
+    let pageToken = "";
+    do {
+      const response = await cal.events.list({
+        calendarId: this.googleCalendarId,
+        timeMin: rangeStart.toISOString(),
+        timeMax: rangeEnd.toISOString(),
+        singleEvents: true,
+        pageToken,
+      });
+      if (!response.data.items)
+        throw new Error(
+          `Couldn't fetch events from Google Calendar ${this.googleCalendarId}`
+        );
+      response.data.items.forEach((i) => events.push(i));
+      pageToken = response.data.nextPageToken ?? "";
+    } while (pageToken);
 
     const determineEventStatus = (s: string | undefined | null) => {
       if (s === "confirmed") return EventStatus.Confirmed;
