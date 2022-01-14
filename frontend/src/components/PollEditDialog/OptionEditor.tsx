@@ -4,7 +4,7 @@ import { Button, Form, Input, Radio, Tooltip } from "antd";
 import { Rule } from "antd/lib/form";
 import moment from "moment";
 import "moment/locale/de";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Calendar as RBCalendar,
   Event,
@@ -13,9 +13,6 @@ import {
   stringOrDate
 } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
-//TODO use ant styling for calendar
-import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
-import "react-big-calendar/lib/css/react-big-calendar.css";
 import { PollOptionType } from "__generated__/globalTypes";
 
 interface PollOptionAsEvent extends Event {
@@ -65,10 +62,13 @@ const OptionEditorCalendar = ({
     );
 
   //this assumes that the entries are sorted
-  const firstEventStart = getFirstDateOrDateTimeEvent(value)
-    ? moment(getFirstDateOrDateTimeEvent(value)?.from)
-    : moment().set({ h: 8, m: 0 });
-  if (isMidnight(firstEventStart.toDate())) firstEventStart.set({ h: 8, m: 0 });
+  const firstEventStart = useMemo(() => {
+    const first = getFirstDateOrDateTimeEvent(value)
+      ? moment(getFirstDateOrDateTimeEvent(value)?.from)
+      : moment().set({ h: 8, m: 0 });
+    if (isMidnight(first.toDate())) first.set({ h: 8, m: 0 });
+    return first;
+  }, [value]);
 
   const handleEventChange = (e: {
     event: PollOptionAsEvent;
@@ -107,12 +107,12 @@ const OptionEditorCalendar = ({
 
   return (
     <Calendar
-      defaultDate={firstEventStart.toDate()}
-      scrollToTime={firstEventStart.toDate()}
+      defaultDate={firstEventStart ? firstEventStart.toDate() : undefined}
+      scrollToTime={firstEventStart ? firstEventStart.toDate() : undefined}
       defaultView="week"
       localizer={localizer}
       resizable
-      style={{ height: "550px" }}
+      style={{ height: 550, minWidth: 600 }}
       events={mapValueToCalendarEvents(value)}
       onEventDrop={handleEventChange}
       onEventResize={handleEventChange}
@@ -268,35 +268,43 @@ export const OptionEditor = ({
         display: "flex",
         alignItems: "center",
         flexDirection: "column",
+        overflowX: "auto",
       }}
     >
       <Form.Item noStyle name="editorType">
         <OptionEditorTypeSelector typeChangeDisabled={typeChangeDisabled} />
       </Form.Item>
-      <div style={{ width: "100%", marginTop: 16 }}>
-        <Form.Item dependencies={["editorType"]} noStyle>
-          {({ getFieldValue }) => {
-            const editorType = getFieldValue("editorType");
-            if (editorType == OptionEditorType.Arbitrary)
-              return (
-                <Form.Item name="options" rules={optionsValidatorRules}>
-                  <OptionEditorArbitrary />
-                </Form.Item>
-              );
-            else if (editorType == OptionEditorType.Calendar)
-              return (
-                <Form.Item name="options" rules={optionsValidatorRules}>
-                  <OptionEditorCalendar pollTitle={pollTitle} />
-                </Form.Item>
-              );
-            else
-              return (
-                <Form.Item name="options" rules={optionsValidatorRules}>
-                  <input type="hidden" />
-                </Form.Item>
-              );
+      <div style={{ width: "100%", overflowX: "auto" }}>
+        <div
+          style={{
+            width: "100%",
+            marginTop: 16,
           }}
-        </Form.Item>
+        >
+          <Form.Item dependencies={["editorType"]} noStyle>
+            {({ getFieldValue }) => {
+              const editorType = getFieldValue("editorType");
+              if (editorType == OptionEditorType.Arbitrary)
+                return (
+                  <Form.Item name="options" rules={optionsValidatorRules}>
+                    <OptionEditorArbitrary />
+                  </Form.Item>
+                );
+              else if (editorType == OptionEditorType.Calendar)
+                return (
+                  <Form.Item name="options" rules={optionsValidatorRules}>
+                    <OptionEditorCalendar pollTitle={pollTitle} />
+                  </Form.Item>
+                );
+              else
+                return (
+                  <Form.Item name="options" rules={optionsValidatorRules}>
+                    <input type="hidden" />
+                  </Form.Item>
+                );
+            }}
+          </Form.Item>
+        </div>
       </div>
     </div>
   );

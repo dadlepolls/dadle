@@ -16,6 +16,7 @@ import {
   Resolver,
 } from "type-graphql";
 import { User as UserModel } from "../db/models";
+import logger from "../log";
 
 @ObjectType()
 class Calendar implements Omit<Partial<ICalendar>, "provider"> {
@@ -98,6 +99,10 @@ class CalendarResolver {
       );
       calendar.healthy = true;
     } catch (err) {
+      logger.info(
+        `Calendar health check failed for user ${user._id}, cal ${calendar._id}`,
+        { user: user._id, calendar: calendar._id, error: err }
+      );
       calendar.healthy = false;
     }
 

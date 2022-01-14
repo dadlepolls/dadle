@@ -28,6 +28,10 @@ jobs:
         working-directory: ./backend
         run: |
           ts-node ./test/util/printGraphSchema.ts > ${{ runner.temp }}/dadlex-schema.graphql
+      - name: Store auto-generated schema
+        uses: actions/upload-artifact@v2
+        with:
+          path: ${{ runner.temp }}/dadlex-schema.graphql
       - name: Validate committed schema is up-to-date
         run: |
           cmp ./backend/dadlex-schema.graphql ${{ runner.temp }}/dadlex-schema.graphql || (exit 1)

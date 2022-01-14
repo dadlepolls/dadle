@@ -15,6 +15,7 @@ import { IGraphContext, IUser } from "./util/types";
 import { authRouter } from "./auth/authRouter";
 import { parseTokenMiddleware } from "./auth/token";
 import { CalendarProviders } from "./integrations/calendar/CalendarProviders";
+import logger from "./log";
 
 /* eslint-disable */
 declare global {
@@ -63,8 +64,12 @@ const main = async () => {
   server.applyMiddleware({ app, path: "/graphql" });
 
   app.listen(port, () => {
-    console.log(`App listening on ${port}`);
+    logger.info(`App listening on ${port}`);
   });
 };
+
+process.on("unhandledRejection", (reason, p) => {
+  logger.debug("Unhandled Rejection at: Promise", p, "reason:", reason);
+});
 
 main();

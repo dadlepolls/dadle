@@ -21,9 +21,9 @@ import {
 import { Poll as PollModel } from "../db/models";
 import { IGraphContext, IPoll, IUserOrAnon } from "../util/types";
 import { AvailabilityHint } from "./AvailabilityHint";
-import { PollComment, PollCommentInput } from "./PollComment";
+import { PollComment } from "./PollComment";
 import { PollOption, PollOptionInput } from "./PollOption";
-import { PollParticipation, PollParticipationInput } from "./PollParticipation";
+import { PollParticipation } from "./PollParticipation";
 import { UserOrAnon } from "./UserOrAnon";
 
 @ObjectType()
@@ -171,6 +171,14 @@ class PollResolver {
     return polls[0].toObject();
   }
 
+  @Query(() => Boolean, {
+    description:
+      "Check if a poll link is currently available for use. Returns true if available",
+  })
+  async checkPollLinkAvailability(@Arg("link") link: string) {
+    return (await PollModel.findOne({ link }).exec()) ? false : true;
+  }
+
   @Mutation(() => Poll)
   async createOrUpdatePoll(
     @Arg("poll") poll: PollInput,
@@ -293,210 +301,6 @@ class PollResolver {
     await poll.delete();
 
     return true;
-  }
-
-  @Mutation(() => Poll)
-  async createOrUpdateParticipation(
-    @Arg("pollId", () => ID) pollId: string,
-    @Arg("participation") participationInput: PollParticipationInput,
-    @Ctx() ctx: IGraphContext
-  ) {
-    const dbPoll = await PollModel.findOne({ _id: pollId }).exec();
-    if (!dbPoll) {
-      throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
-    }
-
-    if (!participationInput.anonName && !ctx.user?._id)
-      throw new ApolloError(
-        "anonName must be given in case user is not authenticated",
-        "INVALID_REQUEST"
-      );
-
-    //validate that all options exist for this poll
-    for (const opt of participationInput.choices) {
-      if (!dbPoll.options?.some((o) => o._id == opt.option.toString())) {
-        throw new ApolloError(
-          "Response for unkown option given",
-          "REPONSE_TO_INVALID_OPTION",
-          { invalidOptionId: opt.option.toString() }
-        );
-      }
-    }
-
-    if (participationInput._id) {
-      //participation does already exist, try to update
-      const participation = dbPoll.participations?.find(
-        (p) => p._id == participationInput._id
-      );
-
-      if (!participation)
-        throw new ApolloError(
-          "Couldn't find participation!",
-          "PARTICIPATION_NOT_FOUND"
-        );
-
-      if (
-        participation.author.userId &&
-        participation.author.userId != ctx.user?._id
-      )
-        throw new ApolloError(
-          "Can't edit participation of other users",
-          "INSUFFICIENT_PERMISSIONS"
-        );
-
-      if (participation.author.userId && participationInput.anonName)
-        throw new ApolloError(
-          "Can't change a user-based to anonymous participation",
-          "INSUFFICIENT_PERMISSIONS"
-        );
-
-      participation.author = {
-        anonName: participationInput.anonName,
-        userId: !participationInput.anonName ? ctx.user?._id : undefined,
-      };
-
-      for (const opt of participationInput.choices) {
-        //update existing choices
-        participation.choices.forEach((c) => {
-          if (c.option == opt.option) c.choice = opt.choice;
-        });
-        //create new choices
-        if (!participation.choices.some((c) => c.option == opt.option)) {
-          participation.choices.push(opt);
-        }
-      }
-    } else {
-      if (!dbPoll.participations) dbPoll.participations = [];
-      dbPoll.participations.push({
-        ...participationInput,
-        author: {
-          anonName: participationInput.anonName,
-          userId: !participationInput.anonName ? ctx.user?._id : undefined,
-        },
-      });
-    }
-
-    await dbPoll.save();
-    return dbPoll.toObject();
-  }
-
-  @Mutation(() => Poll)
-  async deleteParticipation(
-    @Arg("pollId", () => ID) pollId: string,
-    @Arg("participationId", () => ID) participationId: string,
-    @Ctx() ctx: IGraphContext
-  ) {
-    const dbPoll = await PollModel.findOne({ _id: pollId }).exec();
-    if (!dbPoll) throw new ApolloError("Couldn't find poll", "POLL_NOT_FOUND");
-
-    const participation = dbPoll.participations?.find(
-      (p) => p._id == participationId
-    );
-    if (!participation)
-      throw new ApolloError(
-        "Couldn't find participation",
-        "PARTICIPATION_NOT_FOUND"
-      );
-
-    if (
-      participation.author.userId &&
-      participation.author.userId != ctx.user?._id
-    )
-      throw new ApolloError(
-        "Can't delete participations of other users!",
-        "INSUFFICIENT_PERMISSIONS"
-      );
-
-    return (
-      await PollModel.findByIdAndUpdate(
-        pollId,
-        {
-          $pull: {
-            participations: { _id: participationId },
-          },
-        },
-        { new: true }
-      )
-    )?.toObject();
-  }
-
-  @Mutation(() => Poll)
-  async createOrUpdateComment(
-    @Arg("pollId", () => ID) pollId: string,
-    @Arg("comment") commentInput: PollCommentInput,
-    @Ctx() ctx: IGraphContext
-  ) {
-    const dbPoll = await PollModel.findOne({ _id: pollId }).exec();
-    if (!dbPoll) {
-      throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
-    }
-
-    if (!commentInput.anonName && !ctx.user?._id)
-      throw new ApolloError(
-        "anonName must be given in case user is not authenticated",
-        "INVALID_REQUEST"
-      );
-
-    if (commentInput._id) {
-      const comment = dbPoll.comments?.find((c) => c._id == commentInput._id);
-      if (!comment)
-        throw new ApolloError("Couldn't find comment!", "COMMENT_NOT_FOUND");
-
-      if (comment.author.userId && comment.author.userId != ctx.user?._id)
-        throw new ApolloError(
-          "Can't edit comments of other users",
-          "INSUFFICIENT_PERMISSIONS"
-        );
-
-      comment.author = {
-        anonName: commentInput.anonName,
-        userId: !commentInput.anonName ? ctx.user?._id : undefined,
-      };
-      comment.text = commentInput.text;
-    } else {
-      dbPoll.comments?.push({
-        ...commentInput,
-        author: {
-          anonName: commentInput.anonName,
-          userId: !commentInput.anonName ? ctx.user?._id : undefined,
-        },
-      });
-    }
-
-    await dbPoll.save();
-    return dbPoll.toObject();
-  }
-
-  @Mutation(() => Poll)
-  async deleteComment(
-    @Arg("pollId", () => ID) pollId: string,
-    @Arg("commentId", () => ID) commentId: string,
-    @Ctx() ctx: IGraphContext
-  ) {
-    const dbPoll = await PollModel.findOne({ _id: pollId }).exec();
-    if (!dbPoll) throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
-
-    const comment = dbPoll.comments?.find((c) => c._id == commentId);
-    if (!comment)
-      throw new ApolloError("Couldn't find comment", "COMMENT_NOT_FOUND");
-
-    if (comment.author.userId && comment.author.userId != ctx.user?._id)
-      throw new ApolloError(
-        "Can't delete comments of other users!",
-        "INSUFFICIENT_PERMISSIONS"
-      );
-
-    return (
-      await PollModel.findByIdAndUpdate(
-        pollId,
-        {
-          $pull: {
-            comments: { _id: commentId },
-          },
-        },
-        { new: true }
-      )
-    )?.toObject();
   }
 }
 

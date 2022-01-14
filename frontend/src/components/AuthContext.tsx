@@ -69,7 +69,7 @@ const AuthContextProvider = ({
   const { client, data } = useQuery<GetMe>(GET_ME, {
     skip: !token,
     onCompleted: ({ me: response }) => {
-      message.success("Anmeldung erfolgreich!");
+      if (authLoading) message.success("Anmeldung erfolgreich!");
       if (response.name) ls.set("username", response.name);
       setAuthLoading(false);
     },

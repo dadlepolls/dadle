@@ -3,6 +3,11 @@ type Query {
   getPolls(first: Int = 0, limit: Int): [Poll!]!
   getMyPolls(first: Int = 0, limit: Int): [Poll!]!
   getPollByLink(pollLink: String!): Poll
+
+  """
+  Check if a poll link is currently available for use. Returns true if available
+  """
+  checkPollLinkAvailability(link: String!): Boolean!
   getMyCalendars: [Calendar!]!
 }
 
@@ -109,31 +114,23 @@ type Calendar {
 
 type Mutation {
   updateName(newName: String!): User!
-  createOrUpdatePoll(poll: PollInput!): Poll!
-  deletePoll(pollId: ID!): Boolean
-  createOrUpdateParticipation(participation: PollParticipationInput!, pollId: ID!): Poll!
-  deleteParticipation(participationId: ID!, pollId: ID!): Poll!
   createOrUpdateComment(comment: PollCommentInput!, pollId: ID!): Poll!
   deleteComment(commentId: ID!, pollId: ID!): Poll!
+  createOrUpdateParticipation(participation: PollParticipationInput!, pollId: ID!): Poll!
+  deleteParticipation(participationId: ID!, pollId: ID!): Poll!
+  createOrUpdatePoll(poll: PollInput!): Poll!
+  deletePoll(pollId: ID!): Boolean
   checkCalendarHealth(calendarId: ID!): Calendar!
   setCalendarEnabled(enabled: Boolean!, calendarId: ID!): Calendar!
   deleteCalendar(calendarId: ID!): Boolean
 }
 
-input PollInput {
+input PollCommentInput {
   _id: ID
-  title: String!
-  link: String
-  timezone: String
-  options: [PollOptionInput!]!
-}
 
-input PollOptionInput {
-  _id: ID
-  type: PollOptionType!
-  from: DateTime
-  to: DateTime
-  title: String
+  """Name of comment author, in case user is not authenticated"""
+  anonName: String
+  text: String!
 }
 
 input PollParticipationInput {
@@ -150,10 +147,18 @@ input PollChoiceInput {
   choice: YesNoMaybe!
 }
 
-input PollCommentInput {
+input PollInput {
   _id: ID
+  title: String!
+  link: String
+  timezone: String
+  options: [PollOptionInput!]!
+}
 
-  """Name of comment author, in case user is not authenticated"""
-  anonName: String
-  text: String!
+input PollOptionInput {
+  _id: ID
+  type: PollOptionType!
+  from: DateTime
+  to: DateTime
+  title: String
 }

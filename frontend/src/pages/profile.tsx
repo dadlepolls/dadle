@@ -152,8 +152,10 @@ const Profile: NextPage = () => {
             </Descriptions.Item>
           </Descriptions>
         </Card>
+
         <Card
           title="Meine verknüpften Kalender"
+          className="card-extra-responsive"
           extra={
             <Dropdown
               overlay={
@@ -177,6 +179,17 @@ const Profile: NextPage = () => {
             </Dropdown>
           }
         >
+          <style jsx global>
+            {`
+              .card-extra-responsive .ant-card-head-title {
+                text-overflow: initial;
+                overflow: initial;
+              }
+              .card-extra-responsive .ant-card-head-wrapper {
+                flex-wrap: wrap;
+              }
+            `}
+          </style>
           <CalendarList />
           <FreshlyAddedCalendarModal
             freshlyAddedCalendars={freshlyAddedCalendars}

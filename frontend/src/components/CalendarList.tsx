@@ -25,6 +25,7 @@ import {
 } from "@operations/mutations/__generated__/SetCalendarEnabled";
 import { GET_MY_CALENDARS } from "@operations/queries/GetMyCalendars";
 import { GetMyCalendars } from "@operations/queries/__generated__/GetMyCalendars";
+import { useInitiallySorted } from "@util/initiallySorted";
 import { useStyledMutation } from "@util/mutationWrapper";
 import {
   Avatar,
@@ -35,7 +36,7 @@ import {
   Switch,
   Tooltip
 } from "antd";
-import React from "react";
+import React, { useMemo } from "react";
 import { useImmer } from "use-immer";
 
 type TCalendarHealthCheck = {
@@ -72,6 +73,19 @@ const CalendarList = ({
 }) => {
   const { loading: calendarsLoading, data: calendarsData } =
     useQuery<GetMyCalendars>(GET_MY_CALENDARS);
+  const calendarsDataSorted = useInitiallySorted(
+    calendarsData?.getMyCalendars,
+    calendarsLoading || !calendarsData?.getMyCalendars,
+    (a, b) => {
+      if (a.enabled && !b.enabled) return -1;
+      if (!a.enabled && b.enabled) return 1;
+      return 0;
+    }
+  );
+  const calendars = useMemo(
+    () => calendarsDataSorted.filter((c) => filter(c._id)),
+    [calendarsDataSorted, filter]
+  );
 
   const [
     calendarsWithPendingEnabledChange,
@@ -99,8 +113,6 @@ const CalendarList = ({
     CheckCalendarHealth,
     CheckCalendarHealthVariables
   >(CHECK_CALENDAR_HEALTH, { successMessage: null });
-  const calendars =
-    calendarsData?.getMyCalendars.filter((c) => filter(c._id)) ?? [];
 
   const onDeleteClick = async (calendarId: string) => {
     updateCalendarsBeingDeleted((l) => {
@@ -132,12 +144,19 @@ const CalendarList = ({
       if (checkResult) checkResult.loading = true;
       else checks.push({ calId: calendarId, loading: true });
     });
-    const { data: result } =
-      (await checkCalendarHealth({
+
+    let healthyResult: boolean;
+    try {
+      const fetchResponse = await checkCalendarHealth({
         calendarId: calendarId,
-      })) || {};
-    if (!result) return;
-    if (!result.checkCalendarHealth.healthy)
+      });
+      if (!fetchResponse || !fetchResponse.data) throw new Error();
+      healthyResult = fetchResponse.data.checkCalendarHealth.healthy ?? false;
+    } catch (_) {
+      healthyResult = false;
+    }
+
+    if (!healthyResult)
       message.error(
         <>
           <span>Die Verbindung zum Kalender ist fehlgeschlagen!</span>
@@ -151,12 +170,12 @@ const CalendarList = ({
       const checkResult = checks.find((c) => c.calId == calendarId);
       if (checkResult) {
         checkResult.loading = false;
-        checkResult.healthy = result.checkCalendarHealth.healthy;
+        checkResult.healthy = healthyResult;
       } else
         checks.push({
           calId: calendarId,
           loading: false,
-          healthy: result.checkCalendarHealth.healthy,
+          healthy: healthyResult,
         });
     });
   };
