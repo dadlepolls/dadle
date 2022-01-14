@@ -1,0 +1,25 @@
+$default-border-color: #d9d9d9
+$calendar-border: $default-border-color
+$cell-border: $default-border-color
+$border-color: $default-border-color
+$btn-border: $default-border-color
+$active-border: $default-border-color
+
+$event-bg: #1890ff
+$event-border: #1890ff
+$event-border-radius: 2px
+
+$btn-color: rgba(0, 0, 0, 0.85)
+
+.rbc-toolbar
+  & button
+    border-radius: 2px !important
+    font-size: 14px !important
+    height: 32px !important
+    &:active,
+    &.rbc-active 
+      box-shadow: none !important
+
+
+@import "react-big-calendar/lib/addons/dragAndDrop/styles.scss"
+@import "react-big-calendar/lib/sass/styles.scss"

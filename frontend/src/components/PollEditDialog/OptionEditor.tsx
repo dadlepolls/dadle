@@ -13,9 +13,6 @@ import {
   stringOrDate
 } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
-//TODO use ant styling for calendar
-import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
-import "react-big-calendar/lib/css/react-big-calendar.css";
 import { PollOptionType } from "__generated__/globalTypes";
 
 interface PollOptionAsEvent extends Event {

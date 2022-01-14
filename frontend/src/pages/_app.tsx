@@ -16,6 +16,7 @@ import {
   useWindowIsSm
 } from "@components/ResponsiveContext";
 import "@styles/globals.css";
+import "@styles/OptionEditor.sass";
 import "@styles/pollpage.css";
 import LoadingBar from "@util/LoadingBar";
 import { Layout, Menu } from "antd";
