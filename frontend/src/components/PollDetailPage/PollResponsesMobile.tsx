@@ -206,7 +206,9 @@ const PollResponsesMobile = ({
                 );
               else
                 p?.choices.push({
-                  choice: YesNoMaybe.Yes,
+                  choice: determineAvailabilitySuggestion(
+                    poll.availabilityHints?.find((h) => h.option == option._id)
+                  ),
                   option: option._id,
                   __typename: "PollChoice",
                 });
