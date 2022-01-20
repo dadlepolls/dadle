@@ -12,7 +12,7 @@ import { buildAppSchema } from "./graphql/BuildSchema";
 import mongoose from "mongoose";
 import passport from "passport";
 import { IGraphContext, IUser } from "./util/types";
-import { authRouter } from "./auth/authRouter";
+import { getAuthRouter } from "./auth/authRouter";
 import { parseTokenMiddleware } from "./auth/token";
 import { CalendarProviders } from "./integrations/calendar/CalendarProviders";
 import logger from "./log";
@@ -28,8 +28,6 @@ declare global {
 const app = express();
 app.use(passport.initialize());
 const port = process.env.HTTP_PORT || 3001;
-
-app.use("/auth", authRouter);
 
 app.use("/cal", CalendarProviders.getProviderRouter());
 
@@ -47,10 +45,14 @@ app.get("/health", (req, res) => {
 app.use("/graphql", parseTokenMiddleware);
 
 const main = async () => {
+  //db setup
   await dbConnect();
 
-  const schema = await buildAppSchema();
+  //auth routing setup
+  app.use("/auth", await getAuthRouter());
 
+  //graphql setup
+  const schema = await buildAppSchema();
   const server = new ApolloServer({
     schema,
     context: ({ req }): IGraphContext => ({ req, user: req.user }),
@@ -63,6 +65,7 @@ const main = async () => {
   await server.start();
   server.applyMiddleware({ app, path: "/graphql" });
 
+  //startup app
   app.listen(port, () => {
     logger.info(`App listening on ${port}`);
   });

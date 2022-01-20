@@ -1,4 +1,5 @@
 import { ICalendarProvider, IMicrosoftCalendar } from "./calendar";
+import "isomorphic-fetch";
 import {
   Event as TGraphEvent,
   Calendar as TGraphCalendar,
