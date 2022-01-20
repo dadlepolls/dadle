@@ -12,7 +12,6 @@ interface IUserDocument extends IUser, Document {
 
 const schema = new Schema<IUserDocument>(
   {
-    provider: { type: Schema.Types.String, required: true },
     idAtProvider: {
       type: Schema.Types.String,
       required: true,

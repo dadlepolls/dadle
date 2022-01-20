@@ -109,12 +109,6 @@ const Profile: NextPage = () => {
             level={3}
           >{`Howdy, ${user.name}!`}</Typography.Title>
           <Descriptions column={mobileDisplay ? 1 : 3}>
-            <Descriptions.Item
-              label="Anmeldedienst"
-              style={{ textTransform: "capitalize" }}
-            >
-              {user.provider}
-            </Descriptions.Item>
             <Descriptions.Item label="Name beim Anmeldedienst">
               <Tooltip
                 title={`Eindeutige ID beim Anmeldedienst: ${user.idAtProvider}`}
@@ -122,7 +116,9 @@ const Profile: NextPage = () => {
                 {user.nameAtProvider}
               </Tooltip>
             </Descriptions.Item>
-            <Descriptions.Item label="Email">{user.mail}</Descriptions.Item>
+            <Descriptions.Item label="Email" span={mobileDisplay ? 1 : 2}>
+              {user.mail}
+            </Descriptions.Item>
             <Descriptions.Item label="Anzeigename">
               <Input.Group>
                 <Input

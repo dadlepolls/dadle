@@ -19,9 +19,6 @@ class User implements IUser {
   _id: string;
 
   @Field({ nullable: true })
-  provider: "microsoft";
-
-  @Field({ nullable: true })
   idAtProvider: string;
 
   @Field({ nullable: true })
@@ -35,14 +32,12 @@ class User implements IUser {
 
   constructor(
     _id: string,
-    provider: "microsoft",
     idAtProvider: string,
     nameAtProvider: string,
     mail: string,
     name: string
   ) {
     this._id = _id;
-    this.provider = provider;
     this.idAtProvider = idAtProvider;
     this.nameAtProvider = nameAtProvider;
     this.mail = mail;

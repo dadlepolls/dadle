@@ -4,7 +4,6 @@ export const GET_ME = gql`
   query GetMe {
     me {
       _id
-      provider
       idAtProvider
       nameAtProvider
       mail
