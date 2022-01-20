@@ -69,7 +69,7 @@ const main = async () => {
 };
 
 process.on("unhandledRejection", (reason, p) => {
-  logger.debug("Unhandled Rejection at: Promise", p, "reason:", reason);
+  logger.debug(`Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
 });
 
 main();
