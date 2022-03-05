@@ -76,12 +76,25 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract metadata for Docker
+      - name: Extract metadata for Docker (frontendbase)
+        id: frontendbasemeta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontendbase
+      - name: Build and push Docker image (frontendbase)
+        uses: docker/build-push-action@v2
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ steps.frontendbasemeta.outputs.tags }}
+          labels: ${{ steps.frontendbasemeta.outputs.labels }}
+          target: deps
+      - name: Extract metadata for Docker (frontend)
         id: frontendmeta
         uses: docker/metadata-action@v3
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
-      - name: Build and push Docker image
+      - name: Build and push Docker image (frontend)
         uses: docker/build-push-action@v2
         with:
           context: ./frontend
