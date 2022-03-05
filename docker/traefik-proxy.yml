@@ -1,0 +1,33 @@
+http:
+  routers:
+    backend-router:
+      entryPoints:
+      - http
+      middlewares:
+      - backend-stripprefix
+      service: backend-service
+      rule: "PathPrefix(`/backend`)"
+    frontend-router:
+      entryPoints:
+      - http
+      service: frontend-service
+      rule: "PathPrefix(`/`)"
+  middlewares:
+    backend-stripprefix:
+      stripPrefix:
+        prefixes:
+          - "/backend"
+  services:
+    backend-service:
+      loadBalancer:
+        servers:
+        - url: http://backend:3000
+        healthCheck:
+          path: /health
+          interval: "10s"
+          timeout: "3s"
+          port: 3000
+    frontend-service:
+      loadBalancer:
+        servers:
+        - url: http://frontend:3000

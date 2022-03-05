@@ -12,13 +12,9 @@ DadleX is configured by environment variables, either by setting them in the `.e
 
 Version of DadleX to be used. Default: `latest`. Can be `latest` for latest stable version, `dev` for current development snapshot or any other tagged version.
 
-### `DADLEX_FRONTEND_PORT`
+### `DADLEX_PORT`
 
-Listening port of the frontend service. Default: `3000`.
-
-### `DADLEX_BACKEND_PORT`
-
-Listening port of the backend service. Default: `3001`.
+HTTP port that the service is listening on. You should expose this port to public by some reverse proxy and with HTTPS configured. Default: `3000`.
 
 ### `BACKEND_LOG_LEVEL`
 
