@@ -1,5 +1,6 @@
 ---
 slug: /configuration
+sidebar_position: 3
 ---
 
 # Configuration
