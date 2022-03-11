@@ -44,6 +44,12 @@ app.get("/health", (req, res) => {
 
 app.use("/graphql", parseTokenMiddleware);
 
+if (process.env.BACKEND_TRUST_PROXY) {
+  const { BACKEND_TRUST_PROXY } = process.env;
+  logger.info(`Trusting proxies: "${BACKEND_TRUST_PROXY}"`);
+  app.set("trust proxy", BACKEND_TRUST_PROXY);
+}
+
 const main = async () => {
   //db setup
   await dbConnect();
