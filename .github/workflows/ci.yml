@@ -1,5 +1,10 @@
 name: CI - Lint and Build
-on: push
+on: 
+  push:
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - '.github/workflows/ci.yml'
 
 env:
   REGISTRY: ghcr.io
