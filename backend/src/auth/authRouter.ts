@@ -6,6 +6,9 @@ import session from "express-session";
 import crypto from "crypto";
 import { readFileSync, writeFileSync } from "fs";
 import logger from "../log";
+import createMemoryStore from "memorystore";
+
+const MemoryStore = createMemoryStore(session);
 
 declare module "express-session" {
   interface SessionData {
@@ -58,7 +61,10 @@ const getAuthRouter = async () => {
       secret: await getSessionKey(),
       resave: false,
       saveUninitialized: false,
-      cookie: { secure: process.env.NODE_ENV === "production" },
+      store: new MemoryStore({
+        checkPeriod: 86400000,
+      }),
+      cookie: { secure: "auto" },
     })
   );
 
