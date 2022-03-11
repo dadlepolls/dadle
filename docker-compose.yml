@@ -1,25 +1,34 @@
 version: "3.9"
 services:
+  proxy:
+    image: traefik:latest
+    command: --providers.file.filename=/etc/traefik/traefik-dadlex.yml #--api.dashboard=true --api.insecure=true
+    ports:
+      - ${DADLEX_PORT:-3000}:80
+    volumes:
+      - ./docker/traefik-proxy.yml:/etc/traefik/traefik-dadlex.yml
+    networks:
+      - public
+      - internal
+    depends_on:
+      - frontend
+      - backend
   frontend:
     image: "ghcr.io/exanion/dadlex-frontend:${PACKAGE_VERSION:-latest}"
-    ports:
-      - "${DADLEX_FRONTEND_PORT}:3000"
     networks:
-      - frontend
+      - internal
   backend:
     image: "ghcr.io/exanion/dadlex-backend:${PACKAGE_VERSION:-latest}"
-    ports:
-      - "${DADLEX_BACKEND_PORT}:3000"
     networks:
-      - backend
+      - internal
     environment:
       - MONGODB_CONNECTION=mongodb://database/dadlex
       - LOG_LEVEL=${BACKEND_LOG_LEVEL:-info}
       - BACKEND_PUBLIC_URL
       - FRONTEND_PUBLIC_URL
-      - AUTH_MS_TENANT_ID
-      - AUTH_MS_CLIENT_ID
-      - AUTH_MS_CLIENT_SECRET
+      - AUTH_ISSUER_BASEURL
+      - AUTH_CLIENT_ID
+      - AUTH_CLIENT_SECRET
       - CAL_MS_TENANT_ID
       - CAL_MS_CLIENT_ID
       - CAL_MS_CLIENT_SECRET
@@ -34,8 +43,7 @@ services:
     volumes:
       - ./data/mongo:/data/db
     networks:
-      - backend
+      - internal
 networks:
-  frontend: null
-  backend: null
-  
+  internal: null
+  public: null

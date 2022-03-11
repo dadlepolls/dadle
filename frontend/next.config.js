@@ -22,4 +22,7 @@ module.exports = {
       },
     ];
   },
+  publicRuntimeConfig: {
+    backendPublicUrl: process.env.BACKEND_PUBLIC_URL
+  }
 };

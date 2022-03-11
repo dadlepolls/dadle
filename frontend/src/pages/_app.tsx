@@ -21,13 +21,16 @@ import "@styles/pollpage.css";
 import LoadingBar from "@util/LoadingBar";
 import { Layout, Menu } from "antd";
 import type { AppProps } from "next/app";
+import getConfig from "next/config";
 import { Router, useRouter } from "next/router";
 import "nprogress/nprogress.css";
 
 const { Header, Content, Footer } = Layout;
 
+const { publicRuntimeConfig } = getConfig();
+
 const httpLink = createHttpLink({
-  uri: "/backend/graphql",
+  uri: `${publicRuntimeConfig?.backendPublicUrl ?? "/backend"}/graphql`,
 });
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem("token");

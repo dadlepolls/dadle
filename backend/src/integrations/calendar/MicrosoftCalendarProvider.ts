@@ -1,4 +1,5 @@
 import { ICalendarProvider, IMicrosoftCalendar } from "./calendar";
+import "isomorphic-fetch";
 import {
   Event as TGraphEvent,
   Calendar as TGraphCalendar,
@@ -64,29 +65,36 @@ class MicrosoftCalendarProvider implements ICalendarProvider {
   public static apiRouter() {
     const router = express.Router();
 
-    //tenant id is given, we assume that ms calendar shall be enabled
-    if (process.env.CAL_MS_TENANT_ID) {
-      if (!process.env.BACKEND_PUBLIC_URL || !process.env.FRONTEND_PUBLIC_URL)
-        throw new Error(
-          "BACKEND_PUBLIC_URL and FRONTEND_PUBLIC_URL must be specified when microsoft calendar is enabled"
-        );
-    }
+    const {
+      CAL_MS_TENANT_ID,
+      CAL_MS_CLIENT_ID,
+      CAL_MS_CLIENT_SECRET,
+      BACKEND_PUBLIC_URL,
+      FRONTEND_PUBLIC_URL,
+    } = process.env;
+
+    //tenant id is not given, we assume MS calendar shall be disabled
+    if (!CAL_MS_TENANT_ID) return router;
+
+    if (!BACKEND_PUBLIC_URL || !FRONTEND_PUBLIC_URL)
+      throw new Error(
+        "BACKEND_PUBLIC_URL and FRONTEND_PUBLIC_URL must be specified when microsoft calendar is enabled"
+      );
+
+    if (!CAL_MS_CLIENT_ID || !CAL_MS_CLIENT_SECRET)
+      throw new Error(
+        "CAL_MS_CLIENT_ID and CAL_MS_CLIENT_SECRET mus be specified when microsoft calendar is enabled"
+      );
 
     passport.use(
       "cal_microsoft",
       new OAuth2Strategy(
         {
-          authorizationURL: `https://login.microsoftonline.com/${
-            process.env.CAL_MS_TENANT_ID ?? "common"
-          }/oauth2/v2.0/authorize`,
-          tokenURL: `https://login.microsoftonline.com/${
-            process.env.CAL_MS_TENANT_ID ?? "common"
-          }/oauth2/v2.0/token`,
-          clientID: process.env.CAL_MS_CLIENT_ID ?? "unknown_client_id",
-          clientSecret:
-            process.env.CAL_MS_CLIENT_SECRET ?? "unknown_client_secret",
-          callbackURL:
-            `${process.env.BACKEND_PUBLIC_URL}/cal/microsoft/callback` ?? "",
+          authorizationURL: `https://login.microsoftonline.com/${CAL_MS_TENANT_ID}/oauth2/v2.0/authorize`,
+          tokenURL: `https://login.microsoftonline.com/${CAL_MS_TENANT_ID}/oauth2/v2.0/token`,
+          clientID: CAL_MS_CLIENT_ID,
+          clientSecret: CAL_MS_CLIENT_SECRET,
+          callbackURL: `${BACKEND_PUBLIC_URL}/cal/microsoft/callback` ?? "",
           scope: [
             "openid",
             "profile",
@@ -195,15 +203,13 @@ class MicrosoftCalendarProvider implements ICalendarProvider {
     router.get(
       "/callback",
       passport.authenticate("cal_microsoft", {
-        failureRedirect: `${process.env.FRONTEND_PUBLIC_URL}/profile?calendarAddFailure=true`,
+        failureRedirect: `${FRONTEND_PUBLIC_URL}/profile?calendarAddFailure=true`,
         session: false,
       }),
       (req, res) => {
         const authInfo = req.authInfo as { freshlyAddedCalendars?: string[] };
         return res.redirect(
-          `${
-            process.env.FRONTEND_PUBLIC_URL
-          }/profile?freshlyAddedCalendars=${JSON.stringify(
+          `${FRONTEND_PUBLIC_URL}/profile?freshlyAddedCalendars=${JSON.stringify(
             authInfo.freshlyAddedCalendars
           )}`
         );

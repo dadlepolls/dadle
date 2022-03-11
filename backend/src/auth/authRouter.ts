@@ -1,106 +1,137 @@
-import { User as TGraphUser } from "@microsoft/microsoft-graph-types";
 import { User } from "../db/models";
 import { issueToken } from "../auth/token";
-import "isomorphic-fetch";
-import OAuth2Strategy, { VerifyCallback } from "passport-oauth2";
-import * as msgraph from "@microsoft/microsoft-graph-client";
-import passport from "passport";
-import express, { Request } from "express";
+import express from "express";
+import { generators, Issuer } from "openid-client";
+import session from "express-session";
+import crypto from "crypto";
+import { readFileSync, writeFileSync } from "fs";
+import logger from "../log";
 
-const authRouter = express.Router();
+declare module "express-session" {
+  interface SessionData {
+    code_verifier: string;
+  }
+}
 
-//tenant id is given, we assume that authentication shall be enabled
-if (process.env.AUTH_MS_TENANT_ID) {
+const SESSION_SECRET_PATH = "./secrets/session_secret";
+const REDIRECT_URI = `${process.env.BACKEND_PUBLIC_URL}/auth/callback`;
+
+const getSessionKey = async () => {
+  try {
+    const secret = String(readFileSync(SESSION_SECRET_PATH));
+    return secret;
+  } catch (_) {
+    logger.info("Automatically generating new session secret...");
+    const secretBuffer = await new Promise<Buffer>((resolve, reject) => {
+      crypto.randomBytes(1024, (ex, buffer) => {
+        if (ex) reject(ex);
+        resolve(buffer);
+      });
+    });
+    const secret = crypto
+      .createHash("sha1")
+      .update(secretBuffer)
+      .digest("base64");
+    writeFileSync(SESSION_SECRET_PATH, secret);
+    return secret;
+  }
+};
+
+const getAuthRouter = async () => {
+  const authRouter = express.Router();
+  if (!process.env.AUTH_ISSUER_BASEURL) return authRouter; //auth seems to be disabled by config, don't specify routes
+  const issuer = await Issuer.discover(process.env.AUTH_ISSUER_BASEURL);
+
+  //validate environment variables
+  if (!process.env.AUTH_CLIENT_ID || !process.env.AUTH_CLIENT_SECRET)
+    throw new Error(
+      "AUTH_CLIENT_ID and AUTH_CLIENT_SECRET mzst be specified when authentication is enabled"
+    );
   if (!process.env.BACKEND_PUBLIC_URL || !process.env.FRONTEND_PUBLIC_URL)
     throw new Error(
       "BACKEND_PUBLIC_URL and FRONTEND_PUBLIC_URL must be specified when authentication is enabled"
     );
-}
 
-passport.use(
-  new OAuth2Strategy(
-    {
-      authorizationURL: `https://login.microsoftonline.com/${
-        process.env.AUTH_MS_TENANT_ID ?? "common"
-      }/oauth2/v2.0/authorize`,
-      tokenURL: `https://login.microsoftonline.com/${
-        process.env.AUTH_MS_TENANT_ID ?? "common"
-      }/oauth2/v2.0/token`,
-      clientID: process.env.AUTH_MS_CLIENT_ID ?? "",
-      clientSecret: process.env.AUTH_MS_CLIENT_SECRET ?? "",
-      callbackURL: `${process.env.BACKEND_PUBLIC_URL}/auth/callback` ?? "",
-      scope: [
-        "openid",
-        "profile",
-        "offline_access",
-        "User.Read",
-        "Calendars.Read",
-      ],
-      passReqToCallback: true,
-    },
-    async (
-      req: Request,
-      accessToken: string,
-      refreshToken: string,
-      profile: Record<string, unknown>,
-      cb: VerifyCallback
-    ) => {
-      const graphClient = msgraph.Client.init({
-        authProvider: (done) => done(null, accessToken),
+  //enable sessions for auth routes
+  authRouter.use(
+    session({
+      secret: await getSessionKey(),
+      resave: false,
+      saveUninitialized: false,
+      cookie: { secure: process.env.NODE_ENV === "production" },
+    })
+  );
+
+  const client = new issuer.Client({
+    client_id: process.env.AUTH_CLIENT_ID,
+    client_secret: process.env.AUTH_CLIENT_SECRET,
+    response_types: ["code"],
+    redirect_uris: [REDIRECT_URI],
+  });
+
+  //redirect to authorization edpoint
+  authRouter.get("/login", (req, res) => {
+    const code_verifier = generators.codeVerifier();
+    req.session.code_verifier = code_verifier;
+
+    const code_challenge = generators.codeChallenge(code_verifier);
+    return res.redirect(
+      client.authorizationUrl({
+        scope: "openid email profile",
+        code_challenge,
+        code_challenge_method: "S256",
+      })
+    );
+  });
+
+  //callback from authorization endpoint
+  authRouter.get("/callback", async (req, res) => {
+    try {
+      const params = client.callbackParams(req);
+      const tokenSet = await client.callback(REDIRECT_URI, params, {
+        code_verifier: req.session.code_verifier,
       });
-      const graphUserInfo: TGraphUser = await graphClient.api("/me").get();
-      if (!graphUserInfo.id)
-        return cb(new Error("Couldn't retrieve user infomation"));
+      const userinfo = await client.userinfo(tokenSet);
 
-      const existingUser = await User.findOne({
-        idAtProvider: graphUserInfo.id,
+      let user = await User.findOne({
+        idAtProvider: userinfo.sub,
       });
 
-      if (existingUser) {
+      if (user) {
         //update user details
-        existingUser.nameAtProvider = graphUserInfo.displayName ?? "UNKNOWN";
-        existingUser.mail = graphUserInfo.mail ?? "UNKNOWN";
-        await existingUser.save();
-        return cb(null, existingUser);
+        user.nameAtProvider = userinfo.name ?? "UNKNOWN";
+        user.mail = userinfo.email ?? "UNKNOWN";
+        await user.save();
       } else {
-        //user doesn't exist yet in db. Retrieve all Calendars first
-        const dbUser = await User.findOneAndUpdate(
-          { idAtProvider: graphUserInfo.id },
+        //user doesn't exist yet in db
+        user = await User.findOneAndUpdate(
+          { idAtProvider: userinfo.sub },
           {
-            provider: "microsoft",
-            name: graphUserInfo.displayName ?? "UNKNOWN",
-            nameAtProvider: graphUserInfo.displayName ?? "UNKNOWN",
-            mail: graphUserInfo.mail ?? "UNKNOWN",
+            name: userinfo.name ?? "UNKNOWN",
+            nameAtProvider: userinfo.name ?? "UNKNOWN",
+            mail: userinfo.email ?? "UNKNOWN",
             calendars: [],
           },
           { upsert: true, new: true }
         );
-
-        if (!dbUser) return cb(new Error("Couldn't store user in db"));
-        return cb(null, dbUser);
       }
+
+      if (!user) return res.status(401).send("Could not store user!");
+      const token = issueToken(String(user._id));
+
+      return res.redirect(
+        `${process.env.FRONTEND_PUBLIC_URL}/login/callback?token=${token}`
+      );
+    } catch (err) {
+      return res.redirect(
+        `${
+          process.env.FRONTEND_PUBLIC_URL
+        }/login/callback?failure=true&failureMsg=${(err as Error).message}`
+      );
     }
-  )
-);
+  });
 
-authRouter.get("/login", (req, res, next) => {
-  passport.authenticate("oauth2", { state: "" })(req, res, next);
-});
+  return authRouter;
+};
 
-authRouter.get(
-  "/callback",
-  passport.authenticate("oauth2", {
-    failureRedirect: `${process.env.FRONTEND_PUBLIC_URL}/login/callback?failure=true`,
-    session: false,
-  }),
-  (req, res) => {
-    if (!req.user || !req.user._id)
-      return res.status(401).send("Could not find user!");
-    const token = issueToken(String(req.user._id));
-    return res.redirect(
-      `${process.env.FRONTEND_PUBLIC_URL}/login/callback?token=${token}`
-    );
-  }
-);
-
-export { authRouter };
+export { getAuthRouter };

@@ -54,7 +54,6 @@ interface IPollComment {
 
 interface IUser {
   _id?: string;
-  provider: "microsoft";
   idAtProvider: string;
   nameAtProvider: string;
   name: string;
