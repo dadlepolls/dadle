@@ -108,16 +108,33 @@ class GoogleCalendarProvider implements ICalendarProvider {
   public static apiRouter() {
     const router = express.Router();
 
+    const {
+      BACKEND_PUBLIC_URL,
+      CAL_GOOGLE_CLIENT_ID,
+      CAL_GOOGLE_CLIENT_SECRET,
+    } = process.env;
+
+    //both client id and secret are not given, assume that Google Calendar shall be disabled
+    if (!CAL_GOOGLE_CLIENT_ID && !CAL_GOOGLE_CLIENT_SECRET) return router;
+
+    if (!CAL_GOOGLE_CLIENT_ID || !CAL_GOOGLE_CLIENT_SECRET)
+      throw new Error(
+        "CAL_GOOGLE_CLIENT_ID and CAL_GOOGLE_CLIENT_SECRET mus be specified when Google Calendar is enabled"
+      );
+
+    if (!BACKEND_PUBLIC_URL)
+      throw new Error(
+        "BACKEND_PUBLIC_URL must be specified when Google Calendar is enabled"
+      );
+
     passport.use(
       "google",
       new GoogleStrategy(
         {
           passReqToCallback: true,
-          clientID: process.env.CAL_GOOGLE_CLIENT_ID ?? "unknown_client_id",
-          clientSecret:
-            process.env.CAL_GOOGLE_CLIENT_SECRET ?? "unknown_client_secret",
-          callbackURL:
-            `${process.env.BACKEND_PUBLIC_URL}/cal/google/callback` ?? "",
+          clientID: CAL_GOOGLE_CLIENT_ID,
+          clientSecret: CAL_GOOGLE_CLIENT_SECRET,
+          callbackURL: `${BACKEND_PUBLIC_URL}/cal/google/callback`,
           scope: [
             "profile",
             "https://www.googleapis.com/auth/calendar.readonly",
