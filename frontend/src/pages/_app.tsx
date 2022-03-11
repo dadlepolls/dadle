@@ -20,12 +20,11 @@ import "@styles/OptionEditor.sass";
 import "@styles/pollpage.css";
 import LoadingBar from "@util/LoadingBar";
 import { Layout, Menu } from "antd";
+import { appWithTranslation, useTranslation } from "next-i18next";
 import type { AppProps } from "next/app";
 import getConfig from "next/config";
 import { Router, useRouter } from "next/router";
 import "nprogress/nprogress.css";
-
-const { Header, Content, Footer } = Layout;
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -88,10 +87,11 @@ function AppLayout({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const isSm = useWindowIsSm();
   const { logout, user } = useAuth();
+  const { t } = useTranslation("common");
 
   return (
     <Layout className="layout" style={{ minHeight: "100vh" }}>
-      <Header>
+      <Layout.Header>
         {/*<div
           className="logo"
           style={{
@@ -110,11 +110,11 @@ function AppLayout({ Component, pageProps }: AppProps) {
             <b>DadleX</b>
           </Menu.Item>
           <Menu.Item key="home" onClick={() => router.push("/")}>
-            Home
+            {t("navbar_home")}
           </Menu.Item>
           {user ? (
             <Menu.Item key="mypolls" onClick={() => router.push("/mypolls")}>
-              Meine Umfragen
+              {t("navbar_my_polls")}
             </Menu.Item>
           ) : null}
           {user ? (
@@ -125,14 +125,14 @@ function AppLayout({ Component, pageProps }: AppProps) {
               title={`Hey ${user.name}`}
             >
               <Menu.Item key="profile" onClick={() => router.push("/profile")}>
-                Mein Profil
+                {t("navbar_my_profile")}
               </Menu.Item>
               <Menu.Item
                 key="logout"
                 icon={<LogoutOutlined />}
                 onClick={() => logout()}
               >
-                Abmelden
+                {t("navbar_logout")}
               </Menu.Item>
             </Menu.SubMenu>
           ) : (
@@ -142,12 +142,12 @@ function AppLayout({ Component, pageProps }: AppProps) {
               onClick={() => window.location.replace("/backend/auth/login")}
               style={{ marginLeft: "auto" }}
             >
-              Anmelden
+              {t("navbar_login")}
             </Menu.Item>
           )}
         </Menu>
-      </Header>
-      <Content style={{ padding: isSm ? "0 16px" : "0 50px" }}>
+      </Layout.Header>
+      <Layout.Content style={{ padding: isSm ? "0 16px" : "0 50px" }}>
         <div
           style={{
             minHeight: "280px",
@@ -157,8 +157,8 @@ function AppLayout({ Component, pageProps }: AppProps) {
         >
           <Component {...pageProps} />
         </div>
-      </Content>
-      <Footer style={{ textAlign: "center" }}>
+      </Layout.Content>
+      <Layout.Footer style={{ textAlign: "center" }}>
         <MobileDesktopSwitcher />
         <br />
         <small>
@@ -173,7 +173,7 @@ function AppLayout({ Component, pageProps }: AppProps) {
           &copy;&nbsp;2021&nbsp;-&nbsp;
           {new Date().getFullYear()}
         </small>
-      </Footer>
+      </Layout.Footer>
     </Layout>
   );
 }
@@ -189,4 +189,4 @@ function App(props: AppProps) {
     </ApolloProvider>
   );
 }
-export default App;
+export default appWithTranslation(App);

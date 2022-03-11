@@ -1,0 +1,12 @@
+{
+  "navbar_home": "Home",
+  "navbar_my_polls": "Meine Umfragen",
+  "navbar_my_profile": "Mein Profil",
+  "navbar_logout": "Abmelden",
+  "navbar_login": "Anmelden",
+  "poll_by_name": "von {{name}}",
+  "change_to_mobile_version": "Zu mobiler Ansicht wechseln",
+  "change_to_desktop_version": "Zu Desktop-Ansicht wechseln",
+  "login_success": "Anmeldung erfolgreich!",
+  "login_failed_with_message": "Anmelden fehlgeschlagen: {{message}}"
+}

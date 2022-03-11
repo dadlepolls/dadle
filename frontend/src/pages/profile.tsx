@@ -29,6 +29,7 @@ import {
 } from "antd";
 import * as ls from "local-storage";
 import { NextPage } from "next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -196,5 +197,14 @@ const Profile: NextPage = () => {
     </>
   );
 };
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ["common", "profile"])),
+    },
+  };
+}
+
 
 export default Profile;

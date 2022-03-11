@@ -4,6 +4,7 @@ import { GetMe, GetMe_me } from "@operations/queries/__generated__/GetMe";
 import { message } from "antd";
 import jwt_decode from "jwt-decode";
 import * as ls from "local-storage";
+import { useTranslation } from "next-i18next";
 import { Router } from "next/router";
 import React, { useContext, useEffect, useState } from "react";
 
@@ -48,6 +49,8 @@ const AuthContextProvider = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
+  const { t } = useTranslation();
+
   const token =
     typeof localStorage !== "undefined"
       ? localStorage.getItem("token")
@@ -69,12 +72,12 @@ const AuthContextProvider = ({
   const { client, data } = useQuery<GetMe>(GET_ME, {
     skip: !token,
     onCompleted: ({ me: response }) => {
-      if (authLoading) message.success("Anmeldung erfolgreich!");
+      if (authLoading) message.success(t("login_success"));
       if (response.name) ls.set("username", response.name);
       setAuthLoading(false);
     },
     onError: (error) => {
-      message.error("Anmelden fehlgeschlagen: " + error.message);
+      message.error(t("login_failed_with_message", { message: error.message }));
       localStorage.removeItem("token");
       forceReRender();
       setAuthLoading(false);

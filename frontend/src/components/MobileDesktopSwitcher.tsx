@@ -1,4 +1,5 @@
 import { Button } from "antd";
+import { useTranslation } from "next-i18next";
 import React from "react";
 import {
   ResponsiveRequestedMedium,
@@ -6,6 +7,7 @@ import {
 } from "./ResponsiveContext";
 
 const MobileDesktopSwitcher = () => {
+  const { t } = useTranslation();
   const { requestedMedium, setRequestedMedium, isSm } = useResponsiveContext();
 
   const currentExpectedMedium:
@@ -18,8 +20,8 @@ const MobileDesktopSwitcher = () => {
 
   let displayText =
     currentExpectedMedium == ResponsiveRequestedMedium.Desktop
-      ? "Zu mobiler Ansicht wechseln"
-      : "Zu Desktop-Ansicht wechseln";
+      ? t("change_to_mobile_version")
+      : t("change_to_desktop_version");
 
   return (
     <Button

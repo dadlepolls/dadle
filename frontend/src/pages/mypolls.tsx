@@ -9,6 +9,7 @@ import { GetMyPolls } from "@operations/queries/__generated__/GetMyPolls";
 import { Card, Empty, Popover, Typography } from "antd";
 import moment from "moment";
 import { NextPage } from "next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -61,5 +62,13 @@ const MyPolls: NextPage = () => {
     </>
   );
 };
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ["common", "mypolls"])),
+    },
+  };
+}
 
 export default MyPolls;

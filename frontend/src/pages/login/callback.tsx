@@ -2,6 +2,7 @@ import { useAuth } from "@components/AuthContext";
 import { ErrorPage } from "@components/ErrorPage";
 import { LoadingCard } from "@components/LoadingCard";
 import { NextPage } from "next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
@@ -37,5 +38,14 @@ const LoginCallbackPage: NextPage = () => {
 
   return <LoadingCard title="Anmeldung läuft..." />;
 };
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ["common", "logincallback"])),
+    },
+  };
+}
+
 
 export default LoginCallbackPage;
