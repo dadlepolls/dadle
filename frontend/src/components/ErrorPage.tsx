@@ -1,9 +1,11 @@
 import { ApolloError } from "@apollo/client";
 import { Collapse, Input, Result } from "antd";
+import { useTranslation } from "next-i18next";
 import Head from "next/head";
 import React from "react";
 
 const ErrorPage = ({ error }: { error: ApolloError | string }) => {
+  const { t } = useTranslation();
   if (typeof error === "string") {
     error = {
       message: error,
@@ -18,21 +20,20 @@ const ErrorPage = ({ error }: { error: ApolloError | string }) => {
   return (
     <>
       <Head>
-        <title>Fehler | DadleX</title>
+        <title>{t("error_page_title")} | DadleX</title>
       </Head>
       <Result
         status="500"
-        title="Ups, da ist was schiefgelaufen..."
+        title={t("error_excuse")}
         subTitle={
           <>
-            Beim Aufrufen der Seite ist ein Fehler aufgetreten. Bitte wende dich
-            an deinen Administrator.
+            {t("error_explanation_generic")}
             <br />({error.message})
           </>
         }
         extra={
           <Collapse ghost>
-            <Collapse.Panel key="1" header="Weitere Details">
+            <Collapse.Panel key="1" header={t("error_more_details")}>
               <Input.TextArea
                 readOnly
                 autoSize

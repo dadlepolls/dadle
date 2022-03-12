@@ -1,0 +1,14 @@
+{
+  "availability_hint_fetch_failed": "Abrufen der Verfügbarkeit fehlgeschlagen: {{message}}",
+  "participation_deleted": "Antwort gelöscht!",
+  "participation_saved": "Antwort gespeichert",
+  "poll_changed_at": "Letzte Änderung",
+  "poll_created_at": "Umfrage erstellt",
+  "poll_delete_confirmation_no": "Abbrechen",
+  "poll_delete_confirmation_yes": "Ja",
+  "poll_delete_confirmation": "Soll die Umfrage wirklich gelöscht werden?",
+  "poll_delete_error": "Umfrage konnte nicht gelöscht werden!",
+  "poll_delete_success": "Umfrage erfolgreich gelöscht!",
+  "poll_edit": "Umfrage bearbeiten",
+  "poll_save_changes": "Änderungen speichern"
+}

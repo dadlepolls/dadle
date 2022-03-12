@@ -1,12 +1,16 @@
 {
+  "change_to_desktop_version": "Zu Desktop-Ansicht wechseln",
+  "change_to_mobile_version": "Zu mobiler Ansicht wechseln",
+  "error_excuse": "Ups, da ist was schiefgelaufen...",
+  "error_explanation_generic": "Beim Aufrufen der Seite ist ein Fehler aufgetreten. Bitte wende dich an deinen Administrator.",
+  "error_more_details": "Weitere Details",
+  "error_page_title": "Fehler",
+  "login_failed_with_message": "Anmelden fehlgeschlagen: {{message}}",
+  "login_success": "Anmeldung erfolgreich!",
   "navbar_home": "Home",
+  "navbar_login": "Anmelden",
+  "navbar_logout": "Abmelden",
   "navbar_my_polls": "Meine Umfragen",
   "navbar_my_profile": "Mein Profil",
-  "navbar_logout": "Abmelden",
-  "navbar_login": "Anmelden",
-  "poll_by_name": "von {{name}}",
-  "change_to_mobile_version": "Zu mobiler Ansicht wechseln",
-  "change_to_desktop_version": "Zu Desktop-Ansicht wechseln",
-  "login_success": "Anmeldung erfolgreich!",
-  "login_failed_with_message": "Anmelden fehlgeschlagen: {{message}}"
+  "poll_by_name": "von {{name}}"
 }

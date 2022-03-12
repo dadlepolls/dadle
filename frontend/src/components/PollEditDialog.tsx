@@ -14,6 +14,7 @@ import { GetPollByLink_getPollByLink } from "@operations/queries/__generated__/G
 import { useStyledMutation } from "@util/mutationWrapper";
 import { Button, Card, Collapse, Form, Input, Select } from "antd";
 import produce from "immer";
+import { useTranslation } from "next-i18next";
 import React, { useCallback, useState } from "react";
 import { PollOptionType } from "__generated__/globalTypes";
 import { OptionEditor, OptionEditorType } from "./PollEditDialog/OptionEditor";
@@ -33,7 +34,7 @@ export const PollEditDialog = ({
   poll: _poll,
   title,
   allowLinkEditing = true,
-  saveButtonContent = "Speichern",
+  saveButtonContent,
   saveButtonIcon,
   onSaveSuccess = (_) => {},
   onSaveFailure = () => {},
@@ -46,6 +47,7 @@ export const PollEditDialog = ({
   onSaveSuccess?: (poll?: CreateOrUpdatePoll_createOrUpdatePoll) => any;
   onSaveFailure?: () => any;
 }) => {
+  const { t } = useTranslation("polleditor");
   const [form] = Form.useForm();
 
   const [linkModifiedManually, setLinkModifiedManually] = useState(
@@ -58,12 +60,14 @@ export const PollEditDialog = ({
 
   const apolloClient = useApolloClient();
 
+  if (!saveButtonContent) saveButtonContent = t("save");
+
   const createOrUpdatePollMutation = useStyledMutation<
     CreateOrUpdatePoll,
     CreateOrUpdatePollVariables
   >(CREATE_OR_UPDATE_POLL, {
     statusCallbackFunction: setPollIsSaving,
-    successMessage: "Umfrage gespeichert!",
+    successMessage: t("save_success"),
     onSuccess: (r) => onSaveSuccess(r?.createOrUpdatePoll),
     onError: onSaveFailure,
   });
@@ -188,19 +192,19 @@ export const PollEditDialog = ({
       >
         <Form.Item
           required={true}
-          label="Name der Umfrage"
+          label={t("title")}
           name="title"
           style={{ marginBottom: 0 }}
           rules={[
             {
               required: true,
-              message: "Es muss ein Name für die Umfrage angegeben werden",
+              message: t("title_required_error"),
             },
           ]}
         >
           <Input
             type="text"
-            placeholder="Name der Umfrage"
+            placeholder={t("title")}
             onChange={(e) => {
               if (!linkModifiedManually) autocreateLink(e.target.value);
             }}
@@ -217,25 +221,23 @@ export const PollEditDialog = ({
               >
                 <Collapse.Panel
                   key="1"
-                  header="Erweiterte Einstellungen"
+                  header={t("advanced_settings")}
                   forceRender={true}
                 >
                   {allowLinkEditing ? (
                     <Form.Item
                       required={true}
-                      label="Link zur Umfrage"
+                      label={t("link_description")}
                       name="link"
                       dependencies={["linkMode"]}
                       rules={[
                         {
                           required: true,
-                          message:
-                            "Es muss ein Link für die Umfrage angegeben werden!",
+                          message: t("link_required_error"),
                         },
                         {
                           pattern: /^[\w-]+$/g,
-                          message:
-                            "Der Link darf nur Buchstaben, Zahlen, Bindestriche und Unterstriche enthalten!",
+                          message: t("link_invalid_error"),
                         },
                         {
                           validator: async (_, value) => {
@@ -243,9 +245,7 @@ export const PollEditDialog = ({
                               return Promise.resolve();
                             else
                               return Promise.reject(
-                                new Error(
-                                  "Der Link ist schon vergeben, bitte wähle einen anderen!"
-                                )
+                                new Error(t("link_unavilable_error"))
                               );
                           },
                         },
@@ -269,16 +269,16 @@ export const PollEditDialog = ({
                               }}
                             >
                               <Select.Option value="auto">
-                                Automatisch erzeugen
+                                {t("link_autocreate")}
                               </Select.Option>
                               <Select.Option value="manual">
-                                Link anpassen
+                                {t("link_manual")}
                               </Select.Option>
                             </Select>
                           </Form.Item>
                         }
                         disabled={getFieldValue("linkMode") == "auto"}
-                        placeholder="Link zur Umfrage"
+                        placeholder={t("link_description")}
                         prefix={`${getWindowOrigin()}/p/`}
                         onChange={() => {
                           if (!linkModifiedManually)

@@ -1,4 +1,5 @@
 import { Button, Modal, Result } from "antd";
+import { useTranslation } from "next-i18next";
 import React from "react";
 import { CalendarList } from "./CalendarList";
 
@@ -9,20 +10,22 @@ const FreshlyAddedCalendarModal = ({
   freshlyAddedCalendars: string[];
   onDone: () => unknown;
 }) => {
+  const { t } = useTranslation("profile");
+
   return (
     <Modal
       visible={freshlyAddedCalendars.length > 0}
       onCancel={onDone}
       footer={
         <Button type="primary" onClick={onDone}>
-          Fertig
+          {t("cal_link_success_done")}
         </Button>
       }
     >
       <Result
         status="success"
-        title="Die Kalender wurden verknüpft!"
-        subTitle="Wähle aus, in welchen der verfügbaren Kalender nach Terminüberlappungen gesucht werden soll."
+        title={t("cal_link_success_title")}
+        subTitle={t("cal_link_success_explanation")}
       />
       <CalendarList
         filter={(id) => freshlyAddedCalendars.some((c) => c == id)}

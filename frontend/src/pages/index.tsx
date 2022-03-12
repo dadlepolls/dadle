@@ -49,7 +49,11 @@ const Home: NextPage = () => {
 export async function getStaticProps({ locale }: { locale: string }) {
   return {
     props: {
-      ...(await serverSideTranslations(locale, ["common", "index"])),
+      ...(await serverSideTranslations(locale, [
+        "common",
+        "index",
+        "polleditor",
+      ])),
     },
   };
 }

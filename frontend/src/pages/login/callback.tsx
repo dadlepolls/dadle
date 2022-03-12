@@ -2,11 +2,13 @@ import { useAuth } from "@components/AuthContext";
 import { ErrorPage } from "@components/ErrorPage";
 import { LoadingCard } from "@components/LoadingCard";
 import { NextPage } from "next";
+import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 const LoginCallbackPage: NextPage = () => {
+  const { t } = useTranslation("logincallback");
   const router = useRouter();
   const { tryLogin } = useAuth();
   const [isMissingTokenInQuery, setIsMissingTokenInQuery] = useState(false);
@@ -32,11 +34,11 @@ const LoginCallbackPage: NextPage = () => {
 
   if (isMissingTokenInQuery || failureMessage) {
     if (failureMessage)
-      return <ErrorPage error={`Fehlercode: ${failureMessage}`} />;
-    else return <ErrorPage error={"Es wurde kein Token erzeugt"} />;
+      return <ErrorPage error={t("errorcode", { message: failureMessage })} />;
+    else return <ErrorPage error={t("error_generic")} />;
   }
 
-  return <LoadingCard title="Anmeldung läuft..." />;
+  return <LoadingCard title={t("logging_in")} />;
 };
 
 export async function getStaticProps({ locale }: { locale: string }) {
@@ -46,6 +48,5 @@ export async function getStaticProps({ locale }: { locale: string }) {
     },
   };
 }
-
 
 export default LoginCallbackPage;

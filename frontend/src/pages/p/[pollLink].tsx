@@ -48,6 +48,7 @@ import {
 } from "antd";
 import moment from "moment";
 import { NextPage } from "next";
+import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -71,6 +72,7 @@ const sortPollOptions = (poll: GetPollByLink_getPollByLink) => {
 };
 
 const PollPage: NextPage = () => {
+  const { t } = useTranslation("pollpage");
   const router = useRouter();
   const { pollLink } = router.query;
   const mobileDisplay = useMobileComponentsPrefered();
@@ -96,7 +98,7 @@ const PollPage: NextPage = () => {
       nextFetchPolicy: "network-only",
       onError: (error) =>
         message.error(
-          "Abrufen der Verfügbarkeit fehlgeschlagen: " + error.message
+          t("availability_hint_fetch_failed", { message: error.message })
         ),
     }
   );
@@ -104,8 +106,8 @@ const PollPage: NextPage = () => {
   const deletePollMutation = useStyledMutation<DeletePoll, DeletePollVariables>(
     DELETE_POLL,
     {
-      successMessage: "Umfrage erfolgreich gelöscht!",
-      errorMessage: "Umfrage konnte nicht gelöscht werden!",
+      successMessage: t("poll_delete_success"),
+      errorMessage: t("poll_delete_error"),
     }
   );
   const deletePoll = async () => {
@@ -129,7 +131,9 @@ const PollPage: NextPage = () => {
   const createOrUpdateParticipationMutation = useStyledMutation<
     CreateOrUpdateParticipation,
     CreateOrUpdateParticipationVariables
-  >(CREATE_OR_UPDATE_PARTICIPATION, { successMessage: "Antwort gespeichert!" });
+  >(CREATE_OR_UPDATE_PARTICIPATION, {
+    successMessage: t("participation_saved"),
+  });
   const saveParticipation = async (
     participation: TPartialParticipationWithId
   ) => {
@@ -151,7 +155,7 @@ const PollPage: NextPage = () => {
   const deleteParticipationMutation = useStyledMutation<
     DeleteParticipation,
     DeleteParticipationVariables
-  >(DELETE_PARTICIPATION, { successMessage: "Antwort gelöscht!" });
+  >(DELETE_PARTICIPATION, { successMessage: t("participation_deleted") });
   const deleteParticipation = async (participationId: string) => {
     await deleteParticipationMutation(
       {
@@ -204,9 +208,9 @@ const PollPage: NextPage = () => {
                     icon={<EditOutlined />}
                   />
                   <Popconfirm
-                    title="Soll die Umfrage wirklich gelöscht werden?"
-                    okText="Ja"
-                    cancelText="Abbrechen"
+                    title={t("poll_delete_confirmation")}
+                    okText={t("poll_delete_confirmation_yes")}
+                    cancelText={t("poll_delete_confirmation_no")}
                     placement="bottomLeft"
                     onConfirm={() => deletePoll()}
                   >
@@ -218,7 +222,7 @@ const PollPage: NextPage = () => {
           >
             <Descriptions size="small" column={mobileDisplay ? 1 : 3}>
               {poll.createdAt ? (
-                <Descriptions.Item label="Umfrage erstellt">
+                <Descriptions.Item label={t("poll_created_at")}>
                   <Tooltip
                     title={moment(poll.createdAt).format("DD.MM.YY HH:MM:SS")}
                   >
@@ -227,7 +231,7 @@ const PollPage: NextPage = () => {
                 </Descriptions.Item>
               ) : null}
               {poll.updatedAt ? (
-                <Descriptions.Item label="Letzte Änderung">
+                <Descriptions.Item label={t("poll_changed_at")}>
                   <Tooltip
                     title={moment(poll.updatedAt).format("DD.MM.YY HH:MM:SS")}
                   >
@@ -239,11 +243,11 @@ const PollPage: NextPage = () => {
 
             {isEditingPoll ? (
               <PollEditDialog
-                title="Umfrage bearbeiten"
+                title={t("poll_edit")}
                 poll={poll}
                 allowLinkEditing={false}
                 saveButtonIcon={<SaveOutlined />}
-                saveButtonContent="Änderungen speichern"
+                saveButtonContent={t("poll_save_changes")}
                 onSaveSuccess={() => setIsEditingPoll(false)}
               />
             ) : null}
@@ -269,7 +273,13 @@ const PollPage: NextPage = () => {
 export async function getStaticProps({ locale }: { locale: string }) {
   return {
     props: {
-      ...(await serverSideTranslations(locale, ["common", "pollpage"])),
+      ...(await serverSideTranslations(locale, [
+        "common",
+        "pollpage",
+        "pollresponses",
+        "pollcomments",
+        "polleditor",
+      ])),
     },
   };
 }
