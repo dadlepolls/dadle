@@ -225,9 +225,7 @@ const CalendarList = ({
           actions.push(
             <Tooltip
               key="check"
-              title={
-                healthCheckResult ? null : t("cal_healthcheck_action")
-              }
+              title={healthCheckResult ? null : t("cal_healthcheck_action")}
             >
               <Button
                 size="small"
@@ -273,11 +271,13 @@ const CalendarList = ({
                 <Avatar icon={getIconForCalendarProvider(cal.provider)} />
               }
               title={
+                /* eslint-disable indent */
                 cal.enabled
                   ? cal.friendlyName
                   : t("cal_deactivated_title", {
                       name: cal.friendlyName,
                     })
+                /* eslint-enable indent */
               }
               description={cal.usernameAtProvider}
             />

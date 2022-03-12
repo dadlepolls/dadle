@@ -1,12 +1,16 @@
 {
+  "change_to_desktop_version": "Change to desktop version",
+  "change_to_mobile_version": "Change to mobile version",
+  "error_excuse": "Oops, something went wrong...",
+  "error_explanation_generic": "There has been an error. Please contact your administrator.",
+  "error_more_details": "More Details",
+  "error_page_title": "Error",
+  "login_failed_with_message": "Login failed: {{message}}",
+  "login_success": "Login successfull!",
   "navbar_home": "Home",
+  "navbar_login": "Log in",
+  "navbar_logout": "Log out",
   "navbar_my_polls": "My Polls",
   "navbar_my_profile": "Profile",
-  "navbar_logout": "Log out",
-  "navbar_login": "Log in",
-  "poll_by_name": "by {{name}}",
-  "change_to_mobile_version": "Change to mobile version",
-  "change_to_desktop_version": "Change to desktop version",
-  "login_success": "Login successfull!",
-  "login_failed_with_message": "Login failed: {{message}}"
+  "poll_by_name": "by {{name}}"
 }
