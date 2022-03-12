@@ -35,5 +35,8 @@
     "eslint": "^7.23.0",
     "eslint-config-next": "11.1.2",
     "typescript": "4.4.4"
+  },
+  "resolutions": {
+    "cssnano-preset-simple": "3.0.0"
   }
 }
