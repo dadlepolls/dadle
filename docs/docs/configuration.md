@@ -29,6 +29,10 @@ THe public URL that the backend is reachable at, without trailing slash. Example
 
 The public URL that the frontend service is reachable at, without trailing slash.
 
+### `BACKEND_TRUST_PROXY`
+
+This sets the ["trust proxy" attribute](https://expressjs.com/guide/behind-proxies.html) of the backend service. For the pre-built Docker image, this may be set to 1 (if you are accessing DadleX directly from your system), 2 (if you've got a reverse proxy running) or any other value stated in the [documentation](https://expressjs.com/guide/behind-proxies.html) 
+
 ## Authentication settings
 
 Any OpenID provider (e.g. MS Azure, Google Sign-In, Keycloak etc.) can be used for allowing users to sign in to the instance.
