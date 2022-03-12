@@ -1,3 +1,5 @@
+const { i18n } = require("./next-i18next.config");
+
 /** @type {import('next').NextConfig} */
 module.exports = {
   reactStrictMode: true,
@@ -23,6 +25,7 @@ module.exports = {
     ];
   },
   publicRuntimeConfig: {
-    backendPublicUrl: process.env.BACKEND_PUBLIC_URL
-  }
+    backendPublicUrl: process.env.BACKEND_PUBLIC_URL,
+  },
+  i18n,
 };

@@ -9,10 +9,13 @@ import { GetMyPolls } from "@operations/queries/__generated__/GetMyPolls";
 import { Card, Empty, Popover, Typography } from "antd";
 import moment from "moment";
 import { NextPage } from "next";
+import { useTranslation } from "next-i18next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
 const MyPolls: NextPage = () => {
+  const { t } = useTranslation("mypolls");
   const { user } = useAuth();
   const router = useRouter();
 
@@ -22,10 +25,7 @@ const MyPolls: NextPage = () => {
     nextFetchPolicy: "network-only",
   });
 
-  if (!user)
-    return (
-      <ErrorPage error="Um die Umfragen anzuzeigen, bei denen du mitgemacht hast, musst du angemeldet sein!" />
-    );
+  if (!user) return <ErrorPage error={t("auth_required_error")} />;
   if (error) return <ErrorPage error={error} />;
   if (loading) return <LoadingCard />;
 
@@ -34,14 +34,12 @@ const MyPolls: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Meine Umfragen | DadleX</title>
+        <title>{t("title")} | DadleX</title>
       </Head>
-      <Card title="Meine Umfragen">
-        <Typography.Paragraph>
-          Das sind alle Umfragen, bei denen du dich eingetragen hast.
-        </Typography.Paragraph>
+      <Card title={t("title")}>
+        <Typography.Paragraph>{t("explanation")}</Typography.Paragraph>
         {!polls?.length ? (
-          <Empty description="Du hast bisher an keinen Umfragen teilgenommen" />
+          <Empty description={t("no_participations")} />
         ) : (
           polls
             .sort((b, a) => moment(a.updatedAt).diff(moment(b.updatedAt)))
@@ -61,5 +59,13 @@ const MyPolls: NextPage = () => {
     </>
   );
 };
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ["common", "mypolls", "pollresponses"])),
+    },
+  };
+}
 
 export default MyPolls;

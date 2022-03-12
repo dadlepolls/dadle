@@ -29,6 +29,7 @@ import {
 } from "antd";
 import produce from "immer";
 import * as ls from "local-storage";
+import { useTranslation } from "next-i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import { useImmer } from "use-immer";
 import {
@@ -91,6 +92,7 @@ const ParticipantRow = ({
   onSaveClick?: (_newName: string) => any;
   onDeleteClick?: () => any;
 }) => {
+  const { t } = useTranslation("pollresponses");
   const [name, setName] = useState(nameHint);
 
   return (
@@ -112,9 +114,9 @@ const ParticipantRow = ({
             {deletable ? (
               deleteConfirmation ? (
                 <Popconfirm
-                  title="Soll die Antwort wirklich gelöscht werden?"
-                  okText="Ja"
-                  cancelText="Abbrechen"
+                  title={t("participation_delete_confirmation")}
+                  okText={t("participation_delete_confirmation_yes")}
+                  cancelText={t("participation_delete_confirmation_no")}
                   onConfirm={() => onDeleteClick()}
                 >
                   <Button danger icon={<DeleteOutlined />} />
@@ -129,7 +131,7 @@ const ParticipantRow = ({
             <Button
               type="primary"
               onClick={() => {
-                if (!name) message.error("Bitte gib einen Namen an!");
+                if (!name) message.error(t("error_name_required"));
                 else onSaveClick(name);
               }}
               icon={<SaveOutlined />}
@@ -277,6 +279,7 @@ const ParticipationChoiceCell = ({
   overlappingEvents?: string[];
   onClick?: () => any;
 }) => {
+  const { t } = useTranslation("pollresponses");
   const mapChoiceToIcon = (c?: YesNoMaybe, editable: boolean = false) => {
     switch (c) {
       case YesNoMaybe.Yes:
@@ -293,7 +296,7 @@ const ParticipationChoiceCell = ({
   return (
     <Popover
       visible={overlappingEvents?.length && editable ? undefined : false} //hide when there is no hint
-      title="Kalender-Überlappungen"
+      title={t("calendar_overlapping_events")}
       placement="bottom"
       content={<span>{overlappingEvents?.join(", ")}</span>}
     >

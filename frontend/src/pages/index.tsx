@@ -8,13 +8,15 @@ import { GET_POLLS_OVERVIEW } from "@operations/queries/GetPollsOverview";
 import { GetPollsOverview } from "@operations/queries/__generated__/GetPollsOverview";
 import moment from "moment";
 import type { NextPage } from "next";
+import { useTranslation } from "next-i18next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
 
 const Home: NextPage = () => {
+  const { t } = useTranslation("index");
   const router = useRouter();
-
   const { loading, data, error } =
     useQuery<GetPollsOverview>(GET_POLLS_OVERVIEW);
 
@@ -28,10 +30,10 @@ const Home: NextPage = () => {
         <title>DadleX</title>
       </Head>
       <PollEditDialog
-        title="Neue Umfrage erstellen"
+        title={t("create_new_poll")}
         key="dialog"
         saveButtonIcon={<PlusOutlined />}
-        saveButtonContent="Umfrage erstellen"
+        saveButtonContent={t("create_poll")}
         onSaveSuccess={(p) => router.push(`/p/${p?.link}`)}
       />
       {loading ? <LoadingCard /> : null}
@@ -43,5 +45,17 @@ const Home: NextPage = () => {
     </>
   );
 };
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, [
+        "common",
+        "index",
+        "polleditor",
+      ])),
+    },
+  };
+}
 
 export default Home;

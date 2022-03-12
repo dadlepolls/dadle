@@ -36,6 +36,7 @@ import {
   Switch,
   Tooltip
 } from "antd";
+import { useTranslation } from "next-i18next";
 import React, { useMemo } from "react";
 import { useImmer } from "use-immer";
 
@@ -71,6 +72,7 @@ const CalendarList = ({
   showHealthCheckButtons?: boolean;
   showDeleteButtons?: boolean;
 }) => {
+  const { t } = useTranslation("profile");
   const { loading: calendarsLoading, data: calendarsData } =
     useQuery<GetMyCalendars>(GET_MY_CALENDARS);
   const calendarsDataSorted = useInitiallySorted(
@@ -104,7 +106,7 @@ const CalendarList = ({
   const deleteCalender = useStyledMutation<
     DeleteCalendar,
     DeleteCalendarVariables
-  >(DELETE_CALENDAR, { successMessage: "Kalender gelöscht!" });
+  >(DELETE_CALENDAR, { successMessage: t("cal_deleted") });
 
   const [calendarHealthChecks, updateCalendarHealthChecks] = useImmer<
     TCalendarHealthCheck[]
@@ -159,11 +161,9 @@ const CalendarList = ({
     if (!healthyResult)
       message.error(
         <>
-          <span>Die Verbindung zum Kalender ist fehlgeschlagen!</span>
+          <span>{t("cal_healthcheck_failed_title")}</span>
           <br />
-          <small>
-            Bitte probiere, den Kalender zu löschen und ihn neu zu verknüpfen.
-          </small>
+          <small>{t("cal_healthcheck_failed_description")}</small>
         </>
       );
     updateCalendarHealthChecks((checks) => {
@@ -201,7 +201,7 @@ const CalendarList = ({
       itemLayout="horizontal"
       loading={calendarsLoading}
       dataSource={calendars}
-      locale={{ emptyText: "Du hast bisher keine Kalender verknüpft" }}
+      locale={{ emptyText: t("cal_none_linked") }}
       renderItem={(cal) => {
         const healthCheckResult = calendarHealthChecks.find(
           (h) => h.calId == cal._id
@@ -225,7 +225,7 @@ const CalendarList = ({
           actions.push(
             <Tooltip
               key="check"
-              title={healthCheckResult ? null : "Verknüpfung überprüfen"}
+              title={healthCheckResult ? null : t("cal_healthcheck_action")}
             >
               <Button
                 size="small"
@@ -250,10 +250,10 @@ const CalendarList = ({
           actions.push(
             <Popconfirm
               key="delete"
-              title="Soll die Kalenderverknüpfung wirklich gelöscht werden?"
+              title={t("cal_delete_confirmation")}
               onConfirm={async () => onDeleteClick(cal._id)}
-              okText="Ja"
-              cancelText="Abbrechen"
+              okText={t("cal_delete_confirm")}
+              cancelText={t("cal_delete_cancel")}
               placement="left"
             >
               <Button
@@ -271,9 +271,13 @@ const CalendarList = ({
                 <Avatar icon={getIconForCalendarProvider(cal.provider)} />
               }
               title={
+                /* eslint-disable indent */
                 cal.enabled
                   ? cal.friendlyName
-                  : `${cal.friendlyName} (deaktiviert)`
+                  : t("cal_deactivated_title", {
+                      name: cal.friendlyName,
+                    })
+                /* eslint-enable indent */
               }
               description={cal.usernameAtProvider}
             />

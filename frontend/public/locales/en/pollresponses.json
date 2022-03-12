@@ -1,0 +1,11 @@
+{
+  "calendar_overlapping_events": "Overlapping Events",
+  "error_name_required": "Please specify a name!",
+  "overlapping_events_one": "{{count}} overlap",
+  "overlapping_events_other": "{{count}} overlaps",
+  "overlapping_events_zero": "No overlap",
+  "participation_delete_confirmation_no": "Cancel",
+  "participation_delete_confirmation_yes": "Yes",
+  "participation_delete_confirmation": "Do you really want to delete the participation?",
+  "responses": "{{amount}} Confirmations"
+}

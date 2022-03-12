@@ -29,11 +29,14 @@ import {
 } from "antd";
 import * as ls from "local-storage";
 import { NextPage } from "next";
+import { useTranslation } from "next-i18next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 
 const Profile: NextPage = () => {
+  const { t } = useTranslation("profile");
   const router = useRouter();
   const { user, authLoading, token } = useAuth();
   const mobileDisplay = useMobileComponentsPrefered();
@@ -58,7 +61,7 @@ const Profile: NextPage = () => {
   useEffect(() => {
     //check if there was a failure while adding calendar, show message
     if (router.isReady && router.query.calendarAddFailure) {
-      message.error("Verknüpfen des Kalenders fehlgeschlagen!");
+      message.error(t("calendar_linking_failed"));
       removeQueryParams();
     }
     //eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,7 +92,7 @@ const Profile: NextPage = () => {
         setNameIsEdited(false);
         ls.set("username", name);
       },
-      successMessage: "Name aktualisiert!",
+      successMessage: t("username_saved"),
     }
   );
 
@@ -101,25 +104,28 @@ const Profile: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Mein Profil | DadleX</title>
+        <title>{t("title")} | DadleX</title>
       </Head>
       <Space direction="vertical">
-        <Card title="Profilinformationen">
+        <Card title={t("information")}>
           <Typography.Title
             level={3}
           >{`Howdy, ${user.name}!`}</Typography.Title>
           <Descriptions column={mobileDisplay ? 1 : 3}>
-            <Descriptions.Item label="Name beim Anmeldedienst">
+            <Descriptions.Item label={t("provider_name")}>
               <Tooltip
-                title={`Eindeutige ID beim Anmeldedienst: ${user.idAtProvider}`}
+                title={t("provider_id", { id: user.idAtProvider })}
               >
                 {user.nameAtProvider}
               </Tooltip>
             </Descriptions.Item>
-            <Descriptions.Item label="Email" span={mobileDisplay ? 1 : 2}>
+            <Descriptions.Item
+              label={t("email")}
+              span={mobileDisplay ? 1 : 2}
+            >
               {user.mail}
             </Descriptions.Item>
-            <Descriptions.Item label="Anzeigename">
+            <Descriptions.Item label={t("displayname")}>
               <Input.Group>
                 <Input
                   value={name}
@@ -150,7 +156,7 @@ const Profile: NextPage = () => {
         </Card>
 
         <Card
-          title="Meine verknüpften Kalender"
+          title={t("linked_calendars")}
           className="card-extra-responsive"
           extra={
             <Dropdown
@@ -163,15 +169,17 @@ const Profile: NextPage = () => {
                   }
                 >
                   <Menu.Item key="microsoft" icon={<WindowsOutlined />}>
-                    Microsoft 365&reg;-Kalender
+                    {t("cal_microsoft")}
                   </Menu.Item>
                   <Menu.Item key="google" icon={<GoogleOutlined />}>
-                    Google-Kalender
+                    {t("cal_google")}
                   </Menu.Item>
                 </Menu>
               }
             >
-              <Button icon={<LinkOutlined />}>Kalender verknüpfen</Button>
+              <Button icon={<LinkOutlined />}>
+                {t("link_calendar_action")}
+              </Button>
             </Dropdown>
           }
         >
@@ -196,5 +204,13 @@ const Profile: NextPage = () => {
     </>
   );
 };
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ["common", "profile"])),
+    },
+  };
+}
 
 export default Profile;

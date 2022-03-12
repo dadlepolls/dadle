@@ -9,6 +9,7 @@ import {
 import { Button, Col, Input, List, message, Popover, Row } from "antd";
 import produce from "immer";
 import * as ls from "local-storage";
+import { useTranslation } from "next-i18next";
 import React, { useState } from "react";
 import { useImmer } from "use-immer";
 import {
@@ -25,17 +26,6 @@ import {
   TPartialParticipationWithId
 } from "./PollResponses";
 
-const getAvailabilityHintText = (numberOfOverlappingElements: number) => {
-  const quantifier = numberOfOverlappingElements
-    ? numberOfOverlappingElements
-    : "Keine";
-  const text = `${quantifier} ${
-    numberOfOverlappingElements == 1 ? "Überlappung" : "Überlappungen"
-  }`;
-
-  return <span>{text}</span>;
-};
-
 const OptionRow = ({
   option,
   poll,
@@ -50,6 +40,7 @@ const OptionRow = ({
   choice?: YesNoMaybe;
   onChoiceCellClick: () => any;
 }) => {
+  const { t } = useTranslation("pollresponses");
   const from = option.from ? new Date(option.from) : null;
   const to = option.to ? new Date(option.to) : null;
   const responses = responsesPerChoice[option._id];
@@ -122,8 +113,11 @@ const OptionRow = ({
           }
         >
           <b>
-            {responses.yes ?? 0}&nbsp;
-            {responses.maybe ? `(+${responses.maybe}) ` : null}Zusagen
+            {t("responses", {
+              amount: `${responses.yes ?? 0}${
+                responses.maybe ? ` (+${responses.maybe})` : ""
+              }`,
+            })}
           </b>
         </Popover>
         {availabilityHint ? (
@@ -135,7 +129,11 @@ const OptionRow = ({
               .map((e) => e.title)
               .join(", ")}
           >
-            {getAvailabilityHintText(availabilityHint.overlappingEvents.length)}
+            <span>
+              {t("overlapping_events", {
+                count: availabilityHint.overlappingEvents.length,
+              })}
+            </span>
           </Popover>
         ) : null}
       </div>
@@ -175,6 +173,7 @@ const PollResponsesMobile = ({
   ) => Promise<any>;
   deleteParticipationFunction: (participationId: string) => Promise<any>;
 }) => {
+  const { t } = useTranslation("pollresponses");
   const { user } = useAuth();
   const [editableParticipation, updateEditableParticipation] =
     useImmer<TPartialParticipationWithId>(getEmptyEditableParticipation(user));
@@ -238,7 +237,7 @@ const PollResponsesMobile = ({
             loading={isSaving}
             onClick={async () => {
               if (!editableParticipation.author) {
-                message.error("Bitte gib einen Namen an!");
+                message.error(t("error_name_required"));
                 return;
               }
               setIsSaving(true);

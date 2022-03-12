@@ -1,0 +1,11 @@
+{
+  "calendar_overlapping_events": "Kalender-Überlappungen",
+  "error_name_required": "Bitte gib einen Namen an!",
+  "overlapping_events_one": "{{count}} Überlappung",
+  "overlapping_events_other": "{{count}} Überlappungen",
+  "overlapping_events_zero": "Keine Überlappungen",
+  "participation_delete_confirmation_no": "Abbrechen",
+  "participation_delete_confirmation_yes": "Ja",
+  "participation_delete_confirmation": "Soll die Antwort wirklich gelöscht werden?",
+  "responses": "{{amount}} Zusagen"
+}

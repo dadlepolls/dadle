@@ -1,0 +1,5 @@
+{
+  "error_generic": "No token was created",
+  "errorcode": "Error code: {{message}}",
+  "logging_in": "Logging in..."
+}
