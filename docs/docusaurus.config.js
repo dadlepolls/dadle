@@ -8,8 +8,8 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const config = {
   title: "Dadle Documenation",
   tagline: "Dadle Documentation",
-  url: "https://dadlepolls.github.io",
-  baseUrl: "/dadle/",
+  url: "https://docs.dadle.io",
+  baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
