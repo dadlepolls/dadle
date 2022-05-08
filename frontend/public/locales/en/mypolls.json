@@ -1,6 +1,6 @@
 {
   "auth_required_error": "You need to be logged in in order to view the polls you've participated in",
   "explanation": "Those are all polls you've participated in",
-  "no_participations": "You dind't participate in any polls yet",
+  "no_participations": "You didn't participate in any polls yet",
   "title": "My Polls"
 }
