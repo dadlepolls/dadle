@@ -28,7 +28,7 @@ const issueToken = (
     algorithm: "RS256",
     subject: userId,
     expiresIn: options.expiresIn,
-    issuer: "DadleX-Backend",
+    issuer: "Dadle-Backend",
     audience: options.claims,
   });
 };

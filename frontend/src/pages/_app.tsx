@@ -103,11 +103,11 @@ function AppLayout({ Component, pageProps }: AppProps) {
             fontWeight: 500,
           }
         >
-          <span>DadleX</span>
+          <span>Dadle</span>
         </div>*/}
         <Menu theme="dark" mode="horizontal" selectedKeys={[]}>
           <Menu.Item key="logo">
-            <b>DadleX</b>
+            <b>Dadle</b>
           </Menu.Item>
           <Menu.Item key="home" onClick={() => router.push("/")}>
             {t("navbar_home")}
@@ -163,11 +163,11 @@ function AppLayout({ Component, pageProps }: AppProps) {
         <br />
         <small>
           <a
-            href="https://github.com/peterkappelt/dadlex"
+            href="https://github.com/dadlepolls/dadle"
             target="_blank"
             rel="noreferrer"
           >
-            DadleX
+            Dadle
           </a>
           &nbsp;{process.env.NEXT_PUBLIC_APP_VERSION ?? "version_unknown"} |
           &copy;&nbsp;2021&nbsp;-&nbsp;

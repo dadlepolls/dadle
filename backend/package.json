@@ -1,7 +1,7 @@
 {
-  "name": "dadlex-backend",
+  "name": "dadle-backend",
   "version": "0.0.1-dev",
-  "description": "Backend for DadleX",
+  "description": "Backend for Dadle",
   "main": "src/index.ts",
   "author": "Peter Kappelt <kappelt.peter@gmail.com>",
   "license": "PROPRIETARY",

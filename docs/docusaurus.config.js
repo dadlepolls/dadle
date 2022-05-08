@@ -6,17 +6,17 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "DadleX Documenation",
-  tagline: "DadleX Documentation",
-  url: "https://exanion.github.io",
-  baseUrl: "/dadlex/",
+  title: "Dadle Documenation",
+  tagline: "Dadle Documentation",
+  url: "https://dadlepolls.github.io",
+  baseUrl: "/dadle/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
-  organizationName: "exanion",
+  organizationName: "dadlepolls",
   deploymentBranch: "gh-pages",
   trailingSlash: false,
-  projectName: "dadlex",
+  projectName: "dadle",
   plugins: [],
   presets: [
     [
@@ -25,7 +25,7 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
-          editUrl: "https://github.com/exanion/dadlex/tree/dev/docs/",
+          editUrl: "https://github.com/dadlepolls/dadle/tree/dev/docs/",
           routeBasePath: "/",
         },
         blog: false,
@@ -40,9 +40,9 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: "DadleX Documentation",
+        title: "Dadle Documentation",
         /*logo: {
-          alt: "DadleX Logo",
+          alt: "Dadle Logo",
           src: "img/logo.svg",
         },*/
         items: [
@@ -53,7 +53,7 @@ const config = {
             label: "Documentation",
           },
           {
-            href: "https://github.com/exanion/dadlex",
+            href: "https://github.com/dadlepolls/dadle",
             label: "GitHub",
             position: "right",
           },
@@ -66,7 +66,7 @@ const config = {
             title: "Docs",
             items: [
               {
-                label: "DadleX Documentation",
+                label: "Dadle Documentation",
                 to: "/",
               },
             ],
@@ -77,7 +77,7 @@ const config = {
             items: [
               {
                 label: "GitHub",
-                href: "https://github.com/exanion/dadlex",
+                href: "https://github.com/dadlepolls/dadle",
               },
             ],
           },

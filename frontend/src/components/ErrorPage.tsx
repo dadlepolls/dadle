@@ -20,7 +20,7 @@ const ErrorPage = ({ error }: { error: ApolloError | string }) => {
   return (
     <>
       <Head>
-        <title>{t("error_page_title")} | DadleX</title>
+        <title>{t("error_page_title")} | Dadle</title>
       </Head>
       <Result
         status="500"

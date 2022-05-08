@@ -27,7 +27,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>DadleX</title>
+        <title>Dadle</title>
       </Head>
       <PollEditDialog
         title={t("create_new_poll")}

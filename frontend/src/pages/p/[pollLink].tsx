@@ -186,14 +186,14 @@ const PollPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>DadleX</title>
+        <title>Dadle</title>
       </Head>
       {loading || !poll ? (
         <LoadingCard />
       ) : (
         <>
           <Head>
-            <title>{poll?.title} | DadleX</title>
+            <title>{poll?.title} | Dadle</title>
           </Head>
           <PageHeader
             ghost={false}

@@ -5,11 +5,11 @@ sidebar_position: 2
 
 # Quickstart
 
-This document guides you on the fastest possible way to get DadleX running
+This document guides you on the fastest possible way to get Dadle running
 
 ## Prerequisites
 
-Ideally, DadleX should run on some sort of server. Please make sure that all of those dependencies are installed.
+Ideally, Dadle should run on some sort of server. Please make sure that all of those dependencies are installed.
 
 - Git (install it via your favorite package manager, e.g. `sudo apt install git`)
 - OpenSSL
@@ -21,8 +21,8 @@ Ideally, DadleX should run on some sort of server. Please make sure that all of 
 Clone the git repository and navigate into the directory:
 
 ```bash
-git clone -b main https://github.com/exanion/dadlex.git
-cd dadlex
+git clone -b main https://github.com/dadlepolls/dadle.git
+cd dadle
 ```
 
 :::tip
@@ -31,7 +31,8 @@ Replace `main` with `dev` in case you want to try the latest snapshot build
 
 ## Configuration
 
-For creating session tokens, a keypair needs to be created: 
+For creating session tokens, a keypair needs to be created:
+
 ```bash
 mkdir -p ./data/backend-secrets
 openssl genrsa -out ./data/backend-secrets/tokens.key 2048
@@ -40,22 +41,24 @@ sudo chown -R 1001:docker ./data/backend-secrets
 ```
 
 Configuration variables will be set in the `.env`-File. A template is provided in `.env.example`
+
 ```bash
 cp .env.example .env
 ```
 
 All available settings are documented in the [Configuration](configuration.md) section. For now, you just need to set those:
-* `DADLEX_PORT`: Set it to the HTTP port that you want the service to be available on, for instance `3000`
-* `PACKAGE_VERSION`: This can be `latest` (default) for the latest stable release, `dev` for the latest snapshot or any version tag.
-* `FRONTEND_PUBLIC_URL`: Set this to the public URL the app where will be reachable at in the end. Do _not_ include a trailing slash. Example: `http://localhost:3000` or `https://util.example.com/dadlex`
-* `BACKEND_PUBLIC_URL`: For the pre-build docker images, this always needs to be set to `FRONTEND_PUBLIC URL` with `/backend` appended. Example: `http://localhost:3000/backend` or `https://util.example.com/dadlex/backend`
+
+- `DADLE_PORT`: Set it to the HTTP port that you want the service to be available on, for instance `3000`
+- `PACKAGE_VERSION`: This can be `latest` (default) for the latest stable release, `dev` for the latest snapshot or any version tag.
+- `FRONTEND_PUBLIC_URL`: Set this to the public URL the app where will be reachable at in the end. Do _not_ include a trailing slash. Example: `http://localhost:3000` or `https://util.example.com/dadle`
+- `BACKEND_PUBLIC_URL`: For the pre-build docker images, this always needs to be set to `FRONTEND_PUBLIC URL` with `/backend` appended. Example: `http://localhost:3000/backend` or `https://util.example.com/dadle/backend`
 
 ## Starting up
 
 For starting the containers, you just need to run `docker-compose up -d`
 
 :::tip That's it
-DadleX is now up and running and is reachable on the port you've specified
+Dadle is now up and running and is reachable on the port you've specified
 :::
 
 ## Additional commands

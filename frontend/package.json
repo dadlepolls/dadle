@@ -1,5 +1,5 @@
 {
-  "name": "dadlex-frontend",
+  "name": "dadle-frontend",
   "version": "0.0.1-dev",
   "private": true,
   "scripts": {
@@ -7,7 +7,7 @@
     "build": "NEXT_PUBLIC_APP_VERSION=$npm_package_version next build",
     "start": "next start",
     "lint": "next lint",
-    "graph-types-codegen": "apollo codegen:generate --target=typescript --localSchemaFile=../backend/dadlex-schema.graphql"
+    "graph-types-codegen": "apollo codegen:generate --target=typescript --localSchemaFile=../backend/dadle-schema.graphql"
   },
   "dependencies": {
     "@apollo/client": "^3.4.16",

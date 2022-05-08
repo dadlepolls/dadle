@@ -104,7 +104,7 @@ const Profile: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{t("title")} | DadleX</title>
+        <title>{t("title")} | Dadle</title>
       </Head>
       <Space direction="vertical">
         <Card title={t("information")}>

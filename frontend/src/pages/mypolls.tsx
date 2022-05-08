@@ -39,7 +39,7 @@ const MyPolls: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{t("title")} | DadleX</title>
+        <title>{t("title")} | Dadle</title>
       </Head>
       <Card title={t("title")}>
         <Typography.Paragraph>{t("explanation")}</Typography.Paragraph>
