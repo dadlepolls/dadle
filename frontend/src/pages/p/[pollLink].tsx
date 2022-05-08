@@ -4,11 +4,9 @@ import { useAuth } from "@components/AuthContext";
 import { ErrorPage } from "@components/ErrorPage";
 import { LoadingCard } from "@components/LoadingCard";
 import { PollCommentArea } from "@components/PollCommentArea";
-import {
-  PollResponses,
-  TPartialParticipationWithId
-} from "@components/PollDetailPage/PollResponses";
-import { PollResponsesMobile } from "@components/PollDetailPage/PollResponsesMobile";
+import { Poll } from "@components/PollComponent/Poll";
+import { PollResponsesMobile } from "@components/PollComponent/PollMobile";
+import { TPollParticipationWithOptionalId } from "@components/PollComponent/PollTypes";
 import { PollEditDialog } from "@components/PollEditDialog";
 import { useMobileComponentsPrefered } from "@components/ResponsiveContext";
 import { CREATE_OR_UPDATE_PARTICIPATION } from "@operations/mutations/CreateOrUpdateParticipation";
@@ -33,9 +31,9 @@ import {
   GetPollByLink,
   GetPollByLink_getPollByLink
 } from "@operations/queries/__generated__/GetPollByLink";
+import { convertQueriedPoll } from "@util/convertQueriedPoll";
 import { getUserDisplayname } from "@util/getUserDisplayname";
 import { useStyledMutation } from "@util/mutationWrapper";
-import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
 import {
   Button,
   Card,
@@ -46,6 +44,7 @@ import {
   Space,
   Tooltip
 } from "antd";
+import * as ls from "local-storage";
 import moment from "moment";
 import { NextPage } from "next";
 import { useTranslation } from "next-i18next";
@@ -135,18 +134,21 @@ const PollPage: NextPage = () => {
     successMessage: t("participation_saved"),
   });
   const saveParticipation = async (
-    participation: TPartialParticipationWithId
+    participation: TPollParticipationWithOptionalId
   ) => {
     await createOrUpdateParticipationMutation({
       pollId: poll?._id ?? "",
       participation: {
-        ...removeTypenameFromObject({ ...participation }),
+        _id: participation._id,
+        anonName: participation.allowNameEdit
+          ? participation.participantName
+          : null,
         choices: participation.choices
           .map((n) => ({
             ...n,
             __typename: undefined,
           }))
-          //filter options from an existing response that contains responses to options that have been deleted
+          //filter options from an existing response that contains responses to non-existing options
           .filter((n) => poll?.options.some((o) => o._id == n.option)),
       },
     });
@@ -179,7 +181,7 @@ const PollPage: NextPage = () => {
 
   const PollResponseComponentByMedia = mobileDisplay
     ? PollResponsesMobile
-    : PollResponses;
+    : Poll;
 
   return (
     <>
@@ -254,13 +256,16 @@ const PollPage: NextPage = () => {
           </PageHeader>
           <Card>
             <PollResponseComponentByMedia
-              poll={{
-                ...poll,
-                availabilityHints:
-                  availabilityHintData?.getPollByLink?.availabilityHints,
-              }}
+              poll={convertQueriedPoll(
+                poll,
+                user,
+                availabilityHintData?.getPollByLink?.availabilityHints
+              )}
               saveParticipationFunction={saveParticipation}
               deleteParticipationFunction={deleteParticipation}
+              allowNameEditForNewParticipation={!user?._id}
+              nameHint={user?.name ?? ls.get("username")}
+              onNameHintChange={(name) => ls.set("username", name)}
             />
           </Card>
           <PollCommentArea pollId={poll._id} comments={poll.comments} />

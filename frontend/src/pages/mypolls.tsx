@@ -2,10 +2,11 @@ import { useQuery } from "@apollo/client";
 import { useAuth } from "@components/AuthContext";
 import { ErrorPage } from "@components/ErrorPage";
 import { LoadingCard } from "@components/LoadingCard";
-import { PollResponses } from "@components/PollDetailPage/PollResponses";
+import { Poll } from "@components/PollComponent/Poll";
 import { PollLinkCard } from "@components/PollLinkCard";
 import { GET_MY_POLLS } from "@operations/queries/GetMyPolls";
 import { GetMyPolls } from "@operations/queries/__generated__/GetMyPolls";
+import { convertQueriedPoll } from "@util/convertQueriedPoll";
 import { Card, Empty, Popover, Typography } from "antd";
 import moment from "moment";
 import { NextPage } from "next";
@@ -49,7 +50,7 @@ const MyPolls: NextPage = () => {
                 placement="bottom"
                 overlayStyle={{ maxWidth: "70%" }}
                 autoAdjustOverflow={false}
-                content={<PollResponses poll={p} readOnly />}
+                content={<Poll poll={convertQueriedPoll(p, user)} readOnly />}
               >
                 <PollLinkCard poll={p} router={router} />
               </Popover>
@@ -63,7 +64,11 @@ const MyPolls: NextPage = () => {
 export async function getStaticProps({ locale }: { locale: string }) {
   return {
     props: {
-      ...(await serverSideTranslations(locale, ["common", "mypolls", "pollresponses"])),
+      ...(await serverSideTranslations(locale, [
+        "common",
+        "mypolls",
+        "pollresponses",
+      ])),
     },
   };
 }
