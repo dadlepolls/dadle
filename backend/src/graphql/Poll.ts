@@ -121,6 +121,29 @@ class GetPollsArgs {
 }
 
 @ArgsType()
+class GetMyPollsArgs {
+  @Field(() => Int, { nullable: true })
+  @Min(0)
+  first = 0;
+
+  @Field(() => Int, { nullable: true })
+  @Min(1)
+  limit: number | undefined = undefined;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: "Include polls that were created by me",
+  })
+  includeCreatedByMe = true;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: "Include polls I've participated in",
+  })
+  includeParticipatedByMe = true;
+}
+
+@ArgsType()
 class GetPollByLinkArgs {
   @Field(() => String)
   pollLink: string;
@@ -147,12 +170,28 @@ class PollResolver {
   @Authorized()
   @Query(() => [Poll])
   async getMyPolls(
-    @Args() { first, limit }: GetPollsArgs,
+    @Args()
+    {
+      first,
+      limit,
+      includeCreatedByMe,
+      includeParticipatedByMe,
+    }: GetMyPollsArgs,
     @Ctx() ctx: IGraphContext
   ) {
-    const query = PollModel.find({
-      "participations.author.userId": new Types.ObjectId(ctx.user?._id),
-    });
+    const queryConditions = [];
+    //include polls the authenticated user has participated in
+    if (includeParticipatedByMe)
+      queryConditions.push({
+        "participations.author.userId": new Types.ObjectId(ctx.user?._id),
+      });
+    //include polls the author has created
+    if (includeCreatedByMe)
+      queryConditions.push({
+        "author.userId": new Types.ObjectId(ctx.user?._id),
+      });
+
+    const query = PollModel.find({ $or: queryConditions });
     if (first) {
       query.skip(first);
     }

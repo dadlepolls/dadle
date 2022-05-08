@@ -1,6 +1,6 @@
 {
-  "auth_required_error": "Um die Umfragen anzuzeigen, bei denen du mitgemacht hast, musst du angemeldet sein!",
-  "explanation": "Das sind alle Umfragen, bei denen du dich eingetragen hast.",
-  "no_participations": "Du hast bisher an keinen Umfragen teilgenommen",
+  "auth_required_error": "Um deine Umfragen anzuzeigen musst du angemeldet sein!",
+  "explanation": "Das sind alle Umfragen, bei denen du dich eingetragen hast oder die du erstellt hast.",
+  "no_participations": "Du hast bisher an keine Umfragen erstellt und an keinen Umfragen teilgenommen",
   "title": "Meine Umfragen"
 }

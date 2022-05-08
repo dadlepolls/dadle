@@ -1,7 +1,16 @@
 type Query {
   me: User!
   getPolls(first: Int = 0, limit: Int): [Poll!]!
-  getMyPolls(first: Int = 0, limit: Int): [Poll!]!
+  getMyPolls(
+    first: Int = 0
+    limit: Int
+
+    """Include polls that were created by me"""
+    includeCreatedByMe: Boolean = true
+
+    """Include polls I've participated in"""
+    includeParticipatedByMe: Boolean = true
+  ): [Poll!]!
   getPollByLink(pollLink: String!): Poll
 
   """

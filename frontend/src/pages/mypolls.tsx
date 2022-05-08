@@ -24,6 +24,10 @@ const MyPolls: NextPage = () => {
     skip: !user,
     fetchPolicy: "network-only",
     nextFetchPolicy: "network-only",
+    variables: {
+      includeCreatedByMe: true,
+      includeParticipatedByMe: true,
+    },
   });
 
   if (!user) return <ErrorPage error={t("auth_required_error")} />;
