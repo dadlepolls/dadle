@@ -55,7 +55,7 @@ All available settings are documented in the [Configuration](configuration.md) s
 
 ## Starting up
 
-For starting the containers, you just need to run `docker-compose up -d`
+For starting the containers, you just need to run `docker-compose up -d`. Please give the containers up to 5 minutes for properly starting up since some static pages are being built first.
 
 :::tip That's it
 Dadle is now up and running and is reachable on the port you've specified
