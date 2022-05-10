@@ -26,7 +26,7 @@ services:
     networks:
       - internal
     environment:
-      - MONGODB_CONNECTION=mongodb://database/dadle
+      - MONGODB_CONNECTION=${MONGODB_CONNECTION:-mongodb://database/dadle}
       - LOG_LEVEL=${BACKEND_LOG_LEVEL:-info}
       - BACKEND_PUBLIC_URL
       - FRONTEND_PUBLIC_URL
