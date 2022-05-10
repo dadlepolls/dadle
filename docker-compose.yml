@@ -17,6 +17,10 @@ services:
     image: "ghcr.io/dadlepolls/dadle-frontend:${PACKAGE_VERSION:-latest}"
     networks:
       - internal
+    environment:
+      - AUTH_ISSUER_BASEURL
+      - CAL_MS_TENANT_ID
+      - CAL_GOOGLE_CLIENT_ID
   backend:
     image: "ghcr.io/dadlepolls/dadle-backend:${PACKAGE_VERSION:-latest}"
     networks:

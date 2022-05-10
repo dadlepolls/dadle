@@ -25,6 +25,8 @@ import type { AppProps } from "next/app";
 import getConfig from "next/config";
 import { Router, useRouter } from "next/router";
 import "nprogress/nprogress.css";
+import { useMemo } from "react";
+import { static_config } from "src/static_config";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -89,6 +91,38 @@ function AppLayout({ Component, pageProps }: AppProps) {
   const { logout, user } = useAuth();
   const { t } = useTranslation("common");
 
+  const loginLogoutButton = useMemo(() => {
+    if (!static_config.loginEnabled) return null;
+    return user ? (
+      <Menu.SubMenu
+        key="profileSub"
+        icon={<UserOutlined />}
+        style={{ marginLeft: "auto" }}
+        title={`Hey ${user.name}`}
+      >
+        <Menu.Item key="profile" onClick={() => router.push("/profile")}>
+          {t("navbar_my_profile")}
+        </Menu.Item>
+        <Menu.Item
+          key="logout"
+          icon={<LogoutOutlined />}
+          onClick={() => logout()}
+        >
+          {t("navbar_logout")}
+        </Menu.Item>
+      </Menu.SubMenu>
+    ) : (
+      <Menu.Item
+        key="login"
+        icon={<KeyOutlined />}
+        onClick={() => window.location.replace("/backend/auth/login")}
+        style={{ marginLeft: "auto" }}
+      >
+        {t("navbar_login")}
+      </Menu.Item>
+    );
+  }, [user, logout, router, t]);
+
   return (
     <Layout className="layout" style={{ minHeight: "100vh" }}>
       <Layout.Header>
@@ -117,34 +151,7 @@ function AppLayout({ Component, pageProps }: AppProps) {
               {t("navbar_my_polls")}
             </Menu.Item>
           ) : null}
-          {user ? (
-            <Menu.SubMenu
-              key="profileSub"
-              icon={<UserOutlined />}
-              style={{ marginLeft: "auto" }}
-              title={`Hey ${user.name}`}
-            >
-              <Menu.Item key="profile" onClick={() => router.push("/profile")}>
-                {t("navbar_my_profile")}
-              </Menu.Item>
-              <Menu.Item
-                key="logout"
-                icon={<LogoutOutlined />}
-                onClick={() => logout()}
-              >
-                {t("navbar_logout")}
-              </Menu.Item>
-            </Menu.SubMenu>
-          ) : (
-            <Menu.Item
-              key="login"
-              icon={<KeyOutlined />}
-              onClick={() => window.location.replace("/backend/auth/login")}
-              style={{ marginLeft: "auto" }}
-            >
-              {t("navbar_login")}
-            </Menu.Item>
-          )}
+          {loginLogoutButton}
         </Menu>
       </Layout.Header>
       <Layout.Content style={{ padding: isSm ? "0 16px" : "0 50px" }}>
