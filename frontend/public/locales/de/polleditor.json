@@ -20,5 +20,7 @@
   "title_required_error": "Es muss ein Name für die Umfrage angegeben werden",
   "title": "Name der Umfrage",
   "type_change_disabled_error": "Die Art der Umfrage kann nicht geändert werden, wenn schon Antwortoptionen angegeben wurden.",
-  "type_change_disabled_hint": "Bitte lösche zuerst die Antwortoptionen."
+  "type_change_disabled_hint": "Bitte lösche zuerst die Antwortoptionen.",
+  "type_calendar": "Kalender",
+  "type_arbitrary": "Beliebige Optionen"
 }

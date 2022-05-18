@@ -227,9 +227,11 @@ const OptionEditorTypeSelector = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >
-        <Radio.Button value={OptionEditorType.Calendar}>Kalender</Radio.Button>
+        <Radio.Button value={OptionEditorType.Calendar}>
+          {t("type_calendar")}
+        </Radio.Button>
         <Radio.Button value={OptionEditorType.Arbitrary}>
-          Über beliebige Optionen abstimmen
+          {t("type_arbitrary")}
         </Radio.Button>
       </Radio.Group>
     </Tooltip>

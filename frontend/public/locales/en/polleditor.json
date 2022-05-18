@@ -20,5 +20,7 @@
   "title_required_error": "A name for the poll must be given",
   "title": "Poll Title",
   "type_change_disabled_error": "The poll type can't be change since vou've already specified options!",
-  "type_change_disabled_hint": "Please delete the options first!"
+  "type_change_disabled_hint": "Please delete the options first!",
+  "type_calendar": "Calender",
+  "type_arbitrary": "Arbitrary Options"
 }
