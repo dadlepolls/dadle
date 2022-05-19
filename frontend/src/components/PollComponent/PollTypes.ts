@@ -26,12 +26,6 @@ interface IPollUserOrAnon {
   user: IPollAuthorUser | null;
 }
 
-interface IPollComment {
-  _id: string;
-  author: IPollUserOrAnon;
-  text: string;
-}
-
 interface IPollOption {
   _id: string;
   type: PollOptionType;
@@ -57,14 +51,6 @@ interface IPollParticipation {
 }
 
 interface IPoll {
-  _id: string;
-  title: string;
-  link: string;
-  timezone: string;
-  author: IPollUserOrAnon;
-  createdAt: any | null;
-  updatedAt: any | null;
-  comments: IPollComment[];
   options: IPollOption[];
   participations: IPollParticipation[];
 }
@@ -104,7 +90,6 @@ export type {
   TPollWithOptionalAvailabilityHint,
   IPollAuthorUser,
   IPollChoice,
-  IPollComment,
   IPollOption,
   IPollParticipation,
   TPollParticipationWithOptionalId,
