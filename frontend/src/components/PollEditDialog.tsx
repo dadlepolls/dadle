@@ -1,3 +1,4 @@
+import { CloseOutlined, SettingOutlined } from "@ant-design/icons";
 import { gql, useApolloClient } from "@apollo/client";
 import { CREATE_OR_UPDATE_POLL } from "@operations/mutations/CreateOrUpdatePoll";
 import {
@@ -12,23 +13,17 @@ import {
 } from "@operations/queries/__generated__/CheckLinkAvailability";
 import { GetPollByLink_getPollByLink } from "@operations/queries/__generated__/GetPollByLink";
 import { useStyledMutation } from "@util/mutationWrapper";
-import { Button, Card, Collapse, Form, Input, Select } from "antd";
+import { Button, Card, Form, Input, Select } from "antd";
 import produce from "immer";
 import { useTranslation } from "next-i18next";
-import React, { useCallback, useState } from "react";
-import { PollOptionType } from "__generated__/globalTypes";
-import { OptionEditor, OptionEditorType } from "./PollEditDialog/OptionEditor";
-
-const mapOptionTypeToEditorType = (t?: PollOptionType) => {
-  if (t == PollOptionType.Arbitrary) return OptionEditorType.Arbitrary;
-  else if (t) return OptionEditorType.Calendar;
-  else return null;
-};
-
-const getWindowOrigin = () =>
-  typeof window !== "undefined" && window.location.origin
-    ? window.location.origin
-    : "";
+import React, { useCallback, useMemo, useState } from "react";
+import { InputWithInlineComponent } from "./PollEditDialog/InputWithInlineComponent";
+import { OptionEditor } from "./PollEditDialog/OptionEditor";
+import {
+  getWindowOrigin,
+  linkFromTitle,
+  mapOptionTypeToEditorType
+} from "./PollEditDialog/util";
 
 export const PollEditDialog = ({
   poll: _poll,
@@ -151,19 +146,13 @@ export const PollEditDialog = ({
     [apolloClient]
   );
 
-  const autocreateLink = (title: string) => {
-    form.setFieldsValue({
-      link: title
-        .replaceAll(" ", "-")
-        .replaceAll("ä", "ae")
-        .replaceAll("Ä", "AE")
-        .replaceAll("ö", "oe")
-        .replaceAll("Ö", "OE")
-        .replaceAll("ü", "ue")
-        .replaceAll("Ü", "UE")
-        .replaceAll(/(?![\w-])./g, ""),
-    });
-  };
+  const autocreateLink = useMemo(
+    () => (title: string) =>
+      form.setFieldsValue({
+        link: linkFromTitle(title),
+      }),
+    [form]
+  );
 
   return (
     <Card style={{ width: "100%" }} title={title}>
@@ -187,6 +176,7 @@ export const PollEditDialog = ({
             )
           )
             setAdvancedSettingsExpanded(true);
+          //show the advanced settings in case one of the options couldn't be validated
           else setAdvancedSettingsExpanded(false);
         }}
       >
@@ -194,7 +184,6 @@ export const PollEditDialog = ({
           required={true}
           label={t("title")}
           name="title"
-          style={{ marginBottom: 0 }}
           rules={[
             {
               required: true,
@@ -202,97 +191,107 @@ export const PollEditDialog = ({
             },
           ]}
         >
-          <Input
-            type="text"
+          <InputWithInlineComponent
             placeholder={t("title")}
+            style={{ width: "calc(100% - 32px)" }}
             onChange={(e) => {
               if (!linkModifiedManually) autocreateLink(e.target.value);
             }}
+            inlineComponent={
+              <Button
+                onClick={() => setAdvancedSettingsExpanded((e) => !e)}
+                icon={<SettingOutlined />}
+              />
+            }
           />
         </Form.Item>
-        <Form.Item noStyle dependencies={["title", "linkMode"]}>
-          {({ getFieldValue }) =>
-            getFieldValue("title") ? (
-              <Collapse
-                ghost
-                accordion
-                activeKey={advancedSettingsExpanded ? "1" : undefined}
-                onChange={(k) => setAdvancedSettingsExpanded(!!k)}
-              >
-                <Collapse.Panel
-                  key="1"
-                  header={t("advanced_settings")}
-                  forceRender={true}
+        <Card
+          size="small"
+          title={t("advanced_settings")}
+          style={{
+            display: advancedSettingsExpanded ? undefined : "none",
+            marginBottom: 24,
+          }}
+          extra={[
+            <Button
+              type="link"
+              key="close_button"
+              icon={<CloseOutlined className="close_button" />}
+              onClick={() => setAdvancedSettingsExpanded(false)}
+            />,
+            <style key="style" jsx>{`
+              .close_button {
+                color: rgba(0, 0, 0, 0.45);
+              }
+              .close_button:hover {
+                color: rgba(0, 0, 0, 0.75);
+              }
+            `}</style>,
+          ]}
+        >
+          <Form.Item noStyle dependencies={["title", "linkMode"]}>
+            {({ getFieldValue }) =>
+              allowLinkEditing ? (
+                <Form.Item
+                  required={true}
+                  label={t("link_description")}
+                  name="link"
+                  dependencies={["linkMode"]}
+                  rules={[
+                    {
+                      required: true,
+                      message: t("link_required_error"),
+                    },
+                    {
+                      pattern: /^[\w-]+$/g,
+                      message: t("link_invalid_error"),
+                    },
+                    {
+                      validator: async (_, value) => {
+                        if (await checkLinkAvailability(value))
+                          return Promise.resolve();
+                        else
+                          return Promise.reject(
+                            new Error(t("link_unavailable_error"))
+                          );
+                      },
+                    },
+                  ]}
                 >
-                  {allowLinkEditing ? (
-                    <Form.Item
-                      required={true}
-                      label={t("link_description")}
-                      name="link"
-                      dependencies={["linkMode"]}
-                      rules={[
-                        {
-                          required: true,
-                          message: t("link_required_error"),
-                        },
-                        {
-                          pattern: /^[\w-]+$/g,
-                          message: t("link_invalid_error"),
-                        },
-                        {
-                          validator: async (_, value) => {
-                            if (await checkLinkAvailability(value))
-                              return Promise.resolve();
-                            else
-                              return Promise.reject(
-                                new Error(t("link_unavilable_error"))
-                              );
-                          },
-                        },
-                      ]}
-                    >
-                      <Input
-                        type="text"
-                        addonBefore={
-                          <Form.Item
-                            name="linkMode"
-                            noStyle
-                            initialValue={"auto"}
-                          >
-                            <Select
-                              onChange={(opt) => {
-                                if (opt == "auto") {
-                                  //reset link when changing to auto
-                                  setLinkModifiedManually(false);
-                                  autocreateLink(getFieldValue("title"));
-                                }
-                              }}
-                            >
-                              <Select.Option value="auto">
-                                {t("link_autocreate")}
-                              </Select.Option>
-                              <Select.Option value="manual">
-                                {t("link_manual")}
-                              </Select.Option>
-                            </Select>
-                          </Form.Item>
-                        }
-                        disabled={getFieldValue("linkMode") == "auto"}
-                        placeholder={t("link_description")}
-                        prefix={`${getWindowOrigin()}/p/`}
-                        onChange={() => {
-                          if (!linkModifiedManually)
-                            setLinkModifiedManually(true);
-                        }}
-                      />
-                    </Form.Item>
-                  ) : null}
-                </Collapse.Panel>
-              </Collapse>
-            ) : null
-          }
-        </Form.Item>
-
+                  <Input
+                    type="text"
+                    addonBefore={
+                      <Form.Item name="linkMode" noStyle initialValue={"auto"}>
+                        <Select
+                          onChange={(opt) => {
+                            if (opt == "auto") {
+                              //reset link when changing to auto
+                              setLinkModifiedManually(false);
+                              autocreateLink(getFieldValue("title"));
+                            }
+                          }}
+                        >
+                          <Select.Option value="auto">
+                            {t("link_autocreate")}
+                          </Select.Option>
+                          <Select.Option value="manual">
+                            {t("link_manual")}
+                          </Select.Option>
+                        </Select>
+                      </Form.Item>
+                    }
+                    disabled={getFieldValue("linkMode") == "auto"}
+                    placeholder={t("link_description")}
+                    prefix={`${getWindowOrigin()}/p/`}
+                    onChange={() => {
+                      if (!linkModifiedManually) setLinkModifiedManually(true);
+                    }}
+                  />
+                </Form.Item>
+              ) : null
+            }
+          </Form.Item>
+        </Card>
         <Form.Item noStyle dependencies={["options", "title"]}>
           {({ getFieldValue }) =>
             getFieldValue("title") ? (

@@ -1,5 +1,5 @@
 {
-  "advanced_settings": "Advanced options",
+  "advanced_settings": "Advanced poll options",
   "calendar_nextweek": "Next Week",
   "calendar_overview": "Overview",
   "calendar_previousweek": "Previous Week",
@@ -22,5 +22,6 @@
   "type_change_disabled_error": "The poll type can't be change since vou've already specified options!",
   "type_change_disabled_hint": "Please delete the options first!",
   "type_calendar": "Calender",
-  "type_arbitrary": "Arbitrary Options"
+  "type_arbitrary": "Arbitrary Options",
+  "calendar_option_delete_explanation": "An option can be deleted by double-clicking"
 }

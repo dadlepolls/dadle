@@ -1,6 +1,6 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { GetPollByLink_getPollByLink_options } from "@operations/queries/__generated__/GetPollByLink";
-import { Button, Form, Input, Radio, Tooltip } from "antd";
+import { Alert, Button, Form, Input, Segmented, Tooltip } from "antd";
 import { Rule } from "antd/lib/form";
 import moment from "moment";
 import "moment/locale/de";
@@ -109,43 +109,53 @@ const OptionEditorCalendar = ({
   };
 
   return (
-    <Calendar
-      defaultDate={firstEventStart ? firstEventStart.toDate() : undefined}
-      scrollToTime={firstEventStart ? firstEventStart.toDate() : undefined}
-      defaultView="week"
-      localizer={localizer}
-      resizable
-      style={{ height: 550, minWidth: 600 }}
-      events={mapValueToCalendarEvents(value)}
-      onEventDrop={handleEventChange}
-      onEventResize={handleEventChange}
-      onSelectSlot={handleEventCreate}
-      onDoubleClickEvent={(e) => {
-        const opts = [...value];
-        opts.splice(e.optionIndex, 1);
-        onChange(opts);
-      }}
-      selectable
-      views={["week", "agenda"]}
-      popup={true}
-      messages={{
-        agenda: t("calendar_overview"),
-        week: t("calendar_weekview"),
-        today: t("calendar_today"),
-        next: t("calendar_nextweek"),
-        previous: t("calendar_previousweek"),
-      }}
-      formats={{
-        dayRangeHeaderFormat: (range, culture, localizer) => {
-          return `${
-            localizer?.format(range.start, "DD.MM.", culture || "de") || ""
-          } - ${localizer?.format(range.end, "DD.MM.", culture || "de") || ""}`;
-        },
-        dayFormat: (date, culture, localizer) => {
-          return localizer?.format(date, "dd (DD.)", culture || "de") || "";
-        },
-      }}
-    />
+    <>
+      <Alert
+        type="info"
+        showIcon
+        description={t("calendar_option_delete_explanation")}
+        style={{ marginBottom: 16 }}
+      />
+      <Calendar
+        defaultDate={firstEventStart ? firstEventStart.toDate() : undefined}
+        scrollToTime={firstEventStart ? firstEventStart.toDate() : undefined}
+        defaultView="week"
+        localizer={localizer}
+        resizable
+        style={{ height: 550, minWidth: 600 }}
+        events={mapValueToCalendarEvents(value)}
+        onEventDrop={handleEventChange}
+        onEventResize={handleEventChange}
+        onSelectSlot={handleEventCreate}
+        onDoubleClickEvent={(e) => {
+          const opts = [...value];
+          opts.splice(e.optionIndex, 1);
+          onChange(opts);
+        }}
+        selectable
+        views={["week", "agenda"]}
+        popup={true}
+        messages={{
+          agenda: t("calendar_overview"),
+          week: t("calendar_weekview"),
+          today: t("calendar_today"),
+          next: t("calendar_nextweek"),
+          previous: t("calendar_previousweek"),
+        }}
+        formats={{
+          dayRangeHeaderFormat: (range, culture, localizer) => {
+            return `${
+              localizer?.format(range.start, "DD.MM.", culture || "de") || ""
+            } - ${
+              localizer?.format(range.end, "DD.MM.", culture || "de") || ""
+            }`;
+          },
+          dayFormat: (date, culture, localizer) => {
+            return localizer?.format(date, "dd (DD.)", culture || "de") || "";
+          },
+        }}
+      />
+    </>
   );
 };
 
@@ -221,19 +231,15 @@ const OptionEditorTypeSelector = ({
         ) : null
       }
     >
-      <Radio.Group
-        buttonStyle="solid"
+      <Segmented
         disabled={typeChangeDisabled}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <Radio.Button value={OptionEditorType.Calendar}>
-          {t("type_calendar")}
-        </Radio.Button>
-        <Radio.Button value={OptionEditorType.Arbitrary}>
-          {t("type_arbitrary")}
-        </Radio.Button>
-      </Radio.Group>
+        options={[
+          { value: OptionEditorType.Calendar, label: t("type_calendar") },
+          { value: OptionEditorType.Arbitrary, label: t("type_arbitrary") },
+        ]}
+        onChange={(e) => onChange(e as OptionEditorType)}
+      />
     </Tooltip>
   );
 };
