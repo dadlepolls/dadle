@@ -74,6 +74,7 @@ jobs:
         working-directory: ./frontend
         run: |
           yarn install
+          yarn add apollo
           yarn graph-types-codegen
       - name: Log in to the Container registry
         uses: docker/login-action@v1

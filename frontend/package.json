@@ -12,23 +12,25 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
-    "@apollo/client": "^3.4.16",
+    "@apollo/client": "^3.7.12",
     "@types/nprogress": "^0.2.0",
-    "antd": "^4.20.5",
+    "antd": "^5.4.4",
     "graphql": "^15.0.0",
+    "i18next": "^22.4.15",
     "immer": "^9.0.7",
     "jwt-decode": "^3.1.2",
     "local-storage": "^2.0.0",
     "moment": "^2.29.1",
-    "next": "11.1.2",
-    "next-i18next": "^10.5.0",
+    "next": "^13.3.1",
+    "next-i18next": "13",
     "nprogress": "^0.2.0",
-    "react": "17.0.2",
-    "react-big-calendar": "^0.38.1",
+    "react": "^18.2.0",
+    "react-big-calendar": "^1.6.9",
     "react-dnd": "^14.0.4",
-    "react-dom": "17.0.2",
+    "react-dom": "^18.2.0",
+    "react-i18next": "^12.2.0",
     "sass": "^1.48.0",
-    "use-immer": "^0.6.0"
+    "use-immer": "^0.9.0"
   },
   "devDependencies": {
     "@babel/core": "^7.17.12",
@@ -41,16 +43,15 @@
     "@storybook/manager-webpack5": "^6.5.2",
     "@storybook/react": "^6.5.2",
     "@storybook/testing-library": "^0.0.11",
-    "@types/react": "17.0.30",
-    "@types/react-big-calendar": "^0.36.2",
-    "@types/uuid": "^8.3.1",
-    "apollo": "^2.33.9",
+    "@types/react": "^18.0.38",
+    "@types/react-big-calendar": "^1.6.3",
+    "@types/uuid": "^9.0.1",
     "babel-loader": "^8.2.5",
     "chromatic": "^6.5.4",
-    "eslint": "^7.23.0",
-    "eslint-config-next": "11.1.2",
+    "eslint": "^8.39.0",
+    "eslint-config-next": "^13.3.1",
     "storybook-dark-mode": "^1.1.0",
-    "typescript": "4.4.4"
+    "typescript": "^5.0.4"
   },
   "resolutions": {
     "cssnano-preset-simple": "3.0.0"

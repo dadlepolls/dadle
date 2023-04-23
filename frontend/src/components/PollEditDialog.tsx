@@ -16,13 +16,13 @@ import { useStyledMutation } from "@util/mutationWrapper";
 import { Button, Card, Form, Input, Select } from "antd";
 import produce from "immer";
 import { useTranslation } from "next-i18next";
-import React, { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { InputWithInlineComponent } from "./PollEditDialog/InputWithInlineComponent";
 import { OptionEditor } from "./PollEditDialog/OptionEditor";
 import {
-  getWindowOrigin,
   linkFromTitle,
-  mapOptionTypeToEditorType
+  mapOptionTypeToEditorType,
+  useWindowOrigin
 } from "./PollEditDialog/util";
 
 export const PollEditDialog = ({
@@ -52,7 +52,7 @@ export const PollEditDialog = ({
   //accordion with "advanced settings" is expanded
   const [advancedSettingsExpanded, setAdvancedSettingsExpanded] =
     useState(false);
-
+  const windowOrigin = useWindowOrigin(); //URL origin of the window
   const apolloClient = useApolloClient();
 
   if (!saveButtonContent) saveButtonContent = t("save");
@@ -282,7 +282,7 @@ export const PollEditDialog = ({
                     }
                     disabled={getFieldValue("linkMode") == "auto"}
                     placeholder={t("link_description")}
-                    prefix={`${getWindowOrigin()}/p/`}
+                    prefix={`${windowOrigin}/p/`}
                     onChange={() => {
                       if (!linkModifiedManually) setLinkModifiedManually(true);
                     }}

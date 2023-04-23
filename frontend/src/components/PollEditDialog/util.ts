@@ -1,5 +1,6 @@
 import { PollOptionType } from "__generated__/globalTypes";
 import { OptionEditorType } from "./OptionEditor";
+import { useEffect, useState } from "react";
 
 const linkFromTitle = (title?: string) => {
   if (!title) return "";
@@ -18,10 +19,15 @@ const linkFromTitle = (title?: string) => {
   );
 };
 
-const getWindowOrigin = () =>
-  typeof window !== "undefined" && window.location.origin
-    ? window.location.origin
-    : "";
+const useWindowOrigin = () => {
+  const [origin, setOrigin] = useState<string>("");
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.origin)
+      setOrigin(window.location.origin);
+    else setOrigin("");
+  }, []);
+  return origin;
+};
 
 const mapOptionTypeToEditorType = (t?: PollOptionType) => {
   if (t == PollOptionType.Arbitrary) return OptionEditorType.Arbitrary;
@@ -29,4 +35,4 @@ const mapOptionTypeToEditorType = (t?: PollOptionType) => {
   else return null;
 };
 
-export { linkFromTitle, getWindowOrigin, mapOptionTypeToEditorType };
+export { linkFromTitle, useWindowOrigin, mapOptionTypeToEditorType };

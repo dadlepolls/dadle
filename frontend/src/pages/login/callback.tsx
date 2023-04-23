@@ -5,7 +5,7 @@ import { NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const LoginCallbackPage: NextPage = () => {
   const { t } = useTranslation("logincallback");
@@ -24,7 +24,7 @@ const LoginCallbackPage: NextPage = () => {
   }, [router.isReady, router.query.failureMsg]);
 
   useEffect(() => {
-    if (typeof localStorage !== undefined && router.query.token) {
+    if (typeof localStorage !== "undefined" && router.query.token) {
       localStorage.setItem("token", String(router.query.token));
       tryLogin();
       router.push("/");
