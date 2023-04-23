@@ -14,10 +14,10 @@ jobs:
   lint-backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: "14"
+          node-version: "16"
       - name: Yarn Install
         working-directory: ./backend
         run: |
@@ -34,7 +34,7 @@ jobs:
         run: |
           ts-node ./test/util/printGraphSchema.ts > ${{ runner.temp }}/dadle-schema.graphql
       - name: Store auto-generated schema
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: ${{ runner.temp }}/dadle-schema.graphql
       - name: Validate committed schema is up-to-date
