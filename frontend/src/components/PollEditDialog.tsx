@@ -74,10 +74,7 @@ export const PollEditDialog = ({
   ) => {
     const poll = produce(_poll, (draft) => {
       if ("__typename" in draft) delete draft.__typename;
-      if ("linkMode" in draft) {
-        if (draft.linkMode == "auto") draft.link = undefined;
-        delete draft.linkMode;
-      }
+      if ("linkMode" in draft) delete draft.linkMode;
     });
 
     await createOrUpdatePollMutation(
@@ -248,6 +245,7 @@ export const PollEditDialog = ({
                     },
                     {
                       validator: async (_, value) => {
+                        if (value == "") return Promise.resolve();
                         if (await checkLinkAvailability(value))
                           return Promise.resolve();
                         else
