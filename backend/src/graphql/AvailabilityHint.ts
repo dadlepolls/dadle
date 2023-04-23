@@ -17,9 +17,9 @@ import {
 import { Event } from "./Event";
 import { Poll } from "./Poll";
 import { User as UserModel } from "../db/models";
-import { ApolloError } from "apollo-server-express";
 import moment from "moment";
 import "moment-timezone";
+import { GraphQLError } from "graphql";
 
 type TFromTo = Pick<IEvent, "from" | "to">;
 
@@ -64,13 +64,15 @@ class PollAvailabilityHintResolver {
     @Ctx() ctx: IGraphContext
   ): Promise<AvailabilityHint[]> {
     if (!ctx.user?._id)
-      throw new ApolloError(
-        "User not authenticated!",
-        "USER_NOT_AUTHENTICATED"
-      );
+      throw new GraphQLError("User not authenticated!", {
+        extensions: { code: "USER_NOT_AUTHENTICATED" },
+      });
 
     const user = await UserModel.findById(ctx.user._id);
-    if (!user) throw new ApolloError("User deleted!", "USER_DELETED");
+    if (!user)
+      throw new GraphQLError("User deleted!", {
+        extensions: { code: "USER_DELETED" },
+      });
 
     const pollOptionsAsEvents = (poll.options || [])
       .filter(

@@ -13,7 +13,7 @@ import { Poll } from "./Poll";
 import { PollChoice } from "./PollChoice";
 import { UserOrAnon } from "./UserOrAnon";
 import { Poll as PollModel } from "../db/models";
-import { ApolloError } from "apollo-server-express";
+import { GraphQLError } from "graphql";
 
 @ObjectType()
 class PollParticipation implements IPollParticipation {
@@ -64,23 +64,26 @@ class PollParticipationResolver {
   ) {
     const dbPoll = await PollModel.findOne({ _id: pollId }).exec();
     if (!dbPoll) {
-      throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
+      throw new GraphQLError("Couldn't find poll!", {
+        extensions: { code: "POLL_NOT_FOUND" },
+      });
     }
 
     if (!participationInput.anonName && !ctx.user?._id)
-      throw new ApolloError(
+      throw new GraphQLError(
         "anonName must be given in case user is not authenticated",
-        "INVALID_REQUEST"
+        { extensions: { code: "INVALID_REQUEST" } }
       );
 
     //validate that all options exist for this poll
     for (const opt of participationInput.choices) {
       if (!dbPoll.options?.some((o) => o._id == opt.option.toString())) {
-        throw new ApolloError(
-          "Response for unkown option given",
-          "REPONSE_TO_INVALID_OPTION",
-          { invalidOptionId: opt.option.toString() }
-        );
+        throw new GraphQLError("Response for unkown option given", {
+          extensions: {
+            code: "REPONSE_TO_INVALID_OPTION",
+            invalidOptionId: opt.option.toString(),
+          },
+        });
       }
     }
 
@@ -91,24 +94,22 @@ class PollParticipationResolver {
       );
 
       if (!participation)
-        throw new ApolloError(
-          "Couldn't find participation!",
-          "PARTICIPATION_NOT_FOUND"
-        );
+        throw new GraphQLError("Couldn't find participation!", {
+          extensions: { code: "PARTICIPATION_NOT_FOUND" },
+        });
 
       if (
         participation.author.userId &&
         participation.author.userId != ctx.user?._id
       )
-        throw new ApolloError(
-          "Can't edit participation of other users",
-          "INSUFFICIENT_PERMISSIONS"
-        );
+        throw new GraphQLError("Can't edit participation of other users", {
+          extensions: { code: "INSUFFICIENT_PERMISSIONS" },
+        });
 
       if (participation.author.userId && participationInput.anonName)
-        throw new ApolloError(
+        throw new GraphQLError(
           "Can't change a user-based to anonymous participation",
-          "INSUFFICIENT_PERMISSIONS"
+          { extensions: { code: "INSUFFICIENT_PERMISSIONS" } }
         );
 
       participation.author = {
@@ -148,25 +149,26 @@ class PollParticipationResolver {
     @Ctx() ctx: IGraphContext
   ) {
     const dbPoll = await PollModel.findOne({ _id: pollId }).exec();
-    if (!dbPoll) throw new ApolloError("Couldn't find poll", "POLL_NOT_FOUND");
+    if (!dbPoll)
+      throw new GraphQLError("Couldn't find poll", {
+        extensions: { code: "POLL_NOT_FOUND" },
+      });
 
     const participation = dbPoll.participations?.find(
       (p) => p._id == participationId
     );
     if (!participation)
-      throw new ApolloError(
-        "Couldn't find participation",
-        "PARTICIPATION_NOT_FOUND"
-      );
+      throw new GraphQLError("Couldn't find participation", {
+        extensions: { code: "PARTICIPATION_NOT_FOUND" },
+      });
 
     if (
       participation.author.userId &&
       participation.author.userId != ctx.user?._id
     )
-      throw new ApolloError(
-        "Can't delete participations of other users!",
-        "INSUFFICIENT_PERMISSIONS"
-      );
+      throw new GraphQLError("Can't delete participations of other users!", {
+        extensions: { code: "INSUFFICIENT_PERMISSIONS" },
+      });
 
     return (
       await PollModel.findByIdAndUpdate(

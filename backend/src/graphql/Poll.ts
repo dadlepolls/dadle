@@ -1,4 +1,3 @@
-import { ApolloError } from "apollo-server-errors";
 import { Min } from "class-validator";
 import moment from "moment";
 import "moment-timezone";
@@ -25,6 +24,7 @@ import { PollComment } from "./PollComment";
 import { PollOption, PollOptionInput } from "./PollOption";
 import { PollParticipation } from "./PollParticipation";
 import { UserOrAnon } from "./UserOrAnon";
+import { GraphQLError } from "graphql";
 
 @ObjectType()
 class Poll implements IPoll {
@@ -205,7 +205,9 @@ class PollResolver {
   async getPollByLink(@Args() { pollLink }: GetPollByLinkArgs) {
     const polls = await PollModel.find({ link: pollLink });
     if (!polls.length) {
-      throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
+      throw new GraphQLError("Couldn't find poll!", {
+        extensions: { code: "POLL_NOT_FOUND" },
+      });
     }
     return polls[0].toObject();
   }
@@ -226,26 +228,28 @@ class PollResolver {
     //validate that timezone is correct
     if (!poll.timezone) delete poll.timezone; //take nullish value and delete
     if (poll.timezone && !moment.tz.zone(poll.timezone))
-      throw new ApolloError("Invalid timezone given!", "INVALID_REQUEST");
+      throw new GraphQLError("Invalid timezone given!", {
+        extensions: { code: "INVALID_REQUEST" },
+      });
 
     if (poll._id) {
       //update an existing poll
       const dbPoll = await PollModel.findOne({ _id: poll._id }).exec();
       if (!dbPoll) {
-        throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
+        throw new GraphQLError("Couldn't find poll!", {
+          extensions: { code: "POLL_NOT_FOUND" },
+        });
       }
 
       if (dbPoll.author.userId && dbPoll.author.userId != ctx.user?._id)
-        throw new ApolloError(
-          "Can't edit polls of other users",
-          "INSUFFICIENT_PERMISSIONS"
-        );
+        throw new GraphQLError("Can't edit polls of other users", {
+          extensions: { code: "INSUFFICIENT_PERMISSIONS" },
+        });
 
       if (poll.link)
-        throw new ApolloError(
-          "Can't edit link of an existing poll",
-          "INVALID_REQUEST"
-        );
+        throw new GraphQLError("Can't edit link of an existing poll", {
+          extensions: { code: "INVALID_REQUEST" },
+        });
       if (poll.title) dbPoll.title = poll.title;
       if (poll.timezone) dbPoll.timezone = poll.timezone;
 
@@ -296,24 +300,22 @@ class PollResolver {
 
       //validate that link is unique
       if (await PollModel.findOne({ link: poll.link }).exec())
-        throw new ApolloError(
-          "Poll validation failed: Link must be unique",
-          "POLL_VALIDATION_FAILED"
-        );
+        throw new GraphQLError("Poll validation failed: Link must be unique", {
+          extensions: { code: "POLL_VALIDATION_FAILED" },
+        });
 
       const pollDoc = new PollModel({ ...poll, author });
       try {
         await pollDoc.save();
       } catch (err) {
         if (err instanceof Error.ValidationError) {
-          throw new ApolloError(
-            "Poll validation failed!",
-            "POLL_VALIDATION_FAILED",
-            {
+          throw new GraphQLError("Poll validation failed!", {
+            extensions: {
+              code: "POLL_VALIDATION_FAILED",
               message: err.message,
-              stacktrace: err.stack,
-            }
-          );
+              stracktrace: err.stack,
+            },
+          });
         } else {
           throw err;
         }
@@ -329,15 +331,17 @@ class PollResolver {
     @Ctx() ctx: IGraphContext
   ) {
     const poll = await PollModel.findOne({ _id: pollId }).exec();
-    if (!poll) throw new ApolloError("Couldn't find poll", "POLL_NOT_FOUND");
+    if (!poll)
+      throw new GraphQLError("Couldn't find poll", {
+        extensions: { code: "POLL_NOT_FOUND" },
+      });
 
     if (poll.author.userId && poll.author.userId != ctx.user?._id)
-      throw new ApolloError(
-        "Can't delete poll of other users!",
-        "INSUFFICIENT_PERMISSIONS"
-      );
+      throw new GraphQLError("Can't delete poll of other users!", {
+        extensions: { code: "INSUFFICIENT_PERMISSIONS" },
+      });
 
-    await poll.delete();
+    await poll.deleteOne();
 
     return true;
   }
