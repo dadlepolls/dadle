@@ -19,14 +19,14 @@ import "@styles/globals.css";
 import "@styles/OptionEditor.sass";
 import "@styles/pollpage.css";
 import LoadingBar from "@util/LoadingBar";
-import { Layout, Menu } from "antd";
+import { ConfigProvider, Layout, Menu, theme } from "antd";
 import { ItemType } from "antd/es/menu/hooks/useItems";
 import { appWithTranslation, useTranslation } from "next-i18next";
 import type { AppProps } from "next/app";
 import getConfig from "next/config";
 import { Router, useRouter } from "next/router";
 import "nprogress/nprogress.css";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { static_config } from "src/static_config";
 
 const { publicRuntimeConfig } = getConfig();
@@ -212,11 +212,30 @@ function AppLayout({ Component, pageProps }: AppProps) {
 }
 
 function App(props: AppProps) {
+  const [darkMode, setDarkMode] = useState(true);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    )
+      setDarkMode(true);
+    else setDarkMode(false);
+  }, []);
+
   return (
     <ApolloProvider client={client}>
       <AuthContextProvider>
         <ResponsiveContextProvider>
-          <AppLayout {...props} />
+          <ConfigProvider
+            theme={{
+              algorithm: darkMode
+                ? theme.darkAlgorithm
+                : theme.defaultAlgorithm,
+            }}
+          >
+            <AppLayout {...props} />
+          </ConfigProvider>
         </ResponsiveContextProvider>
       </AuthContextProvider>
     </ApolloProvider>
