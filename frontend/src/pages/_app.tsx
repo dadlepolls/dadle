@@ -5,7 +5,7 @@ import {
   createHttpLink,
   from,
   InMemoryCache,
-  ServerError
+  ServerError,
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
@@ -13,13 +13,14 @@ import { AuthContextProvider, useAuth } from "@components/AuthContext";
 import { MobileDesktopSwitcher } from "@components/MobileDesktopSwitcher";
 import {
   ResponsiveContextProvider,
-  useWindowIsSm
+  useWindowIsSm,
 } from "@components/ResponsiveContext";
 import "@styles/globals.css";
 import "@styles/OptionEditor.sass";
 import "@styles/pollpage.css";
 import LoadingBar from "@util/LoadingBar";
 import { Layout, Menu } from "antd";
+import { ItemType } from "antd/es/menu/hooks/useItems";
 import { appWithTranslation, useTranslation } from "next-i18next";
 import type { AppProps } from "next/app";
 import getConfig from "next/config";
@@ -91,68 +92,93 @@ function AppLayout({ Component, pageProps }: AppProps) {
   const { logout, user } = useAuth();
   const { t } = useTranslation("common");
 
-  const loginLogoutButton = useMemo(() => {
+  const loginLogoutButton = useMemo<ItemType | null>(() => {
     if (!static_config.loginEnabled) return null;
-    return user ? (
-      <Menu.SubMenu
-        key="profileSub"
-        icon={<UserOutlined />}
-        style={{ marginLeft: "auto" }}
-        title={`Hey ${user.name}`}
-      >
-        <Menu.Item key="profile" onClick={() => router.push("/profile")}>
-          {t("navbar_my_profile")}
-        </Menu.Item>
-        <Menu.Item
-          key="logout"
-          icon={<LogoutOutlined />}
-          onClick={() => logout()}
-        >
-          {t("navbar_logout")}
-        </Menu.Item>
-      </Menu.SubMenu>
-    ) : (
-      <Menu.Item
-        key="login"
-        icon={<KeyOutlined />}
-        onClick={() => window.location.replace("/backend/auth/login")}
-        style={{ marginLeft: "auto" }}
-      >
-        {t("navbar_login")}
-      </Menu.Item>
-    );
+    if (user)
+      return {
+        key: "profileSub",
+        icon: <UserOutlined />,
+        label: `Hey ${user.name}`,
+        children: [
+          {
+            key: "profile",
+            label: t("navbar_my_profile"),
+          },
+          {
+            key: "logout",
+            label: t("navbar_logout"),
+            icon: <LogoutOutlined />,
+          },
+        ],
+      };
+    else
+      return {
+        key: "login",
+        icon: <KeyOutlined />,
+        label: t("navbar_login"),
+      };
   }, [user, logout, router, t]);
+
+  const menuItems = useMemo(() => {
+    const items: ItemType[] = [
+      {
+        key: "logo",
+        label: <b>Dadle</b>,
+      },
+      {
+        type: "divider",
+      },
+      {
+        key: "home",
+        label: t("navbar_home"),
+      },
+    ];
+    if (user)
+      items.push({
+        key: "mypolls",
+        label: t("navbar_my_polls"),
+      });
+    if (loginLogoutButton) items.push(loginLogoutButton);
+    return items;
+  }, [user, loginLogoutButton]);
+
+  const onMenuClick = ({ key }: { key: string }) => {
+    switch (key) {
+      case "home":
+        router.push("/");
+        break;
+      case "mypolls":
+        router.push("/mypolls");
+        break;
+      case "profile":
+        router.push("/profile");
+        break;
+      case "logout":
+        logout();
+        break;
+      case "login":
+        window.location.replace("/backend/auth/login");
+        break;
+    }
+  };
 
   return (
     <Layout className="layout" style={{ minHeight: "100vh" }}>
       <Layout.Header>
-        {/*<div
-          className="logo"
-          style={{
-            float: "left",
-            width: "120px",
-            height: "31px",
-            margin: "16px 24px 16px 0",
-            color: "white",
-            fontWeight: 500,
-          }
-        >
-          <span>Dadle</span>
-        </div>*/}
-        <Menu theme="dark" mode="horizontal" selectedKeys={[]}>
-          <Menu.Item key="logo">
-            <b>Dadle</b>
-          </Menu.Item>
-          <Menu.Item key="home" onClick={() => router.push("/")}>
-            {t("navbar_home")}
-          </Menu.Item>
-          {user ? (
-            <Menu.Item key="mypolls" onClick={() => router.push("/mypolls")}>
-              {t("navbar_my_polls")}
-            </Menu.Item>
-          ) : null}
-          {loginLogoutButton}
-        </Menu>
+        {/* Left-Align the login menu item */}
+        <style jsx global>
+          {`
+            .ant-menu li:nth-last-child(2) {
+              margin-left: auto;
+            }
+          `}
+        </style>
+        <Menu
+          items={menuItems}
+          theme="dark"
+          mode="horizontal"
+          onClick={onMenuClick}
+        />
       </Layout.Header>
       <Layout.Content style={{ padding: isSm ? "0 16px" : "0 50px" }}>
         <div

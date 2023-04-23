@@ -2,7 +2,7 @@ import {
   GoogleOutlined,
   LinkOutlined,
   SaveOutlined,
-  WindowsOutlined
+  WindowsOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "@components/AuthContext";
 import { CalendarList } from "@components/CalendarList";
@@ -12,7 +12,7 @@ import { useMobileComponentsPrefered } from "@components/ResponsiveContext";
 import { UPDATE_NAME } from "@operations/mutations/UpdateName";
 import {
   UpdateName,
-  UpdateNameVariables
+  UpdateNameVariables,
 } from "@operations/mutations/__generated__/UpdateName";
 import { useStyledMutation } from "@util/mutationWrapper";
 import {
@@ -22,10 +22,10 @@ import {
   Dropdown,
   Input,
   Menu,
-  message,
   Space,
   Tooltip,
-  Typography
+  Typography,
+  message,
 } from "antd";
 import * as ls from "local-storage";
 import { NextPage } from "next";
@@ -33,7 +33,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { static_config } from "src/static_config";
 
 const Profile: NextPage = () => {
@@ -122,7 +122,7 @@ const Profile: NextPage = () => {
               {user.mail}
             </Descriptions.Item>
             <Descriptions.Item label={t("displayname")}>
-              <Input.Group>
+              <Space.Compact style={{ width: "100%" }}>
                 <Input
                   value={name}
                   style={{ width: "calc(100% - 32px)" }}
@@ -146,7 +146,7 @@ const Profile: NextPage = () => {
                     }
                   />
                 ) : null}
-              </Input.Group>
+              </Space.Compact>
             </Descriptions.Item>
           </Descriptions>
         </Card>

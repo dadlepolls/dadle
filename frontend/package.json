@@ -12,6 +12,7 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
+    "@ant-design/pro-components": "^2.4.4",
     "@apollo/client": "^3.7.12",
     "@types/nprogress": "^0.2.0",
     "antd": "^5.4.4",

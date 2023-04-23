@@ -1,4 +1,4 @@
-import { Input } from "antd";
+import { Input, Space } from "antd";
 import React from "react";
 
 const InputWithInlineComponent = ({
@@ -19,7 +19,7 @@ const InputWithInlineComponent = ({
   value?: string | number | readonly string[];
 }) => {
   return (
-    <Input.Group compact={compact}>
+    <Space.Compact style={{ width: "100%" }}>
       <Input
         defaultValue={defaultValue}
         type="text"
@@ -29,7 +29,7 @@ const InputWithInlineComponent = ({
         value={value}
       />
       {inlineComponent}
-    </Input.Group>
+    </Space.Compact>
   );
 };
 

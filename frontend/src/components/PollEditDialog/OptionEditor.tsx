@@ -1,20 +1,20 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { GetPollByLink_getPollByLink_options } from "@operations/queries/__generated__/GetPollByLink";
-import { Alert, Button, Form, Input, Segmented, Tooltip } from "antd";
+import { PollOptionType } from "__generated__/globalTypes";
+import { Alert, Button, Form, Input, Segmented, Space, Tooltip } from "antd";
 import { Rule } from "antd/lib/form";
 import moment from "moment";
 import "moment/locale/de";
 import { useTranslation } from "next-i18next";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import {
-  Calendar as RBCalendar,
   Event,
-  momentLocalizer,
+  Calendar as RBCalendar,
   SlotInfo,
-  stringOrDate
+  momentLocalizer,
+  stringOrDate,
 } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
-import { PollOptionType } from "__generated__/globalTypes";
 
 interface PollOptionAsEvent extends Event {
   optionIndex: number;
@@ -170,7 +170,7 @@ const OptionEditorArbitrary = ({
   return (
     <>
       {[...value, {}].map((o, idx, arr) => (
-        <Input.Group key={idx} style={{ marginTop: 4 }}>
+        <Space.Compact key={idx} style={{ width: "100%", marginTop: 4 }}>
           <Input
             type="text"
             style={{ width: "calc(100% - 32px)" }}
@@ -198,7 +198,7 @@ const OptionEditorArbitrary = ({
               }}
             />
           ) : null}
-        </Input.Group>
+        </Space.Compact>
       ))}
     </>
   );

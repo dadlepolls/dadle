@@ -1,4 +1,5 @@
 import { DeleteOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
+import { PageHeader } from "@ant-design/pro-components";
 import { useQuery } from "@apollo/client";
 import { useAuth } from "@components/AuthContext";
 import { ErrorPage } from "@components/ErrorPage";
@@ -34,15 +35,15 @@ import {
 import { convertQueriedPoll } from "@util/convertQueriedPoll";
 import { getUserDisplayname } from "@util/getUserDisplayname";
 import { useStyledMutation } from "@util/mutationWrapper";
+import { PollOptionType } from "__generated__/globalTypes";
 import {
   Button,
   Card,
   Descriptions,
-  message,
-  PageHeader,
   Popconfirm,
   Space,
-  Tooltip
+  Tooltip,
+  message
 } from "antd";
 import * as ls from "local-storage";
 import moment from "moment";
@@ -51,8 +52,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
-import { PollOptionType } from "__generated__/globalTypes";
+import { useState } from "react";
 
 const sortPollOptions = (poll: GetPollByLink_getPollByLink) => {
   const { options: originalOptions, ...pollData } = poll;

@@ -4,12 +4,12 @@ import { CREATE_OR_UPDATE_POLL } from "@operations/mutations/CreateOrUpdatePoll"
 import {
   CreateOrUpdatePoll,
   CreateOrUpdatePollVariables,
-  CreateOrUpdatePoll_createOrUpdatePoll
+  CreateOrUpdatePoll_createOrUpdatePoll,
 } from "@operations/mutations/__generated__/CreateOrUpdatePoll";
 import { CHECK_LINK_AVAILABILITY } from "@operations/queries/CheckLinkAvailability";
 import {
   CheckLinkAvailability,
-  CheckLinkAvailabilityVariables
+  CheckLinkAvailabilityVariables,
 } from "@operations/queries/__generated__/CheckLinkAvailability";
 import { GetPollByLink_getPollByLink } from "@operations/queries/__generated__/GetPollByLink";
 import { useStyledMutation } from "@util/mutationWrapper";
@@ -22,7 +22,7 @@ import { OptionEditor } from "./PollEditDialog/OptionEditor";
 import {
   linkFromTitle,
   mapOptionTypeToEditorType,
-  useWindowOrigin
+  useWindowOrigin,
 } from "./PollEditDialog/util";
 
 export const PollEditDialog = ({
@@ -219,16 +219,16 @@ export const PollEditDialog = ({
               icon={<CloseOutlined className="close_button" />}
               onClick={() => setAdvancedSettingsExpanded(false)}
             />,
-            <style key="style" jsx>{`
-              .close_button {
-                color: rgba(0, 0, 0, 0.45);
-              }
-              .close_button:hover {
-                color: rgba(0, 0, 0, 0.75);
-              }
-            `}</style>,
           ]}
         >
+          <style key="style" jsx global>{`
+            .close_button {
+              color: rgba(0, 0, 0, 0.45);
+            }
+            .close_button:hover {
+              color: rgba(0, 0, 0, 0.75);
+            }
+          `}</style>
           <Form.Item noStyle dependencies={["title", "linkMode"]}>
             {({ getFieldValue }) =>
               allowLinkEditing ? (
