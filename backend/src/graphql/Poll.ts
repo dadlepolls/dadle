@@ -156,8 +156,24 @@ class GetPollByLinkArgs {
 @Resolver(Poll)
 class PollResolver {
   @Query(() => [Poll])
-  async getPolls(@Args() { first, limit }: GetPollsArgs) {
-    const query = PollModel.find();
+  async getPolls(
+    @Args() { first, limit }: GetPollsArgs,
+    @Ctx() ctx: IGraphContext
+  ) {
+    let query;
+    if (process.env.ALLOW_POLL_LISTING === "true") {
+      query = PollModel.find();
+    } else {
+      //if listing of polls isn't explicitely allowed,
+      //then only include user's polls or polls user participated in
+      query = PollModel.find({
+        $or: [
+          { "participations.author.userId": new Types.ObjectId(ctx.user?._id) },
+          { "author.userId": new Types.ObjectId(ctx.user?._id) },
+        ],
+      });
+    }
+
     if (first) {
       query.skip(first);
     }

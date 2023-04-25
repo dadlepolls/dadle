@@ -69,3 +69,9 @@ Client ID and secret for the Azure app registration
 #### `CAL_GOOGLE_CLIENT_ID` and `CAL_GOOGLE_CLIENT_SECRET`
 
 Client ID and secret for the Google app registration.
+
+## Usage-related settings
+
+### `ALLOW_POLL_LISTING`
+
+When set to `true`, all polls that have been created on the instance will be displayed on the home page. If not, the home page will be empty or show the polls that the authenticated user has created or participated in.
