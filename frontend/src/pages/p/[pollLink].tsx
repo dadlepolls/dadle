@@ -1,4 +1,9 @@
-import { DeleteOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  SaveOutlined,
+  ShareAltOutlined,
+} from "@ant-design/icons";
 import { PageHeader } from "@ant-design/pro-components";
 import { useQuery } from "@apollo/client";
 import { useAuth } from "@components/AuthContext";
@@ -15,26 +20,27 @@ import { DELETE_PARTICIPATION } from "@operations/mutations/DeleteParticipation"
 import { DELETE_POLL } from "@operations/mutations/DeletePoll";
 import {
   CreateOrUpdateParticipation,
-  CreateOrUpdateParticipationVariables
+  CreateOrUpdateParticipationVariables,
 } from "@operations/mutations/__generated__/CreateOrUpdateParticipation";
 import {
   DeleteParticipation,
-  DeleteParticipationVariables
+  DeleteParticipationVariables,
 } from "@operations/mutations/__generated__/DeleteParticipation";
 import {
   DeletePoll,
-  DeletePollVariables
+  DeletePollVariables,
 } from "@operations/mutations/__generated__/DeletePoll";
 import { GET_POLL_AVAILABILITY_HINTS } from "@operations/queries/GetPollAvailabilityHints";
 import { GET_POLL_BY_LINK } from "@operations/queries/GetPollByLink";
 import { GetPollAvailabilityHints } from "@operations/queries/__generated__/GetPollAvailabilityHints";
 import {
   GetPollByLink,
-  GetPollByLink_getPollByLink
+  GetPollByLink_getPollByLink,
 } from "@operations/queries/__generated__/GetPollByLink";
 import { convertQueriedPoll } from "@util/convertQueriedPoll";
 import { getUserDisplayname } from "@util/getUserDisplayname";
 import { useStyledMutation } from "@util/mutationWrapper";
+import { useSharingSupported } from "@util/useSharingSupported";
 import { PollOptionType } from "__generated__/globalTypes";
 import {
   Button,
@@ -43,7 +49,7 @@ import {
   Popconfirm,
   Space,
   Tooltip,
-  message
+  message,
 } from "antd";
 import * as ls from "local-storage";
 import moment from "moment";
@@ -76,6 +82,7 @@ const PollPage: NextPage = () => {
   const { pollLink } = router.query;
   const mobileDisplay = useMobileComponentsPrefered();
   const { user } = useAuth();
+  const sharingSupported = useSharingSupported();
 
   const [isEditingPoll, setIsEditingPoll] = useState(false);
 
@@ -204,6 +211,13 @@ const PollPage: NextPage = () => {
             extra={
               !poll.author.user?._id || poll.author.user._id == user?._id ? (
                 <Space>
+                  <Button
+                    hidden={!sharingSupported}
+                    icon={<ShareAltOutlined />}
+                    onClick={() =>
+                      navigator.share({ url: window.location.toString() })
+                    }
+                  />
                   <Button
                     hidden={isEditingPoll}
                     onClick={() => setIsEditingPoll(true)}
