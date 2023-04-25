@@ -18,11 +18,11 @@ import { GetPollByLink_getPollByLink_comments } from "@operations/queries/__gene
 import { getUserDisplayname } from "@util/getUserDisplayname";
 import { useStyledMutation } from "@util/mutationWrapper";
 import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
+import { PollCommentInput } from "__generated__/globalTypes";
 import { Button, Card, Input, Space } from "antd";
 import * as ls from "local-storage";
 import { useTranslation } from "next-i18next";
-import React, { useState } from "react";
-import { PollCommentInput } from "__generated__/globalTypes";
+import { useState } from "react";
 import { useAuth } from "./AuthContext";
 
 const PollComment = ({
@@ -226,7 +226,6 @@ export const PollCommentArea = ({
           }}
         >
           <Button
-            shape="round"
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => setCommentBeingAdded({ text: "" })}

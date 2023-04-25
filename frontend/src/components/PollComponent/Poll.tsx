@@ -1,16 +1,18 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import { Button, theme } from "antd";
 import produce from "immer";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { OptionsRow } from "./OptionsRow";
 import { ParticipantRow } from "./ParticipantRow";
 import { ParticipationRow } from "./ParticipationRow";
 import {
   IPollParticipation,
   TPollParticipationWithOptionalId,
-  TPollWithOptionalAvailabilityHint
+  TPollWithOptionalAvailabilityHint,
 } from "./PollTypes";
 import { getChoiceCountPerOption, getEmptyEditableParticipation } from "./util";
+
+const { useToken } = theme;
 
 const PollResponses = ({
   poll,
@@ -31,12 +33,12 @@ const PollResponses = ({
   nameHint?: string;
   onNameHintChange?: (newNameHint: string) => any;
 }) => {
+  const themeTokens = useToken();
+
   const [editableParticipation, setEditableParticipation] =
     useState<IPollParticipation | null>(null);
-  const [participationBeingAdded, setParticipationBeingAdded] = useState<Omit<
-    IPollParticipation,
-    "_id"
-  > | null>(null);
+  const [participationBeingAdded, setParticipationBeingAdded] =
+    useState<Omit<IPollParticipation, "_id"> | null>(null);
 
   const onChoiceChangeCallbackEditing = useCallback(
     (c) =>
@@ -55,6 +57,12 @@ const PollResponses = ({
 
   return (
     <div className="pollpage--container">
+      <style global jsx>{`
+        :root {
+          --pollpage--border-color: ${themeTokens.token.colorBorderSecondary};
+          --pollpage--background-color: ${themeTokens.token.colorBgContainer};
+        }
+      `}</style>
       <div className="pollpage--scroll-container">
         <div className="pollpage--participants-container">
           <div className="pollpage--participants">
@@ -109,7 +117,6 @@ const PollResponses = ({
               <div className="pollpage--add-btn-container">
                 {!readOnly ? (
                   <Button
-                    shape="circle"
                     type="primary"
                     icon={<PlusOutlined />}
                     onClick={() =>

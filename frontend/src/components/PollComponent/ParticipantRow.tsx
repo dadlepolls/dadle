@@ -1,7 +1,7 @@
 import { DeleteOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
-import { Button, Input, message, Popconfirm, Space } from "antd";
+import { Button, Input, Popconfirm, Space, message } from "antd";
 import { useTranslation } from "next-i18next";
-import React, { useState } from "react";
+import { useState } from "react";
 
 const ParticipantRow = ({
   nameHint,
@@ -44,7 +44,7 @@ const ParticipantRow = ({
       </div>
       <div className="pollpage--participant-action-btn">
         {editable ? (
-          <Space>
+          <Space.Compact>
             {deletable ? (
               deleteConfirmation ? (
                 <Popconfirm
@@ -53,26 +53,28 @@ const ParticipantRow = ({
                   cancelText={t("participation_delete_confirmation_no")}
                   onConfirm={() => onDeleteClick()}
                 >
-                  <Button danger icon={<DeleteOutlined />} />
+                  <Button type="text" danger icon={<DeleteOutlined />} />
                 </Popconfirm>
               ) : (
                 <Button
+                  type="text"
                   icon={<DeleteOutlined />}
                   onClick={() => onDeleteClick()}
                 />
               )
             ) : null}
             <Button
-              type="primary"
+              type="text"
               onClick={() => {
                 if (!name) message.error(t("error_name_required"));
                 else onSaveClick(name);
               }}
               icon={<SaveOutlined />}
             />
-          </Space>
+          </Space.Compact>
         ) : allowEdit ? (
           <Button
+            type="text"
             icon={<EditOutlined />}
             onClick={() => {
               setName(nameHint);
