@@ -77,7 +77,7 @@ type TPollParticipationWithOptionalId = Omit<IPollParticipation, "_id"> &
 
 type TAccumulatedChoicesPerOption = Record<
   string,
-  { yes: number; no: number; maybe: number }
+  Record<YesNoMaybe, string[]>
 >;
 
 export { EventStatus, PollOptionType, YesNoMaybe };

@@ -1,3 +1,4 @@
+import { theme } from "antd";
 import {
   EventStatus,
   IAvailabilityHintOverlappingEvent,
@@ -7,8 +8,10 @@ import {
   YesNoMaybe,
 } from "./PollTypes";
 
+const { useToken } = theme;
+
 /**
- * Dertermine the availability suggestion for an option
+ * Determine the availability suggestion for an option
  * If there is at least one confirmed event, suggest "no"
  * If there are only tentative events, suggest "maybe"
  * Suggest "yes" else
@@ -101,18 +104,36 @@ const getChoiceCountPerOption = (
 ): TAccumulatedChoicesPerOption => {
   return (
     poll?.options.reduce((map: TAccumulatedChoicesPerOption, o) => {
-      const getAmountOfResponsesForChoice = (choice: YesNoMaybe) =>
-        poll?.participations.filter((p) =>
-          p.choices.some((c) => c.option == o._id && c.choice == choice)
-        ).length;
+      const getRespondersForChoice = (choice: YesNoMaybe) =>
+        poll?.participations
+          .filter((p) =>
+            p.choices.some((c) => c.option == o._id && c.choice == choice)
+          )
+          .map((p) => p.participantName);
       map[o._id] = {
-        yes: getAmountOfResponsesForChoice(YesNoMaybe.Yes),
-        no: getAmountOfResponsesForChoice(YesNoMaybe.No),
-        maybe: getAmountOfResponsesForChoice(YesNoMaybe.Maybe),
+        Yes: getRespondersForChoice(YesNoMaybe.Yes),
+        No: getRespondersForChoice(YesNoMaybe.No),
+        Maybe: getRespondersForChoice(YesNoMaybe.Maybe),
       };
       return map;
     }, {}) || {}
   );
+};
+
+/**
+ * Hook for getting a css style that
+ * sets poll color variables according
+ * to theme used
+ */
+const useThemedColorVars = () => {
+  const themeTokens = useToken();
+
+  return `
+      :root {
+        --pollpage--border-color: ${themeTokens.token.colorBorderSecondary};
+        --pollpage--background-color: ${themeTokens.token.colorBgContainer};
+      }
+    `;
 };
 
 export {
@@ -121,4 +142,5 @@ export {
   deriveNextChoiceFromCurrent,
   mapChoiceToColorVariable,
   getChoiceCountPerOption,
+  useThemedColorVars,
 };

@@ -213,22 +213,28 @@
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  border-width: 1px;
-  border-color: var(--pollpage--border-color);
-  border-left-style: solid;
-  border-right-style: solid;
-  border-bottom-style: solid;
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
-.pollpage-mobile--option-row:first-child {
-  border-top-left-radius: 2px;
-  border-top-right-radius: 2px;
-  border-top-style: solid;
+.pollpage-mobile--option-row > div {
+  border: 1px solid var(--pollpage--border-color);
 }
 
-.pollpage-mobile--option-row:last-child {
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
+.pollpage-mobile--option-row > div:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.pollpage-mobile--option-row > div:nth-child(2):nth-last-child(2) {
+  border-left: none
+}
+
+.pollpage-mobile--option-row > div:nth-last-child(2) {
+  flex-grow: 1;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  margin-right: 8px;
 }
 
 .pollpage-mobile--date {
@@ -246,10 +252,13 @@
   font-size: 1.2em;
   line-height: 1.4em;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .pollpage-mobile--option-text-content > * {
-  display: block;
+  max-width: 100%;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -263,7 +272,8 @@
   font-size: 22px;
   width: 40px;
   min-width: 40px;
-  margin-left: auto;
+  
+  border-radius: 8px;
 }
 
 .pollpage-mobile--option-response div {

@@ -1,5 +1,5 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, theme } from "antd";
+import { Button } from "antd";
 import produce from "immer";
 import { useCallback, useState } from "react";
 import { OptionsRow } from "./OptionsRow";
@@ -11,9 +11,11 @@ import {
   TPollParticipationWithOptionalId,
   TPollWithOptionalAvailabilityHint,
 } from "./PollTypes";
-import { getChoiceCountPerOption, getEmptyEditableParticipation } from "./util";
-
-const { useToken } = theme;
+import {
+  getChoiceCountPerOption,
+  getEmptyEditableParticipation,
+  useThemedColorVars,
+} from "./util";
 
 const PollResponses = ({
   poll,
@@ -34,7 +36,7 @@ const PollResponses = ({
   nameHint?: string;
   onNameHintChange?: (newNameHint: string) => any;
 }) => {
-  const themeTokens = useToken();
+  const themedColors = useThemedColorVars();
 
   const [editableParticipation, setEditableParticipation] =
     useState<IPollParticipation | null>(null);
@@ -58,12 +60,9 @@ const PollResponses = ({
 
   return (
     <div className="pollpage--container">
-      <style global jsx>{`
-        :root {
-          --pollpage--border-color: ${themeTokens.token.colorBorderSecondary};
-          --pollpage--background-color: ${themeTokens.token.colorBgContainer};
-        }
-      `}</style>
+      <style global jsx>
+        {themedColors}
+      </style>
       <div className="pollpage--scroll-container">
         <div className="pollpage--participants-container">
           <div className="pollpage--participants">

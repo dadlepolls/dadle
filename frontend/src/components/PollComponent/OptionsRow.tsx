@@ -1,4 +1,3 @@
-import React from "react";
 import {
   IPollOption,
   PollOptionType,
@@ -83,8 +82,8 @@ const OptionsRow = ({
           option={o}
           key={idx}
           badgeContent={
-            choiceCountPerOption[o._id]?.yes
-              ? String(choiceCountPerOption[o._id]?.yes)
+            choiceCountPerOption[o._id]?.Yes.length
+              ? String(choiceCountPerOption[o._id]?.Yes.length)
               : undefined
           }
         />

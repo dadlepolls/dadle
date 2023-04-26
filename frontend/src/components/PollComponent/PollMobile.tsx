@@ -1,19 +1,20 @@
 import { SaveOutlined } from "@ant-design/icons";
 import { Button, Col, Input, message, Row } from "antd";
 import { useTranslation } from "next-i18next";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useImmer } from "use-immer";
 import { OptionRowMobile } from "./OptionRowMobile";
 import {
   IPoll,
   IPollWithAvailabilityHint,
-  TPollParticipationWithOptionalId
+  TPollParticipationWithOptionalId,
 } from "./PollTypes";
 import {
   deriveNextChoiceFromCurrent,
   determineAvailabilitySuggestion,
   getChoiceCountPerOption,
-  getEmptyEditableParticipation
+  getEmptyEditableParticipation,
+  useThemedColorVars,
 } from "./util";
 
 const PollResponsesMobile = ({
@@ -39,11 +40,15 @@ const PollResponsesMobile = ({
     );
 
   const [isSaving, setIsSaving] = useState(false);
+  const themedColors = useThemedColorVars();
 
   const responsesPerChoice = getChoiceCountPerOption(poll);
 
   return (
     <div className="pollpage-mobile--options">
+      <style global jsx>
+        {themedColors}
+      </style>
       {poll.options.map((option, idx) => (
         <OptionRowMobile
           key={idx}

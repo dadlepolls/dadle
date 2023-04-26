@@ -1,16 +1,17 @@
-import { List, Popover } from "antd";
+import { Card, Popover, Space } from "antd";
 import { useTranslation } from "next-i18next";
+import { useMemo } from "react";
 import { ParticipationChoiceCell } from "./ParticipationChoiceCell";
 import {
   IPollOption,
   PollOptionType,
   TAccumulatedChoicesPerOption,
   TPollWithOptionalAvailabilityHint,
-  YesNoMaybe
+  YesNoMaybe,
 } from "./PollTypes";
 import {
   determineAvailabilitySuggestion,
-  mapChoiceToColorVariable
+  mapChoiceToColorVariable,
 } from "./util";
 
 const OptionRowMobile = ({
@@ -30,6 +31,14 @@ const OptionRowMobile = ({
   const from = option.from ? new Date(option.from) : null;
   const to = option.to ? new Date(option.to) : null;
   const responses = responsesPerChoice[option._id];
+  const amountText = useMemo(() => {
+    let text = responses.Yes.length.toString();
+    if (responses.Maybe.length) text += ` (+${responses.Maybe.length})`;
+    return text;
+  }, [responses.Yes, responses.Maybe]);
+  const hasResponses = useMemo(() => {
+    return Object.values(responses).some((v) => v.length > 0);
+  }, [responses.Yes, responses.No, responses.Maybe]);
 
   const typeIsDateOrDateTime =
     option.type == PollOptionType.Date ||
@@ -76,41 +85,38 @@ const OptionRowMobile = ({
           </span>
         ) : null}
         <Popover
-          visible={responses.yes > 0 || responses.maybe > 0 ? undefined : false}
+          open={hasResponses ? undefined : false}
           content={
-            <List
-              size="small"
-              dataSource={poll.participations}
-              renderItem={(p) =>
-                p.choices.some((c) => c.option == option._id) ? (
-                  <List.Item
-                    style={{
+            <Space direction="vertical" size="small">
+              {(["Yes", "Maybe", "No"] as Array<YesNoMaybe>).map((opt) =>
+                responses[opt].length ? (
+                  <Card
+                    key={opt}
+                    size="small"
+                    bodyStyle={{
                       backgroundColor: `var(${mapChoiceToColorVariable(
-                        p.choices.find((c) => c.option == option._id)?.choice
-                      )})`,
-                      color: "white",
+                        YesNoMaybe[opt]
+                      )}`,
+                      borderRadius: "8px",
+                      maxWidth: "70vw",
                     }}
                   >
-                    {p.participantName}
-                  </List.Item>
+                    {responses[opt].join(", ")}
+                  </Card>
                 ) : null
-              }
-            />
+              )}
+            </Space>
           }
         >
           <b>
             {t("responses", {
-              amount: `${responses.yes ?? 0}${
-                responses.maybe ? ` (+${responses.maybe})` : ""
-              }`,
+              amount: amountText,
             })}
           </b>
         </Popover>
         {availabilityHint ? (
           <Popover
-            visible={
-              availabilityHint.overlappingEvents.length ? undefined : false
-            }
+            open={availabilityHint.overlappingEvents.length ? undefined : false}
             content={availabilityHint.overlappingEvents
               .map((e) => e.title)
               .join(", ")}

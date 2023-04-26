@@ -1,11 +1,10 @@
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
-  QuestionCircleOutlined
+  QuestionCircleOutlined,
 } from "@ant-design/icons";
 import { Checkbox, Popover } from "antd";
 import { useTranslation } from "next-i18next";
-import React from "react";
 import { YesNoMaybe } from "./PollTypes";
 import { mapChoiceToColorVariable } from "./util";
 
@@ -38,7 +37,7 @@ const ParticipationChoiceCell = ({
 
   return (
     <Popover
-      visible={overlappingEvents?.length && editable ? undefined : false} //hide when there is no hint
+      open={overlappingEvents?.length && editable ? undefined : false} //hide when there is no hint
       title={t("calendar_overlapping_events")}
       placement="bottom"
       content={<span>{overlappingEvents?.join(", ")}</span>}
