@@ -157,7 +157,9 @@ function AppLayout({ Component, pageProps }: AppProps) {
         logout();
         break;
       case "login":
-        window.location.replace("/backend/auth/login");
+        window.location.replace(
+          `${process.env.NEXT_PUBLIC_BACKEND_PUBLIC_URL}/auth/login`
+        );
         break;
     }
   };

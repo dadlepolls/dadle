@@ -16,15 +16,6 @@ module.exports = {
       return [];
     }
   },
-  async redirects() {
-    return [
-      {
-        source: "/login",
-        destination: "/backend/auth/login",
-        permanent: true,
-      },
-    ];
-  },
   publicRuntimeConfig: {
     backendPublicUrl: process.env.BACKEND_PUBLIC_URL,
   },
