@@ -209,31 +209,36 @@ const PollPage: NextPage = () => {
             subTitle={poll?.author ? getUserDisplayname(poll.author) : null}
             style={{ marginBottom: "16px" }}
             extra={
-              !poll.author.user?._id || poll.author.user._id == user?._id ? (
-                <Space>
-                  <Button
-                    hidden={!sharingSupported}
-                    icon={<ShareAltOutlined />}
-                    onClick={() =>
-                      navigator.share({ url: window.location.toString() })
-                    }
-                  />
-                  <Button
-                    hidden={isEditingPoll}
-                    onClick={() => setIsEditingPoll(true)}
-                    icon={<EditOutlined />}
-                  />
-                  <Popconfirm
-                    title={t("poll_delete_confirmation")}
-                    okText={t("poll_delete_confirmation_yes")}
-                    cancelText={t("poll_delete_confirmation_no")}
-                    placement="bottomLeft"
-                    onConfirm={() => deletePoll()}
-                  >
-                    <Button icon={<DeleteOutlined />} hidden={isEditingPoll} />
-                  </Popconfirm>
-                </Space>
-              ) : null
+              <Space>
+                <Button
+                  hidden={!sharingSupported}
+                  icon={<ShareAltOutlined />}
+                  onClick={() =>
+                    navigator.share({ url: window.location.toString() })
+                  }
+                />
+                {!poll.author.user?._id || poll.author.user._id == user?._id ? (
+                  <>
+                    <Button
+                      hidden={isEditingPoll}
+                      onClick={() => setIsEditingPoll(true)}
+                      icon={<EditOutlined />}
+                    />
+                    <Popconfirm
+                      title={t("poll_delete_confirmation")}
+                      okText={t("poll_delete_confirmation_yes")}
+                      cancelText={t("poll_delete_confirmation_no")}
+                      placement="bottomLeft"
+                      onConfirm={() => deletePoll()}
+                    >
+                      <Button
+                        icon={<DeleteOutlined />}
+                        hidden={isEditingPoll}
+                      />
+                    </Popconfirm>
+                  </>
+                ) : null}
+              </Space>
             }
           >
             <Descriptions size="small" column={mobileDisplay ? 1 : 3}>
