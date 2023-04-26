@@ -189,6 +189,7 @@ export const PollEditDialog = ({
           ]}
         >
           <InputWithInlineComponent
+            compact
             placeholder={t("title")}
             style={{ width: "calc(100% - 32px)" }}
             onChange={(e) => {

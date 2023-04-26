@@ -18,8 +18,10 @@ const InputWithInlineComponent = ({
   defaultValue?: string | number | readonly string[];
   value?: string | number | readonly string[];
 }) => {
+  const SelectedSpaceStyle = compact ? Space.Compact : Space;
+
   return (
-    <Space.Compact style={{ width: "100%" }}>
+    <SelectedSpaceStyle style={{ width: "100%" }}>
       <Input
         defaultValue={defaultValue}
         type="text"
@@ -29,7 +31,7 @@ const InputWithInlineComponent = ({
         value={value}
       />
       {inlineComponent}
-    </Space.Compact>
+    </SelectedSpaceStyle>
   );
 };
 

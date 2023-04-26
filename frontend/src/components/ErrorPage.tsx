@@ -2,7 +2,6 @@ import { ApolloError } from "@apollo/client";
 import { Collapse, Input, Result } from "antd";
 import { useTranslation } from "next-i18next";
 import Head from "next/head";
-import React from "react";
 
 const ErrorPage = ({ error }: { error: ApolloError | string }) => {
   const { t } = useTranslation();
@@ -13,6 +12,7 @@ const ErrorPage = ({ error }: { error: ApolloError | string }) => {
       extraInfo: [],
       graphQLErrors: [],
       networkError: null,
+      protocolErrors: [],
       name: "",
     };
   }

@@ -6,6 +6,7 @@ import { OptionsRow } from "./OptionsRow";
 import { ParticipantRow } from "./ParticipantRow";
 import { ParticipationRow } from "./ParticipationRow";
 import {
+  IPollChoice,
   IPollParticipation,
   TPollParticipationWithOptionalId,
   TPollWithOptionalAvailabilityHint,
@@ -41,14 +42,14 @@ const PollResponses = ({
     useState<Omit<IPollParticipation, "_id"> | null>(null);
 
   const onChoiceChangeCallbackEditing = useCallback(
-    (c) =>
+    (c: IPollChoice[]) =>
       setEditableParticipation((p) => {
         return p ? { ...p, choices: c } : null;
       }),
     [setEditableParticipation]
   );
   const onChoiceChangeCallbackAdding = useCallback(
-    (c) =>
+    (c: IPollChoice[]) =>
       setParticipationBeingAdded((p) => {
         return p ? { ...p, choices: c } : null;
       }),

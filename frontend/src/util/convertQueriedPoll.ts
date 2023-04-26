@@ -32,15 +32,7 @@ const convertQueriedPoll = (
   });
 
   return {
-    _id: poll._id,
-    title: poll.title,
-    link: poll.link,
-    timezone: poll.timezone,
-    createdAt: poll.createdAt,
-    updatedAt: poll.updatedAt,
-    comments: poll.comments,
     options: poll.options,
-    author: poll.author,
     participations: newParticipations,
     availabilityHints: availabilityHints,
   };
