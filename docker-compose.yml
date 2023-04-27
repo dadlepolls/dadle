@@ -14,7 +14,7 @@ services:
       - frontend
       - backend
   frontend:
-    image: "ghcr.io/dadlepolls/dadle-frontend:${PACKAGE_VERSION:-latest}"
+    image: "ghcr.io/dadlepolls/dadle-frontend-builder:${PACKAGE_VERSION:-latest}"
     networks:
       - internal
     environment:

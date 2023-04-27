@@ -86,7 +86,7 @@ jobs:
         id: frontendmeta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend-builder
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
