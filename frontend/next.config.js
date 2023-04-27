@@ -16,8 +16,5 @@ module.exports = {
       return [];
     }
   },
-  publicRuntimeConfig: {
-    backendPublicUrl: process.env.BACKEND_PUBLIC_URL,
-  },
   i18n,
 };

@@ -161,7 +161,7 @@ const Profile: NextPage = () => {
                   <Menu
                     onClick={(c) =>
                       window.location.assign(
-                        `/backend/cal/${c.key}/add?token=${token}`
+                        `${static_config.backendUrl}/cal/${c.key}/add?token=${token}`
                       )
                     }
                   >

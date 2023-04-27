@@ -2,10 +2,10 @@ import { KeyOutlined, LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import {
   ApolloClient,
   ApolloProvider,
-  createHttpLink,
-  from,
   InMemoryCache,
   ServerError,
+  createHttpLink,
+  from,
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
@@ -23,16 +23,13 @@ import { ConfigProvider, Layout, Menu, theme } from "antd";
 import { ItemType } from "antd/es/menu/hooks/useItems";
 import { appWithTranslation, useTranslation } from "next-i18next";
 import type { AppProps } from "next/app";
-import getConfig from "next/config";
 import { Router, useRouter } from "next/router";
 import "nprogress/nprogress.css";
 import { useEffect, useMemo, useState } from "react";
 import { static_config } from "src/static_config";
 
-const { publicRuntimeConfig } = getConfig();
-
 const httpLink = createHttpLink({
-  uri: `${publicRuntimeConfig?.backendPublicUrl ?? "/backend"}/graphql`,
+  uri: `${static_config.backendUrl}/graphql`,
 });
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem("token");
@@ -157,9 +154,7 @@ function AppLayout({ Component, pageProps }: AppProps) {
         logout();
         break;
       case "login":
-        window.location.replace(
-          `${process.env.NEXT_PUBLIC_BACKEND_PUBLIC_URL}/auth/login`
-        );
+        window.location.replace(`${static_config.backendUrl}/auth/login`);
         break;
     }
   };
