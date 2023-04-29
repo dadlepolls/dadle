@@ -24,14 +24,18 @@ function useInitiallySorted<DataType extends { _id: string }>(
   //order of indices is stored separately
   const [indexOrder, setIndexOrder] = useState<DataType["_id"][]>([]);
 
-  useEffect(() => {
-    if (initiallyOrdered || skip || !data) return;
-    const order = produce(data, (draft) => {
-      return draft.sort(compareFunction);
-    }).map((o) => o._id);
-    setIndexOrder(order);
-    setInitiallyOrdered(true);
-  }, [initiallyOrdered, skip]);
+  useEffect(
+    () => {
+      if (initiallyOrdered || skip || !data) return;
+      const order = produce(data, (draft) => {
+        return draft.sort(compareFunction);
+      }).map((o) => o._id);
+      setIndexOrder(order);
+      setInitiallyOrdered(true);
+    },
+    /* eslint-disable react-hooks/exhaustive-deps */
+    [initiallyOrdered, skip, compareFunction]
+  );
 
   const dataSorted = useMemo(() => {
     if (!data) return [];

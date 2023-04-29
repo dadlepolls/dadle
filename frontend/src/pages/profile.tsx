@@ -2,7 +2,7 @@ import {
   GoogleOutlined,
   LinkOutlined,
   SaveOutlined,
-  WindowsOutlined
+  WindowsOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "@components/AuthContext";
 import { CalendarList } from "@components/CalendarList";
@@ -12,7 +12,7 @@ import { useMobileComponentsPrefered } from "@components/ResponsiveContext";
 import { UPDATE_NAME } from "@operations/mutations/UpdateName";
 import {
   UpdateName,
-  UpdateNameVariables
+  UpdateNameVariables,
 } from "@operations/mutations/__generated__/UpdateName";
 import { useStyledMutation } from "@util/mutationWrapper";
 import {
@@ -22,18 +22,22 @@ import {
   Dropdown,
   Input,
   Menu,
-  message,
   Space,
   Tooltip,
-  Typography
+  Typography,
+  message,
 } from "antd";
 import * as ls from "local-storage";
 import { NextPage } from "next";
+import { useTranslation } from "next-i18next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { static_config } from "src/static_config";
 
 const Profile: NextPage = () => {
+  const { t } = useTranslation("profile");
   const router = useRouter();
   const { user, authLoading, token } = useAuth();
   const mobileDisplay = useMobileComponentsPrefered();
@@ -58,7 +62,7 @@ const Profile: NextPage = () => {
   useEffect(() => {
     //check if there was a failure while adding calendar, show message
     if (router.isReady && router.query.calendarAddFailure) {
-      message.error("Verknüpfen des Kalenders fehlgeschlagen!");
+      message.error(t("calendar_linking_failed"));
       removeQueryParams();
     }
     //eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,7 +93,7 @@ const Profile: NextPage = () => {
         setNameIsEdited(false);
         ls.set("username", name);
       },
-      successMessage: "Name aktualisiert!",
+      successMessage: t("username_saved"),
     }
   );
 
@@ -101,26 +105,24 @@ const Profile: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Mein Profil | DadleX</title>
+        <title>{t("title")} | Dadle</title>
       </Head>
       <Space direction="vertical">
-        <Card title="Profilinformationen">
+        <Card title={t("information")}>
           <Typography.Title
             level={3}
           >{`Howdy, ${user.name}!`}</Typography.Title>
           <Descriptions column={mobileDisplay ? 1 : 3}>
-            <Descriptions.Item label="Name beim Anmeldedienst">
-              <Tooltip
-                title={`Eindeutige ID beim Anmeldedienst: ${user.idAtProvider}`}
-              >
+            <Descriptions.Item label={t("provider_name")}>
+              <Tooltip title={t("provider_id", { id: user.idAtProvider })}>
                 {user.nameAtProvider}
               </Tooltip>
             </Descriptions.Item>
-            <Descriptions.Item label="Email" span={mobileDisplay ? 1 : 2}>
+            <Descriptions.Item label={t("email")} span={mobileDisplay ? 1 : 2}>
               {user.mail}
             </Descriptions.Item>
-            <Descriptions.Item label="Anzeigename">
-              <Input.Group>
+            <Descriptions.Item label={t("displayname")}>
+              <Space.Compact style={{ width: "100%" }}>
                 <Input
                   value={name}
                   style={{ width: "calc(100% - 32px)" }}
@@ -144,35 +146,43 @@ const Profile: NextPage = () => {
                     }
                   />
                 ) : null}
-              </Input.Group>
+              </Space.Compact>
             </Descriptions.Item>
           </Descriptions>
         </Card>
 
         <Card
-          title="Meine verknüpften Kalender"
+          title={t("linked_calendars")}
           className="card-extra-responsive"
           extra={
-            <Dropdown
-              overlay={
-                <Menu
-                  onClick={(c) =>
-                    window.location.assign(
-                      `/backend/cal/${c.key}/add?token=${token}`
-                    )
-                  }
-                >
-                  <Menu.Item key="microsoft" icon={<WindowsOutlined />}>
-                    Microsoft 365&reg;-Kalender
-                  </Menu.Item>
-                  <Menu.Item key="google" icon={<GoogleOutlined />}>
-                    Google-Kalender
-                  </Menu.Item>
-                </Menu>
-              }
-            >
-              <Button icon={<LinkOutlined />}>Kalender verknüpfen</Button>
-            </Dropdown>
+            static_config.calMsEnabled || static_config.calGoogleEnabled ? (
+              <Dropdown
+                overlay={
+                  <Menu
+                    onClick={(c) =>
+                      window.location.assign(
+                        `${static_config.backendUrl}/cal/${c.key}/add?token=${token}`
+                      )
+                    }
+                  >
+                    {static_config.calMsEnabled ? (
+                      <Menu.Item key="microsoft" icon={<WindowsOutlined />}>
+                        {t("cal_microsoft")}
+                      </Menu.Item>
+                    ) : null}
+                    {static_config.calGoogleEnabled ? (
+                      <Menu.Item key="google" icon={<GoogleOutlined />}>
+                        {t("cal_google")}
+                      </Menu.Item>
+                    ) : null}
+                  </Menu>
+                }
+              >
+                <Button icon={<LinkOutlined />}>
+                  {t("link_calendar_action")}
+                </Button>
+              </Dropdown>
+            ) : null
           }
         >
           <style jsx global>
@@ -196,5 +206,13 @@ const Profile: NextPage = () => {
     </>
   );
 };
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ["common", "profile"])),
+    },
+  };
+}
 
 export default Profile;

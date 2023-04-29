@@ -35,3 +35,7 @@ yarn-error.log*
 
 # apollo graphql generated code
 __generated__
+
+# storybook
+storybook-static
+build-storybook.log

@@ -8,8 +8,8 @@ import {
 } from "type-graphql";
 import { User } from "./User";
 import { User as UserModel } from "../db/models";
-import { ApolloError } from "apollo-server-errors";
 import { IGraphContext, IUserOrAnon } from "src/util/types";
+import { GraphQLError } from "graphql";
 
 @ObjectType()
 class UserOrAnon implements IUserOrAnon {
@@ -30,7 +30,7 @@ class UserOrAnonResolver {
     if (!userOrAnon.userId) return null;
 
     const dbUser = await UserModel.findById(userOrAnon.userId);
-    if (!dbUser) throw new ApolloError("User could not be found!");
+    if (!dbUser) throw new GraphQLError("User could not be found!");
 
     //return full profile for authenticated user
     if (dbUser._id == ctx.user?._id) return dbUser;

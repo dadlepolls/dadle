@@ -1,10 +1,10 @@
 name: CI - Lint and Build
-on: 
+on:
   push:
     paths:
-      - 'frontend/**'
-      - 'backend/**'
-      - '.github/workflows/ci.yml'
+      - "frontend/**"
+      - "backend/**"
+      - ".github/workflows/ci.yml"
 
 env:
   REGISTRY: ghcr.io
@@ -14,10 +14,10 @@ jobs:
   lint-backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: "14"
+          node-version: "16"
       - name: Yarn Install
         working-directory: ./backend
         run: |
@@ -32,21 +32,21 @@ jobs:
       - name: Auto-generate GraphQL schema file
         working-directory: ./backend
         run: |
-          ts-node ./test/util/printGraphSchema.ts > ${{ runner.temp }}/dadlex-schema.graphql
+          ts-node ./test/util/printGraphSchema.ts > ${{ runner.temp }}/dadle-schema.graphql
       - name: Store auto-generated schema
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          path: ${{ runner.temp }}/dadlex-schema.graphql
+          path: ${{ runner.temp }}/dadle-schema.graphql
       - name: Validate committed schema is up-to-date
         run: |
-          cmp ./backend/dadlex-schema.graphql ${{ runner.temp }}/dadlex-schema.graphql || (exit 1)
+          cmp ./backend/dadle-schema.graphql ${{ runner.temp }}/dadle-schema.graphql || (exit 1)
   lint-frontend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: "14"
+          node-version: "16"
       - name: Yarn Install
         working-directory: ./frontend
         run: |
@@ -65,42 +65,30 @@ jobs:
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node.JS
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: "14"
+          node-version: "16"
       - name: Auto-generate schema spec for frontend
         working-directory: ./frontend
         run: |
           yarn install
+          yarn add apollo
           yarn graph-types-codegen
       - name: Log in to the Container registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract metadata for Docker (frontendbase)
-        id: frontendbasemeta
-        uses: docker/metadata-action@v3
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontendbase
-      - name: Build and push Docker image (frontendbase)
-        uses: docker/build-push-action@v2
-        with:
-          context: ./frontend
-          push: true
-          tags: ${{ steps.frontendbasemeta.outputs.tags }}
-          labels: ${{ steps.frontendbasemeta.outputs.labels }}
-          target: deps
-      - name: Extract metadata for Docker (frontend)
+      - name: Extract metadata for Docker
         id: frontendmeta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
-      - name: Build and push Docker image (frontend)
-        uses: docker/build-push-action@v2
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend-builder
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
         with:
           context: ./frontend
           push: true
@@ -115,24 +103,24 @@ jobs:
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node.JS
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: "14"
+          node-version: "16"
       - name: Log in to the Container registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract metadata for Docker
         id: backendmeta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./backend
           push: true

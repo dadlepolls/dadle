@@ -1,19 +1,20 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { GetPollByLink_getPollByLink_options } from "@operations/queries/__generated__/GetPollByLink";
-import { Button, Form, Input, Radio, Tooltip } from "antd";
+import { PollOptionType } from "__generated__/globalTypes";
+import { Alert, Button, Form, Input, Segmented, Space, Tooltip } from "antd";
 import { Rule } from "antd/lib/form";
 import moment from "moment";
 import "moment/locale/de";
-import React, { useMemo } from "react";
+import { useTranslation } from "next-i18next";
+import { useMemo } from "react";
 import {
-  Calendar as RBCalendar,
   Event,
-  momentLocalizer,
+  Calendar as RBCalendar,
   SlotInfo,
-  stringOrDate
+  momentLocalizer,
+  stringOrDate,
 } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
-import { PollOptionType } from "__generated__/globalTypes";
 
 interface PollOptionAsEvent extends Event {
   optionIndex: number;
@@ -32,6 +33,8 @@ const OptionEditorCalendar = ({
   onChange?: (value: Partial<GetPollByLink_getPollByLink_options>[]) => any;
   pollTitle: string;
 }) => {
+  const { t } = useTranslation("polleditor");
+
   const mapValueToCalendarEvents = (
     value: Partial<GetPollByLink_getPollByLink_options>[]
   ) => {
@@ -106,43 +109,53 @@ const OptionEditorCalendar = ({
   };
 
   return (
-    <Calendar
-      defaultDate={firstEventStart ? firstEventStart.toDate() : undefined}
-      scrollToTime={firstEventStart ? firstEventStart.toDate() : undefined}
-      defaultView="week"
-      localizer={localizer}
-      resizable
-      style={{ height: 550, minWidth: 600 }}
-      events={mapValueToCalendarEvents(value)}
-      onEventDrop={handleEventChange}
-      onEventResize={handleEventChange}
-      onSelectSlot={handleEventCreate}
-      onDoubleClickEvent={(e) => {
-        const opts = [...value];
-        opts.splice(e.optionIndex, 1);
-        onChange(opts);
-      }}
-      selectable
-      views={["week", "agenda"]}
-      popup={true}
-      messages={{
-        agenda: "Übersicht",
-        week: "Kalenderansicht",
-        today: "Heute",
-        next: "Nächste Woche",
-        previous: "Vorherige Woche",
-      }}
-      formats={{
-        dayRangeHeaderFormat: (range, culture, localizer) => {
-          return `${
-            localizer?.format(range.start, "DD.MM.", culture || "de") || ""
-          } - ${localizer?.format(range.end, "DD.MM.", culture || "de") || ""}`;
-        },
-        dayFormat: (date, culture, localizer) => {
-          return localizer?.format(date, "dd (DD.)", culture || "de") || "";
-        },
-      }}
-    />
+    <>
+      <Alert
+        type="info"
+        showIcon
+        description={t("calendar_option_delete_explanation")}
+        style={{ marginBottom: 16 }}
+      />
+      <Calendar
+        defaultDate={firstEventStart ? firstEventStart.toDate() : undefined}
+        scrollToTime={firstEventStart ? firstEventStart.toDate() : undefined}
+        defaultView="week"
+        localizer={localizer}
+        resizable
+        style={{ height: 550, minWidth: 600 }}
+        events={mapValueToCalendarEvents(value)}
+        onEventDrop={handleEventChange}
+        onEventResize={handleEventChange}
+        onSelectSlot={handleEventCreate}
+        onDoubleClickEvent={(e) => {
+          const opts = [...value];
+          opts.splice(e.optionIndex, 1);
+          onChange(opts);
+        }}
+        selectable
+        views={["week", "agenda"]}
+        popup={true}
+        messages={{
+          agenda: t("calendar_overview"),
+          week: t("calendar_weekview"),
+          today: t("calendar_today"),
+          next: t("calendar_nextweek"),
+          previous: t("calendar_previousweek"),
+        }}
+        formats={{
+          dayRangeHeaderFormat: (range, culture, localizer) => {
+            return `${
+              localizer?.format(range.start, "DD.MM.", culture || "de") || ""
+            } - ${
+              localizer?.format(range.end, "DD.MM.", culture || "de") || ""
+            }`;
+          },
+          dayFormat: (date, culture, localizer) => {
+            return localizer?.format(date, "dd (DD.)", culture || "de") || "";
+          },
+        }}
+      />
+    </>
   );
 };
 
@@ -153,14 +166,17 @@ const OptionEditorArbitrary = ({
   value?: Partial<GetPollByLink_getPollByLink_options>[];
   onChange?: (value: Partial<GetPollByLink_getPollByLink_options>[]) => any;
 }) => {
+  const { t } = useTranslation("polleditor");
   return (
     <>
       {[...value, {}].map((o, idx, arr) => (
-        <Input.Group key={idx} style={{ marginTop: 4 }}>
+        <Space.Compact key={idx} style={{ width: "100%", marginTop: 4 }}>
           <Input
             type="text"
             style={{ width: "calc(100% - 32px)" }}
-            placeholder={idx == arr.length - 1 ? "Option hinzufügen" : "Option"}
+            placeholder={
+              idx == arr.length - 1 ? t("option_add") : t("option_placeholder")
+            }
             value={o.title || ""}
             onChange={(e) => {
               const opts = [...value];
@@ -182,7 +198,7 @@ const OptionEditorArbitrary = ({
               }}
             />
           ) : null}
-        </Input.Group>
+        </Space.Compact>
       ))}
     </>
   );
@@ -202,30 +218,28 @@ const OptionEditorTypeSelector = ({
   onChange?: (o: OptionEditorType) => any;
   typeChangeDisabled?: boolean;
 }) => {
+  const { t } = useTranslation("polleditor");
   return (
     <Tooltip
       title={
         typeChangeDisabled ? (
           <>
-            Die Art der Umfrage kann nicht geändert werden, wenn schon
-            Antwortoptionen angegeben wurden.
+            {t("type_change_disabled_error")}
             <br />
-            Bitte lösche zuerst die Antwortoptionen.
+            {t("type_change_disabled_hint")}
           </>
         ) : null
       }
     >
-      <Radio.Group
-        buttonStyle="solid"
+      <Segmented
         disabled={typeChangeDisabled}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <Radio.Button value={OptionEditorType.Calendar}>Kalender</Radio.Button>
-        <Radio.Button value={OptionEditorType.Arbitrary}>
-          Über beliebige Optionen abstimmen
-        </Radio.Button>
-      </Radio.Group>
+        options={[
+          { value: OptionEditorType.Calendar, label: t("type_calendar") },
+          { value: OptionEditorType.Arbitrary, label: t("type_arbitrary") },
+        ]}
+        onChange={(e) => onChange(e as OptionEditorType)}
+      />
     </Tooltip>
   );
 };
@@ -237,6 +251,7 @@ export const OptionEditor = ({
   options?: GetPollByLink_getPollByLink_options[];
   pollTitle: string;
 }) => {
+  const { t } = useTranslation("polleditor");
   /* disabled type change in case there are any options specified */
   const typeChangeDisabled = options && options.length > 0;
 
@@ -247,15 +262,9 @@ export const OptionEditor = ({
         val: Partial<GetPollByLink_getPollByLink_options>[] = []
       ) => {
         if (val.some((v) => v.type == PollOptionType.Arbitrary && !v.title))
-          return Promise.reject(
-            new Error("Es muss für alle Optionen ein Name vergeben sein!")
-          );
+          return Promise.reject(new Error(t("option_name_required_error")));
         if (val.length == 0)
-          return Promise.reject(
-            new Error(
-              "Es muss mindestens eine Umfrageoption angelegt angelegt sein!"
-            )
-          );
+          return Promise.reject(new Error(t("option_none_given_error")));
         return Promise.resolve();
       },
     },

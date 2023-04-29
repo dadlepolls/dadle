@@ -20,6 +20,8 @@ const buildAppSchema = async () =>
       PollAvailabilityHintResolver,
     ],
     authChecker: graphAuthChecker,
+    //this only needs to be explicitely set for bugfix with type-graphql beta, see: https://github.com/MichalLytek/type-graphql/issues/1396
+    validate: { forbidUnknownValues: false },
   });
 
 export { buildAppSchema };

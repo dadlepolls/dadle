@@ -1,8 +1,3 @@
-import {
-  ApolloServerPluginLandingPageGraphQLPlayground,
-  ApolloServerPluginLandingPageProductionDefault,
-} from "apollo-server-core";
-import { ApolloServer } from "apollo-server-express";
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
@@ -16,6 +11,14 @@ import { getAuthRouter } from "./auth/authRouter";
 import { parseTokenMiddleware } from "./auth/token";
 import { CalendarProviders } from "./integrations/calendar/CalendarProviders";
 import logger from "./log";
+import { ApolloServer } from "@apollo/server";
+import cors from "cors";
+import { json } from "body-parser";
+import { expressMiddleware } from "@apollo/server/express4";
+import {
+  ApolloServerPluginLandingPageLocalDefault,
+  ApolloServerPluginLandingPageProductionDefault,
+} from "@apollo/server/plugin/landingPage/default";
 
 /* eslint-disable */
 declare global {
@@ -44,6 +47,12 @@ app.get("/health", (req, res) => {
 
 app.use("/graphql", parseTokenMiddleware);
 
+if (process.env.BACKEND_TRUST_PROXY) {
+  const { BACKEND_TRUST_PROXY } = process.env;
+  logger.info(`Trusting proxies: "${BACKEND_TRUST_PROXY}"`);
+  app.set("trust proxy", BACKEND_TRUST_PROXY);
+}
+
 const main = async () => {
   //db setup
   await dbConnect();
@@ -53,18 +62,23 @@ const main = async () => {
 
   //graphql setup
   const schema = await buildAppSchema();
-  const server = new ApolloServer({
+  const server = new ApolloServer<IGraphContext>({
     schema,
-    context: ({ req }): IGraphContext => ({ req, user: req.user }),
     plugins: [
       process.env.NODE_ENV == "development"
-        ? ApolloServerPluginLandingPageGraphQLPlayground()
+        ? ApolloServerPluginLandingPageLocalDefault()
         : ApolloServerPluginLandingPageProductionDefault(),
     ],
   });
   await server.start();
-  server.applyMiddleware({ app, path: "/graphql" });
-
+  app.use(
+    "/graphql",
+    cors<cors.CorsRequest>(),
+    json(),
+    expressMiddleware(server, {
+      context: async ({ req }) => ({ req, user: req.user }),
+    })
+  );
   //startup app
   app.listen(port, () => {
     logger.info(`App listening on ${port}`);

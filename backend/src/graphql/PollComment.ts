@@ -11,8 +11,8 @@ import {
 } from "type-graphql";
 import { UserOrAnon } from "./UserOrAnon";
 import { Poll } from "./Poll";
-import { ApolloError } from "apollo-server-express";
 import { Poll as PollModel } from "../db/models";
+import { GraphQLError } from "graphql";
 
 @ObjectType()
 class PollComment implements IPollComment {
@@ -61,25 +61,28 @@ class PollCommentResolver {
   ) {
     const dbPoll = await PollModel.findOne({ _id: pollId }).exec();
     if (!dbPoll) {
-      throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
+      throw new GraphQLError("Couldn't find poll!", {
+        extensions: { code: "POLL_NOT_FOUND" },
+      });
     }
 
     if (!commentInput.anonName && !ctx.user?._id)
-      throw new ApolloError(
+      throw new GraphQLError(
         "anonName must be given in case user is not authenticated",
-        "INVALID_REQUEST"
+        { extensions: { code: "INVALID_REQUEST" } }
       );
 
     if (commentInput._id) {
       const comment = dbPoll.comments?.find((c) => c._id == commentInput._id);
       if (!comment)
-        throw new ApolloError("Couldn't find comment!", "COMMENT_NOT_FOUND");
+        throw new GraphQLError("Couldn't find comment!", {
+          extensions: { code: "COMMENT_NOT_FOUND" },
+        });
 
       if (comment.author.userId && comment.author.userId != ctx.user?._id)
-        throw new ApolloError(
-          "Can't edit comments of other users",
-          "INSUFFICIENT_PERMISSIONS"
-        );
+        throw new GraphQLError("Can't edit comments of other users", {
+          extensions: { code: "INSUFFICIENT_PERMISSIONS" },
+        });
 
       comment.author = {
         anonName: commentInput.anonName,
@@ -107,17 +110,21 @@ class PollCommentResolver {
     @Ctx() ctx: IGraphContext
   ) {
     const dbPoll = await PollModel.findOne({ _id: pollId }).exec();
-    if (!dbPoll) throw new ApolloError("Couldn't find poll!", "POLL_NOT_FOUND");
+    if (!dbPoll)
+      throw new GraphQLError("Couldn't find poll!", {
+        extensions: { code: "POLL_NOT_FOUND" },
+      });
 
     const comment = dbPoll.comments?.find((c) => c._id == commentId);
     if (!comment)
-      throw new ApolloError("Couldn't find comment", "COMMENT_NOT_FOUND");
+      throw new GraphQLError("Couldn't find comment", {
+        extensions: { code: "COMMENT_NOT_FOUND" },
+      });
 
     if (comment.author.userId && comment.author.userId != ctx.user?._id)
-      throw new ApolloError(
-        "Can't delete comments of other users!",
-        "INSUFFICIENT_PERMISSIONS"
-      );
+      throw new GraphQLError("Can't delete comments of other users!", {
+        extensions: { code: "INSUFFICIENT_PERMISSIONS" },
+      });
 
     return (
       await PollModel.findByIdAndUpdate(

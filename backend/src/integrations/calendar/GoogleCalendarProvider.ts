@@ -80,17 +80,20 @@ class GoogleCalendarProvider implements ICalendarProvider {
       pageToken = response.data.nextPageToken ?? "";
     } while (pageToken);
 
-    const determineEventStatus = (s: string | undefined | null) => {
-      if (s === "confirmed") return EventStatus.Confirmed;
-      if (s === "tentative") return EventStatus.Tentative;
-      else return EventStatus.Free;
+    const determineEventStatus = (e: calendar_v3.Schema$Event) => {
+      //e.transparency is either "transparent" (available) or "opaque" (blocked)
+      if (e.transparency === "transparent") return EventStatus.Free;
+      //e.status can be "confirmed", "tentative", "cancelled"
+      if (e.status === "confirmed") return EventStatus.Confirmed;
+      if (e.status === "tentative") return EventStatus.Tentative;
+      return EventStatus.Free;
     };
 
     return events.map<IEvent>((e) => ({
       title: e.summary ?? "",
       from: this.parseEventDateTime(e.start),
       to: this.parseEventDateTime(e.end),
-      status: determineEventStatus(e.status),
+      status: determineEventStatus(e),
     }));
   }
 

@@ -1,4 +1,3 @@
-import { ApolloError } from "apollo-server-errors";
 import {
   getProviderForCalendar,
   ICalendar,
@@ -17,6 +16,7 @@ import {
 } from "type-graphql";
 import { User as UserModel } from "../db/models";
 import logger from "../log";
+import { GraphQLError } from "graphql";
 
 @ObjectType()
 class Calendar implements Omit<Partial<ICalendar>, "provider"> {
@@ -59,13 +59,15 @@ class CalendarResolver {
   @Query(() => [Calendar])
   async getMyCalendars(@Ctx() ctx: IGraphContext) {
     if (!ctx.user?._id)
-      throw new ApolloError(
-        "User not authenticated!",
-        "USER_NOT_AUTHENTICATED"
-      );
+      throw new GraphQLError("User not authenticated!", {
+        extensions: { code: "USER_NOT_AUTHENTICATED" },
+      });
 
     const user = await UserModel.findById(ctx.user._id);
-    if (!user) throw new ApolloError("User deleted!", "USER_DELETED");
+    if (!user)
+      throw new GraphQLError("User deleted!", {
+        extensions: { code: "USER_DELETED" },
+      });
 
     return user.calendars;
   }
@@ -77,17 +79,21 @@ class CalendarResolver {
     @Ctx() ctx: IGraphContext
   ) {
     if (!ctx.user?._id)
-      throw new ApolloError(
-        "User not authenticated!",
-        "USER_NOT_AUTHENTICATED"
-      );
+      throw new GraphQLError("User not authenticated!", {
+        extensions: { code: "USER_NOT_AUTHENTICATED" },
+      });
 
     const user = await UserModel.findById(ctx.user._id);
-    if (!user) throw new ApolloError("User deleted!", "USER_DELETED");
+    if (!user)
+      throw new GraphQLError("User deleted!", {
+        extensions: { code: "USER_DELETED" },
+      });
 
     const calendar = user.calendars?.find((c) => c._id == calendarId);
     if (!calendar)
-      throw new ApolloError("Calendar not found!", "CALENDAR_NOT_FOUND");
+      throw new GraphQLError("Calendar not found!", {
+        extensions: { code: "CALENDAR_NOT_FOUND" },
+      });
 
     const provider = getProviderForCalendar(calendar);
 
@@ -117,17 +123,21 @@ class CalendarResolver {
     @Ctx() ctx: IGraphContext
   ) {
     if (!ctx.user?._id)
-      throw new ApolloError(
-        "User not authenticated!",
-        "USER_NOT_AUTHENTICATED"
-      );
+      throw new GraphQLError("User not authenticated!", {
+        extensions: { code: "USER_NOT_AUTHENTICATED" },
+      });
 
     const user = await UserModel.findById(ctx.user._id);
-    if (!user) throw new ApolloError("User deleted!", "USER_DELETED");
+    if (!user)
+      throw new GraphQLError("User deleted!", {
+        extensions: { code: "USER_DELETED" },
+      });
 
     const calendar = user.calendars?.find((c) => c._id == calendarId);
     if (!calendar)
-      throw new ApolloError("Calendar not found!", "CALENDAR_NOT_FOUND");
+      throw new GraphQLError("Calendar not found!", {
+        extensions: { code: "CALENDAR_NOT_FOUND" },
+      });
 
     calendar.enabled = enabled;
     user.markModified("calendars");
@@ -142,17 +152,21 @@ class CalendarResolver {
     @Ctx() ctx: IGraphContext
   ) {
     if (!ctx.user?._id)
-      throw new ApolloError(
-        "User not authenticated!",
-        "USER_NOT_AUTHENTICATED"
-      );
+      throw new GraphQLError("User not authenticated!", {
+        extensions: { code: "USER_NOT_AUTHENTICATED" },
+      });
 
     const user = await UserModel.findById(ctx.user._id);
-    if (!user) throw new ApolloError("User deleted!", "USER_DELETED");
+    if (!user)
+      throw new GraphQLError("User deleted!", {
+        extensions: { code: "USER_DELETED" },
+      });
 
     const calendar = user.calendars?.find((c) => c._id == calendarId);
     if (!calendar)
-      throw new ApolloError("Calendar not found!", "CALENDAR_NOT_FOUND");
+      throw new GraphQLError("Calendar not found!", {
+        extensions: { code: "CALENDAR_NOT_FOUND" },
+      });
 
     await UserModel.findByIdAndUpdate(
       ctx.user._id,

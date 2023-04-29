@@ -2,6 +2,7 @@ import { GetPollsOverview_getPolls } from "@operations/queries/__generated__/Get
 import { getUserDisplayname } from "@util/getUserDisplayname";
 import { Card, Tooltip, Typography } from "antd";
 import moment from "moment";
+import { useTranslation } from "next-i18next";
 import Link from "next/link";
 import { NextRouter } from "next/router";
 
@@ -13,6 +14,8 @@ const PollLinkCard = ({
   router: NextRouter;
   poll: GetPollsOverview_getPolls;
 }): JSX.Element => {
+  const { t } = useTranslation();
+
   return (
     <Card
       {...props}
@@ -25,7 +28,9 @@ const PollLinkCard = ({
         <Link href={`/p/${poll.link}`}>{poll.title}</Link>
       </Typography.Text>
       {poll.author.user || poll.author.anonName ? (
-        <small>&nbsp; von {getUserDisplayname(poll.author)}</small>
+        <small>
+          &nbsp; {t("poll_by_name", { name: getUserDisplayname(poll.author) })}
+        </small>
       ) : null}
       {poll.updatedAt ? (
         <Tooltip title={moment(poll.updatedAt).format("DD.MM.YY HH:MM")}>

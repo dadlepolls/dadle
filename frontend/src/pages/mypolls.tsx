@@ -2,17 +2,21 @@ import { useQuery } from "@apollo/client";
 import { useAuth } from "@components/AuthContext";
 import { ErrorPage } from "@components/ErrorPage";
 import { LoadingCard } from "@components/LoadingCard";
-import { PollResponses } from "@components/PollDetailPage/PollResponses";
+import { Poll } from "@components/PollComponent/Poll";
 import { PollLinkCard } from "@components/PollLinkCard";
 import { GET_MY_POLLS } from "@operations/queries/GetMyPolls";
 import { GetMyPolls } from "@operations/queries/__generated__/GetMyPolls";
+import { convertQueriedPoll } from "@util/convertQueriedPoll";
 import { Card, Empty, Popover, Typography } from "antd";
 import moment from "moment";
 import { NextPage } from "next";
+import { useTranslation } from "next-i18next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
 const MyPolls: NextPage = () => {
+  const { t } = useTranslation("mypolls");
   const { user } = useAuth();
   const router = useRouter();
 
@@ -20,12 +24,13 @@ const MyPolls: NextPage = () => {
     skip: !user,
     fetchPolicy: "network-only",
     nextFetchPolicy: "network-only",
+    variables: {
+      includeCreatedByMe: true,
+      includeParticipatedByMe: true,
+    },
   });
 
-  if (!user)
-    return (
-      <ErrorPage error="Um die Umfragen anzuzeigen, bei denen du mitgemacht hast, musst du angemeldet sein!" />
-    );
+  if (!user) return <ErrorPage error={t("auth_required_error")} />;
   if (error) return <ErrorPage error={error} />;
   if (loading) return <LoadingCard />;
 
@@ -34,14 +39,12 @@ const MyPolls: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Meine Umfragen | DadleX</title>
+        <title>{t("title")} | Dadle</title>
       </Head>
-      <Card title="Meine Umfragen">
-        <Typography.Paragraph>
-          Das sind alle Umfragen, bei denen du dich eingetragen hast.
-        </Typography.Paragraph>
+      <Card title={t("title")}>
+        <Typography.Paragraph>{t("explanation")}</Typography.Paragraph>
         {!polls?.length ? (
-          <Empty description="Du hast bisher an keinen Umfragen teilgenommen" />
+          <Empty description={t("no_participations")} />
         ) : (
           polls
             .sort((b, a) => moment(a.updatedAt).diff(moment(b.updatedAt)))
@@ -51,7 +54,7 @@ const MyPolls: NextPage = () => {
                 placement="bottom"
                 overlayStyle={{ maxWidth: "70%" }}
                 autoAdjustOverflow={false}
-                content={<PollResponses poll={p} readOnly />}
+                content={<Poll poll={convertQueriedPoll(p, user)} readOnly />}
               >
                 <PollLinkCard poll={p} router={router} />
               </Popover>
@@ -61,5 +64,17 @@ const MyPolls: NextPage = () => {
     </>
   );
 };
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, [
+        "common",
+        "mypolls",
+        "pollresponses",
+      ])),
+    },
+  };
+}
 
 export default MyPolls;

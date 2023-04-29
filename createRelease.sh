@@ -40,8 +40,8 @@ fi
 git checkout -b "release-$version"
 
 yarn config set version-git-tag false
-cd frontend && yarn version --new-version "$version" cd ../
-cd backend && yarn version --new-version "$version" cd ../
+cd frontend && yarn version --new-version "$version" && cd ../
+cd backend && yarn version --new-version "$version" && cd ../
 echo "$version" > VERSION
 git add .
 

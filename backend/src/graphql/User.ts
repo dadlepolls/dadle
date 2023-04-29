@@ -1,4 +1,3 @@
-import { ApolloError } from "apollo-server-errors";
 import { IGraphContext, IUser } from "src/util/types";
 import {
   Arg,
@@ -12,6 +11,7 @@ import {
   Resolver,
 } from "type-graphql";
 import { User as UserModel } from "../db/models";
+import { GraphQLError } from "graphql";
 
 @ObjectType()
 class User implements IUser {
@@ -51,13 +51,15 @@ class UserResolver {
   @Query(() => User)
   async me(@Ctx() ctx: IGraphContext) {
     if (!ctx.user?._id)
-      throw new ApolloError(
-        "User not authenticated!",
-        "USER_NOT_AUTHENTICATED"
-      );
+      throw new GraphQLError("User not authenticated!", {
+        extensions: { code: "USER_NOT_AUTHENTICATED" },
+      });
 
     const user = await UserModel.findById(ctx.user._id);
-    if (!user) throw new ApolloError("User deleted!", "USER_DELETED");
+    if (!user)
+      throw new GraphQLError("User deleted!", {
+        extensions: { code: "USER_DELETED" },
+      });
 
     return user.toObject();
   }
@@ -66,15 +68,17 @@ class UserResolver {
   @Mutation(() => User)
   async updateName(@Arg("newName") newName: string, @Ctx() ctx: IGraphContext) {
     if (!ctx.user?._id)
-      throw new ApolloError(
-        "User not authenticated!",
-        "USER_NOT_AUTHENTICATED"
-      );
+      throw new GraphQLError("User not authenticated!", {
+        extensions: { code: "USER_NOT_AUTHENTICATED" },
+      });
 
     const user = await UserModel.findById(ctx.user._id);
-    if (!user) throw new ApolloError("User deleted!", "USER_DELETED");
+    if (!user)
+      throw new GraphQLError("User deleted!", {
+        extensions: { code: "USER_DELETED" },
+      });
 
-    if (!newName) throw new ApolloError("Name can't be empty!");
+    if (!newName) throw new GraphQLError("Name can't be empty!");
     user.name = newName;
     return (await user.save()).toObject();
   }

@@ -18,10 +18,11 @@ import { GetPollByLink_getPollByLink_comments } from "@operations/queries/__gene
 import { getUserDisplayname } from "@util/getUserDisplayname";
 import { useStyledMutation } from "@util/mutationWrapper";
 import { removeTypenameFromObject } from "@util/removeTypenameFromObject";
+import { PollCommentInput } from "__generated__/globalTypes";
 import { Button, Card, Input, Space } from "antd";
 import * as ls from "local-storage";
-import React, { useState } from "react";
-import { PollCommentInput } from "__generated__/globalTypes";
+import { useTranslation } from "next-i18next";
+import { useState } from "react";
 import { useAuth } from "./AuthContext";
 
 const PollComment = ({
@@ -91,10 +92,7 @@ const PollComment = ({
         ) : (
           <Space>
             {showEditButton ? (
-              <Button
-                icon={<EditOutlined />}
-                onClick={() => onEditClick()}
-              />
+              <Button icon={<EditOutlined />} onClick={() => onEditClick()} />
             ) : null}
             {showDeleteButton ? (
               <Button
@@ -127,6 +125,7 @@ export const PollCommentArea = ({
   pollId: string;
   comments: GetPollByLink_getPollByLink_comments[];
 }) => {
+  const { t } = useTranslation("pollcomments");
   const { user, isAuthenticated } = useAuth();
   const [editableComment, setEditableComment] =
     useState<GetPollByLink_getPollByLink_comments | null>(null);
@@ -140,7 +139,7 @@ export const PollCommentArea = ({
     CreateOrUpdateCommentVariables
   >(CREATE_OR_UPDATE_COMMENT, {
     statusCallbackFunction: setCommentIsSaving,
-    successMessage: "Kommentar gespeichert!",
+    successMessage: t("saved"),
   });
   const saveComment = async (comment: PollCommentInput) => {
     await createOrUpdateCommentMutation({
@@ -153,8 +152,8 @@ export const PollCommentArea = ({
     DeleteComment,
     DeleteCommentVariables
   >(DELETE_COMMENT, {
-    successMessage: "Kommentar gelöscht!",
-    errorMessage: "Löschen fehlgeschlagen!",
+    successMessage: t("delete_success"),
+    errorMessage: t("delete_error"),
   });
   const deleteComment = async (commentId: string) => {
     await deleteCommentMutation(
@@ -227,12 +226,11 @@ export const PollCommentArea = ({
           }}
         >
           <Button
-            shape="round"
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => setCommentBeingAdded({ text: "" })}
           >
-            Neuer Kommentar
+            {t("new_action")}
           </Button>
         </div>
       )}
