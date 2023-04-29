@@ -1,10 +1,10 @@
 import {
   DeleteOutlined,
   EditOutlined,
+  InfoCircleOutlined,
   SaveOutlined,
   ShareAltOutlined,
 } from "@ant-design/icons";
-import { PageHeader } from "@ant-design/pro-components";
 import { useQuery } from "@apollo/client";
 import { useAuth } from "@components/AuthContext";
 import { ErrorPage } from "@components/ErrorPage";
@@ -14,6 +14,7 @@ import { Poll } from "@components/PollComponent/Poll";
 import { PollResponsesMobile } from "@components/PollComponent/PollMobile";
 import { TPollParticipationWithOptionalId } from "@components/PollComponent/PollTypes";
 import { PollEditDialog } from "@components/PollEditDialog";
+import { PollInfoTooltip } from "@components/PollInfoTooltip";
 import { useMobileComponentsPrefered } from "@components/ResponsiveContext";
 import { CREATE_OR_UPDATE_PARTICIPATION } from "@operations/mutations/CreateOrUpdateParticipation";
 import { DELETE_PARTICIPATION } from "@operations/mutations/DeleteParticipation";
@@ -38,17 +39,17 @@ import {
   GetPollByLink_getPollByLink,
 } from "@operations/queries/__generated__/GetPollByLink";
 import { convertQueriedPoll } from "@util/convertQueriedPoll";
-import { getUserDisplayname } from "@util/getUserDisplayname";
 import { useStyledMutation } from "@util/mutationWrapper";
 import { useSharingSupported } from "@util/useSharingSupported";
 import { PollOptionType } from "__generated__/globalTypes";
 import {
   Button,
   Card,
-  Descriptions,
+  Col,
   Popconfirm,
+  Row,
   Space,
-  Tooltip,
+  Typography,
   message,
 } from "antd";
 import * as ls from "local-storage";
@@ -58,7 +59,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 const sortPollOptions = (poll: GetPollByLink_getPollByLink) => {
   const { options: originalOptions, ...pollData } = poll;
@@ -83,18 +84,25 @@ const PollPage: NextPage = () => {
   const mobileDisplay = useMobileComponentsPrefered();
   const { user } = useAuth();
   const sharingSupported = useSharingSupported();
-
   const [isEditingPoll, setIsEditingPoll] = useState(false);
 
   const { error, loading, data } = useQuery<GetPollByLink>(GET_POLL_BY_LINK, {
     skip: !pollLink,
     variables: { pollLink },
   });
-  const poll = data?.getPollByLink
-    ? sortPollOptions(data.getPollByLink)
-    : undefined;
+  const poll = useMemo(() => {
+    if (!data?.getPollByLink) return undefined;
+    return sortPollOptions(data.getPollByLink);
+  }, [data?.getPollByLink]);
 
-  //query availability hints separately so that main display won't be blocked by slow query
+  const canMutatePoll = useMemo(() => {
+    if (!poll) return undefined; //poll is not there yet, don't know if it is mutable
+    if (!poll.author.user?._id) return true; //poll is anonymously created, it is mutables
+    if (poll.author.user._id == user?._id) return true; //current user is author, it is mutable
+    return false;
+  }, [poll, poll?.author.user?._id, user?._id]);
+
+  //query availability hints separately so that main display won't be blocked by potential slow calendar query
   const { data: availabilityHintData } = useQuery<GetPollAvailabilityHints>(
     GET_POLL_AVAILABILITY_HINTS,
     {
@@ -190,106 +198,90 @@ const PollPage: NextPage = () => {
     ? PollResponsesMobile
     : Poll;
 
+  if (loading || !poll)
+    return (
+      <>
+        <Head>
+          <title>Dadle</title>
+        </Head>
+        <LoadingCard />
+      </>
+    );
+
   return (
     <>
       <Head>
-        <title>Dadle</title>
+        <title>{poll.title} | Dadle</title>
       </Head>
-      {loading || !poll ? (
-        <LoadingCard />
-      ) : (
-        <>
-          <Head>
-            <title>{poll?.title} | Dadle</title>
-          </Head>
-          <PageHeader
-            ghost={false}
-            onBack={() => router.back()}
-            title={poll?.title}
-            subTitle={poll?.author ? getUserDisplayname(poll.author) : null}
-            style={{ marginBottom: "16px" }}
-            extra={
-              <Space>
+      <Row style={{ marginBottom: 16 }}>
+        <Col flex="auto">
+          <Typography.Title>{poll.title}</Typography.Title>
+        </Col>
+        <Col flex="none">
+          <Space>
+            {canMutatePoll ? (
+              <>
+                <Popconfirm
+                  title={t("poll_delete_confirmation")}
+                  okText={t("poll_delete_confirmation_yes")}
+                  cancelText={t("poll_delete_confirmation_no")}
+                  placement="bottomLeft"
+                  onConfirm={() => deletePoll()}
+                >
+                  <Button icon={<DeleteOutlined />} hidden={isEditingPoll} />
+                </Popconfirm>
                 <Button
-                  hidden={!sharingSupported}
-                  icon={<ShareAltOutlined />}
-                  onClick={() =>
-                    navigator.share({ url: window.location.toString() })
-                  }
+                  hidden={isEditingPoll}
+                  onClick={() => setIsEditingPoll(true)}
+                  icon={<EditOutlined />}
                 />
-                {!poll.author.user?._id || poll.author.user._id == user?._id ? (
-                  <>
-                    <Button
-                      hidden={isEditingPoll}
-                      onClick={() => setIsEditingPoll(true)}
-                      icon={<EditOutlined />}
-                    />
-                    <Popconfirm
-                      title={t("poll_delete_confirmation")}
-                      okText={t("poll_delete_confirmation_yes")}
-                      cancelText={t("poll_delete_confirmation_no")}
-                      placement="bottomLeft"
-                      onConfirm={() => deletePoll()}
-                    >
-                      <Button
-                        icon={<DeleteOutlined />}
-                        hidden={isEditingPoll}
-                      />
-                    </Popconfirm>
-                  </>
-                ) : null}
-              </Space>
-            }
-          >
-            <Descriptions size="small" column={mobileDisplay ? 1 : 3}>
-              {poll.createdAt ? (
-                <Descriptions.Item label={t("poll_created_at")}>
-                  <Tooltip
-                    title={moment(poll.createdAt).format("DD.MM.YY HH:MM:SS")}
-                  >
-                    {moment(poll.createdAt).fromNow()}
-                  </Tooltip>
-                </Descriptions.Item>
-              ) : null}
-              {poll.updatedAt ? (
-                <Descriptions.Item label={t("poll_changed_at")}>
-                  <Tooltip
-                    title={moment(poll.updatedAt).format("DD.MM.YY HH:MM:SS")}
-                  >
-                    {moment(poll.updatedAt).fromNow()}
-                  </Tooltip>
-                </Descriptions.Item>
-              ) : null}
-            </Descriptions>
-
-            {isEditingPoll ? (
-              <PollEditDialog
-                title={t("poll_edit")}
-                poll={poll}
-                allowLinkEditing={false}
-                saveButtonIcon={<SaveOutlined />}
-                saveButtonContent={t("poll_save_changes")}
-                onSaveSuccess={() => setIsEditingPoll(false)}
-              />
+              </>
             ) : null}
-          </PageHeader>
-          <Card>
-            <PollResponseComponentByMedia
-              poll={convertQueriedPoll(
-                poll,
-                user,
-                availabilityHintData?.getPollByLink?.availabilityHints
-              )}
-              saveParticipationFunction={saveParticipation}
-              deleteParticipationFunction={deleteParticipation}
-              allowNameEditForNewParticipation={!user?._id}
-              nameHint={user?.name ?? ls.get("username")}
-              onNameHintChange={(name) => ls.set("username", name)}
+            <PollInfoTooltip
+              createdAt={poll.createdAt}
+              updatedAt={poll.updatedAt}
+              author={poll.author}
+            >
+              <Button icon={<InfoCircleOutlined />} />
+            </PollInfoTooltip>
+            <Button
+              hidden={!sharingSupported}
+              icon={<ShareAltOutlined />}
+              onClick={() =>
+                navigator.share({ url: window.location.toString() })
+              }
             />
-          </Card>
-          <PollCommentArea pollId={poll._id} comments={poll.comments} />
-        </>
+          </Space>
+        </Col>
+      </Row>
+      {isEditingPoll ? (
+        <PollEditDialog
+          title={t("poll_edit")}
+          poll={poll}
+          allowLinkEditing={false}
+          canCancel
+          saveButtonIcon={<SaveOutlined />}
+          saveButtonContent={t("poll_save_changes")}
+          onSaveSuccess={() => setIsEditingPoll(false)}
+          onCancel={() => setIsEditingPoll(false)}
+        />
+      ) : (
+        <Card>
+          <PollResponseComponentByMedia
+            poll={convertQueriedPoll(
+              poll,
+              user,
+              availabilityHintData?.getPollByLink?.availabilityHints
+            )}
+            saveParticipationFunction={saveParticipation}
+            deleteParticipationFunction={deleteParticipation}
+            allowNameEditForNewParticipation={!user?._id}
+            nameHint={user?.name ?? ls.get("username")}
+            onNameHintChange={(name) => ls.set("username", name)}
+          />
+        </Card>
       )}
+      <PollCommentArea pollId={poll._id} comments={poll.comments} />
     </>
   );
 };

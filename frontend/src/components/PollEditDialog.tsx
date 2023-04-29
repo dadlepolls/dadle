@@ -31,16 +31,20 @@ export const PollEditDialog = ({
   allowLinkEditing = true,
   saveButtonContent,
   saveButtonIcon,
+  canCancel = false,
   onSaveSuccess = (_) => {},
   onSaveFailure = () => {},
+  onCancel = () => {},
 }: {
   poll?: Partial<GetPollByLink_getPollByLink>;
   title: string;
   allowLinkEditing?: boolean;
   saveButtonIcon?: JSX.Element;
   saveButtonContent?: JSX.Element | string;
+  canCancel?: boolean;
   onSaveSuccess?: (poll?: CreateOrUpdatePoll_createOrUpdatePoll) => any;
   onSaveFailure?: () => any;
+  onCancel?: () => any;
 }) => {
   const { t } = useTranslation("polleditor");
   const [form] = Form.useForm();
@@ -152,7 +156,20 @@ export const PollEditDialog = ({
   );
 
   return (
-    <Card style={{ width: "100%" }} title={title}>
+    <Card
+      style={{ width: "100%" }}
+      title={title}
+      extra={[
+        canCancel ? (
+          <Button
+            type="link"
+            key="close_button"
+            icon={<CloseOutlined />}
+            onClick={onCancel}
+          />
+        ) : undefined,
+      ]}
+    >
       <Form
         form={form}
         initialValues={{

@@ -4,6 +4,7 @@
   "participation_saved": "Antwort gespeichert",
   "poll_changed_at": "Letzte Änderung",
   "poll_created_at": "Umfrage erstellt",
+  "poll_created_by": "Erstellt von",
   "poll_delete_confirmation_no": "Abbrechen",
   "poll_delete_confirmation_yes": "Ja",
   "poll_delete_confirmation": "Soll die Umfrage wirklich gelöscht werden?",

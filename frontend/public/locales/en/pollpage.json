@@ -4,6 +4,7 @@
   "participation_saved": "Participation saved",
   "poll_changed_at": "Last change",
   "poll_created_at": "Created at",
+  "poll_created_by": "Created by",
   "poll_delete_confirmation_no": "Cancel",
   "poll_delete_confirmation_yes": "Yes",
   "poll_delete_confirmation": "Do you really want to delete the poll?",
