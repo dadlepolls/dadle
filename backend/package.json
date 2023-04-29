@@ -1,6 +1,6 @@
 {
   "name": "dadle-backend",
-  "version": "0.0.1-dev",
+  "version": "0.1.4",
   "description": "Backend for Dadle",
   "main": "src/index.ts",
   "author": "Peter Kappelt <kappelt.peter@gmail.com>",
