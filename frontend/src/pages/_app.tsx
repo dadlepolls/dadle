@@ -1,4 +1,3 @@
-import { KeyOutlined, LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import {
   ApolloClient,
   ApolloProvider,
@@ -9,23 +8,23 @@ import {
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
-import { AuthContextProvider, useAuth } from "@components/AuthContext";
+import { AppMenu } from "@components/AppMenu";
+import { AuthContextProvider } from "@components/AuthContext";
 import { MobileDesktopSwitcher } from "@components/MobileDesktopSwitcher";
 import {
   ResponsiveContextProvider,
   useWindowIsSm,
 } from "@components/ResponsiveContext";
-import "@styles/globals.css";
 import "@styles/OptionEditor.sass";
 import "@styles/pollpage.css";
 import LoadingBar from "@util/LoadingBar";
-import { ConfigProvider, Layout, Menu, theme } from "antd";
-import { ItemType } from "antd/es/menu/hooks/useItems";
-import { appWithTranslation, useTranslation } from "next-i18next";
+import { ConfigProvider, Layout, theme } from "antd";
+import "antd/dist/reset.css";
+import { appWithTranslation } from "next-i18next";
 import type { AppProps } from "next/app";
-import { Router, useRouter } from "next/router";
+import { Router } from "next/router";
 import "nprogress/nprogress.css";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { static_config } from "src/static_config";
 
 const httpLink = createHttpLink({
@@ -84,98 +83,12 @@ Router.events.on("routeChangeComplete", () => LoadingBar.done());
 Router.events.on("routeChangeError", () => LoadingBar.done());
 
 function AppLayout({ Component, pageProps }: AppProps) {
-  const router = useRouter();
   const isSm = useWindowIsSm();
-  const { logout, user } = useAuth();
-  const { t } = useTranslation("common");
-
-  const loginLogoutButton = useMemo<ItemType | null>(() => {
-    if (!static_config.loginEnabled) return null;
-    if (user)
-      return {
-        key: "profileSub",
-        icon: <UserOutlined />,
-        label: `Hey ${user.name}`,
-        children: [
-          {
-            key: "profile",
-            label: t("navbar_my_profile"),
-          },
-          {
-            key: "logout",
-            label: t("navbar_logout"),
-            icon: <LogoutOutlined />,
-          },
-        ],
-      };
-    else
-      return {
-        key: "login",
-        icon: <KeyOutlined />,
-        label: t("navbar_login"),
-      };
-  }, [user, logout, router, t]);
-
-  const menuItems = useMemo(() => {
-    const items: ItemType[] = [
-      {
-        key: "logo",
-        label: <b>Dadle</b>,
-      },
-      {
-        type: "divider",
-      },
-      {
-        key: "home",
-        label: t("navbar_home"),
-      },
-    ];
-    if (user)
-      items.push({
-        key: "mypolls",
-        label: t("navbar_my_polls"),
-      });
-    if (loginLogoutButton) items.push(loginLogoutButton);
-    return items;
-  }, [user, loginLogoutButton]);
-
-  const onMenuClick = ({ key }: { key: string }) => {
-    switch (key) {
-      case "home":
-        router.push("/");
-        break;
-      case "mypolls":
-        router.push("/mypolls");
-        break;
-      case "profile":
-        router.push("/profile");
-        break;
-      case "logout":
-        logout();
-        break;
-      case "login":
-        window.location.replace(`${static_config.backendUrl}/auth/login`);
-        break;
-    }
-  };
 
   return (
     <Layout className="layout" style={{ minHeight: "100vh" }}>
       <Layout.Header>
-        {/* Left-Align the login menu item */}
-        <style jsx global>
-          {`
-            .ant-menu li:nth-last-child(2) {
-              margin-left: auto;
-            }
-          `}
-        </style>
-        <Menu
-          items={menuItems}
-          theme="dark"
-          mode="horizontal"
-          onClick={onMenuClick}
-        />
+        <AppMenu mobile={isSm} />
       </Layout.Header>
       <Layout.Content style={{ padding: isSm ? "0 16px" : "0 50px" }}>
         <div
