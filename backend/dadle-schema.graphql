@@ -17,7 +17,7 @@ type Query {
   Check if a poll link is currently available for use. Returns true if available
   """
   checkPollLinkAvailability(link: String!): Boolean!
-  getMyCalendars: [Calendar!]!
+  getMyCalendars(onlyWritable: Boolean! = false): [Calendar!]!
 }
 
 type User {
@@ -118,6 +118,7 @@ type Calendar {
   healthy: Boolean
   friendlyName: String!
   usernameAtProvider: String!
+  canWrite: Boolean!
 }
 
 type Mutation {

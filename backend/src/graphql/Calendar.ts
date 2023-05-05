@@ -38,18 +38,23 @@ class Calendar implements Omit<Partial<ICalendar>, "provider"> {
   @Field()
   usernameAtProvider: string;
 
+  @Field()
+  canWrite: boolean;
+
   constructor(
     _id: string,
     provider: "microsoft",
     enabled: boolean,
     friendlyName: string,
-    usernameAtProvider: string
+    usernameAtProvider: string,
+    canWrite: boolean
   ) {
     this._id = _id;
     this.provider = provider;
     this.enabled = enabled;
     this.friendlyName = friendlyName;
     this.usernameAtProvider = usernameAtProvider;
+    this.canWrite = canWrite;
   }
 }
 
@@ -57,7 +62,10 @@ class Calendar implements Omit<Partial<ICalendar>, "provider"> {
 class CalendarResolver {
   @Authorized()
   @Query(() => [Calendar])
-  async getMyCalendars(@Ctx() ctx: IGraphContext) {
+  async getMyCalendars(
+    @Arg("onlyWritable", { defaultValue: false }) onlyWritable: boolean,
+    @Ctx() ctx: IGraphContext
+  ) {
     if (!ctx.user?._id)
       throw new GraphQLError("User not authenticated!", {
         extensions: { code: "USER_NOT_AUTHENTICATED" },
@@ -69,6 +77,7 @@ class CalendarResolver {
         extensions: { code: "USER_DELETED" },
       });
 
+    if (onlyWritable) return user.calendars?.filter((c) => c.canWrite);
     return user.calendars;
   }
 

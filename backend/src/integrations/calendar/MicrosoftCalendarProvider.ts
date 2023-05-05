@@ -162,6 +162,7 @@ class MicrosoftCalendarProvider implements ICalendarProvider {
               existing.usernameAtProvider =
                 graphUserInfo.userPrincipalName || "";
               existing.refreshToken = refreshToken;
+              existing.canWrite = cal.canEdit || false;
             } else {
               dbUser.calendars?.push({
                 provider: "microsoft",
@@ -169,6 +170,7 @@ class MicrosoftCalendarProvider implements ICalendarProvider {
                 friendlyName: cal.name || "",
                 usernameAtProvider: graphUserInfo.userPrincipalName || "",
                 refreshToken,
+                canWrite: cal.canEdit || false,
                 calendarId: cal.id || "",
               });
               if (cal.id) freshlyAddedCalendars.push(cal.id);

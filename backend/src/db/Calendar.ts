@@ -8,6 +8,7 @@ const schema = new Schema<ICalendar>(
     enabled: { type: Schema.Types.Boolean, required: true },
     friendlyName: { type: Schema.Types.String, required: true },
     usernameAtProvider: { type: Schema.Types.String, required: true },
+    canWrite: { type: Schema.Types.Boolean, default: false },
 
     //microsoft-specific fields
     calendarId: { type: Schema.Types.String },

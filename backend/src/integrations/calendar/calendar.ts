@@ -11,6 +11,7 @@ interface IGenericCalendar {
   healthy?: boolean;
   friendlyName: string;
   usernameAtProvider: string;
+  canWrite?: boolean;
 }
 
 interface IMicrosoftCalendar extends IGenericCalendar {

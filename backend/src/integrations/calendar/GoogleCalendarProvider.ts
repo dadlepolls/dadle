@@ -184,6 +184,8 @@ class GoogleCalendarProvider implements ICalendarProvider {
             const username = profile.emails?.length
               ? profile.emails[0].value
               : profile.displayName;
+            const canWrite =
+              cal.accessRole == "writer" || cal.accessRole == "owner";
 
             const existing = existingCalendars.find(
               (c) => c.calendarId == cal.id
@@ -193,6 +195,7 @@ class GoogleCalendarProvider implements ICalendarProvider {
               existing.friendlyName = calName;
               existing.usernameAtProvider = username;
               existing.refreshToken = refreshToken;
+              existing.canWrite = canWrite;
             } else {
               dbUser.calendars?.push({
                 provider: "google",
@@ -200,6 +203,7 @@ class GoogleCalendarProvider implements ICalendarProvider {
                 friendlyName: calName,
                 usernameAtProvider: username,
                 refreshToken,
+                canWrite,
                 calendarId: cal.id || "",
               });
               if (cal.id) freshlyAddedCalendars.push(cal.id);
